@@ -1,0 +1,4 @@
+Proprietary — all rights reserved.
+
+Applies to planning documents, decision records and customer configuration in this repository.
+Not an open-source licence. Not distributed with any release artefact.

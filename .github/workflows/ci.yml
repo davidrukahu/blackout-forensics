@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 David Rukahu
+# SPDX-License-Identifier: AGPL-3.0-only
+
+name: ci
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # Fast per-commit gates.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test
+
+  # The licence boundary is the business model, so it is machine-checked.
+  licences:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pipx install reuse
+      - run: reuse lint
+
+  # A published git history cannot be withdrawn. This gate runs before any export can.
+  export-allowlist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci
+      - run: npm run export:spec
+
+  # Single enforcement point for PRD §15.5's release quality gate.
+  release-gate:
+    needs: [verify, licences, export-allowlist]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "All required gates passed."

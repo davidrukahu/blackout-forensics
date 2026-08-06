@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.local
+coverage/
+.DS_Store
+.gstack/
+
+# Never commit customer telemetry, exports or bundles. See PRD §15.4.
+/customer-data/
+*.bundle.tar
+*.parquet
+!packages/spec/fixtures/**/*.parquet

@@ -1,0 +1,36 @@
+version = 1
+SPDX-PackageName = "blackout-forensics"
+SPDX-PackageSupplier = "David Rukahu <drukahu09@gmail.com>"
+
+# Planning artefacts and decision records. Not distributed with any release.
+[[annotations]]
+path = ["docs/**", ".scratch/**", ".taskmaster/**", ".gstack/**", "cla/**"]
+SPDX-FileCopyrightText = "2026 David Rukahu"
+SPDX-License-Identifier = "LicenseRef-Proprietary"
+
+# Config and dotfiles that cannot carry a comment header.
+[[annotations]]
+path = [
+  "**/package.json",
+  "**/tsconfig.json",
+  "tsconfig.base.json",
+  "package-lock.json",
+  ".nvmrc",
+  ".gitignore",
+  ".env.example",
+  "REUSE.toml",
+]
+SPDX-FileCopyrightText = "2026 David Rukahu"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+# Build output. Inherits the licence of the sources it is compiled from; never committed.
+[[annotations]]
+path = ["**/dist/**", "**/*.tsbuildinfo"]
+SPDX-FileCopyrightText = "2026 David Rukahu"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+# The Developer Certificate of Origin is a third-party document, reproduced verbatim.
+[[annotations]]
+path = ["DCO.txt"]
+SPDX-FileCopyrightText = "2004, 2006 The Linux Foundation and its contributors"
+SPDX-License-Identifier = "LicenseRef-DCO-1.1"
