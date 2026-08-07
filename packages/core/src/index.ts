@@ -59,3 +59,12 @@ export {
 export type { Adapter, NormalizeResult, ObservationVersion, VersionDiff } from './normalize/normalizer.js'
 export { redecode } from './db/stores.js'
 export type { RedecodeOutcome } from './db/stores.js'
+export {
+  DEFAULT_LIMITS, checkScope, planWindows, remainingWindows, runReplay,
+} from './replay/replay.js'
+export type {
+  ReplayHooks, ReplayLimits, ReplayOutcome, ReplayProgress, ReplayScope, ReplayStatus, ReplayWindow,
+  ScopeCheck, ScopeRejection,
+} from './replay/replay.js'
+export { postgresHooks, startOrResumeRun } from './replay/postgres-replay.js'
+export type { StartedRun } from './replay/postgres-replay.js'

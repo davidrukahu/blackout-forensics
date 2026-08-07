@@ -108,6 +108,30 @@ CREATE TABLE IF NOT EXISTS core.quarantine (
   received_at timestamptz NOT NULL
 );
 
+-- A historical replay is a bounded, approved, resumable operation — never an ambient background
+-- job. FR-EPI-007 requires runs to be resumable, scoped and separately audited, so the scope and
+-- the approval are stored with the run rather than passed at the call site and forgotten.
+CREATE TABLE IF NOT EXISTS core.replay_run (
+  id             bigserial PRIMARY KEY,
+  tenant_id      text        NOT NULL,
+  source         text        NOT NULL,
+  interval_start timestamptz NOT NULL,
+  interval_end   timestamptz NOT NULL,
+  approved_by    text        NOT NULL,
+  reason         text        NOT NULL,
+  status         text        NOT NULL DEFAULT 'running'
+                 CHECK (status IN ('running', 'completed', 'cancelled', 'failed')),
+  -- The upper bound of the last window fully processed. A resumed run restarts here, never from
+  -- the beginning: re-processing already-checkpointed windows would be wasted work at best and, on
+  -- a partially-failed run, an inconsistent double-write at worst.
+  checkpoint_at  timestamptz,
+  windows_total  integer     NOT NULL,
+  windows_done   integer     NOT NULL DEFAULT 0,
+  started_at     timestamptz NOT NULL,
+  finished_at    timestamptz,
+  CHECK (interval_end > interval_start)
+);
+
 CREATE TABLE IF NOT EXISTS audit.event (
   id          bigserial PRIMARY KEY,
   tenant_id   text        NOT NULL,
