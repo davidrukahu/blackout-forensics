@@ -211,3 +211,12 @@ export {
   LeakDetectedError, SAFE_SUPPORT_FIELDS, buildSupportBundle, safeLogLine, scanForSensitive,
 } from './security/support-bundle.js'
 export type { LeakFinding, SafeSupportField, SupportBundle } from './security/support-bundle.js'
+export {
+  PILOT_LABEL_GUIDE, RuleVersionDriftError, SealedHoldoutError, ShadowModeError,
+  WindowOverlapError, assertRulesUnchanged, assignInterval, evaluatePilot, guardShadowDecision,
+  lockPilot, pilotReport,
+} from './pilot/pilot.js'
+export type {
+  LabelGuideEntry, PilotEvaluation, PilotProtocol, PilotReport, PilotTargets, PilotWindow,
+  RoiInputs, TimedCase,
+} from './pilot/pilot.js'

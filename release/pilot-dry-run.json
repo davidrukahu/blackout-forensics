@@ -1,0 +1,244 @@
+{
+  "pilotId": "pilot-dry-run",
+  "generatedAt": "2026-09-29T00:00:00.000Z",
+  "ruleVersions": {
+    "rule.h-expected.policy-match": "1.1.0",
+    "rule.h-gnss.position-quality-loss": "1.1.0",
+    "rule.h-gnss.jamming-flag": "1.1.0",
+    "rule.h-vendor.source-cluster": "1.1.0",
+    "rule.h-network.operator-cluster": "1.1.0",
+    "rule.h-corridor.recurrence": "1.1.0",
+    "rule.h-power.external-cut": "1.1.0",
+    "rule.h-device.fault-pattern": "1.1.0",
+    "rule.h-tamper.direct-signal": "1.1.0",
+    "rule.h-tamper.network-jamming": "1.1.0"
+  },
+  "observed": {
+    "calibration": {
+      "n": 70,
+      "classifier": {
+        "name": "classifier",
+        "precision": {
+          "numerator": 10,
+          "denominator": 10,
+          "value": 1,
+          "ci95Lower": 0.7224598312333834,
+          "ci95Upper": 1
+        },
+        "recall": {
+          "numerator": 10,
+          "denominator": 10,
+          "value": 1,
+          "ci95Lower": 0.7224598312333834,
+          "ci95Upper": 1
+        },
+        "flaggedRate": {
+          "numerator": 10,
+          "denominator": 70,
+          "value": 0.14285714285714285,
+          "ci95Lower": 0.07948856360443703,
+          "ci95Upper": 0.24338634701505113
+        }
+      },
+      "baselines": [
+        {
+          "name": "fixed_timeout",
+          "precision": {
+            "numerator": 0,
+            "denominator": 20,
+            "value": 0,
+            "ci95Lower": 0,
+            "ci95Upper": 0.1611301254949332
+          },
+          "recall": {
+            "numerator": 0,
+            "denominator": 10,
+            "value": 0,
+            "ci95Lower": 0,
+            "ci95Upper": 0.2775401687666165
+          },
+          "flaggedRate": {
+            "numerator": 20,
+            "denominator": 70,
+            "value": 0.2857142857142857,
+            "ci95Lower": 0.19322076591803128,
+            "ci95Upper": 0.4005041804536616
+          }
+        },
+        {
+          "name": "power_loss_alert",
+          "precision": {
+            "numerator": 10,
+            "denominator": 10,
+            "value": 1,
+            "ci95Lower": 0.7224598312333834,
+            "ci95Upper": 1
+          },
+          "recall": {
+            "numerator": 10,
+            "denominator": 10,
+            "value": 1,
+            "ci95Lower": 0.7224598312333834,
+            "ci95Upper": 1
+          },
+          "flaggedRate": {
+            "numerator": 10,
+            "denominator": 70,
+            "value": 0.14285714285714285,
+            "ci95Lower": 0.07948856360443703,
+            "ci95Upper": 0.24338634701505113
+          }
+        },
+        {
+          "name": "vendor_volume",
+          "precision": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null,
+            "ci95Lower": null,
+            "ci95Upper": null
+          },
+          "recall": {
+            "numerator": 0,
+            "denominator": 10,
+            "value": 0,
+            "ci95Lower": 0,
+            "ci95Upper": 0.2775401687666165
+          },
+          "flaggedRate": {
+            "numerator": 0,
+            "denominator": 70,
+            "value": 0,
+            "ci95Lower": 0,
+            "ci95Upper": 0.05202487486728348
+          }
+        }
+      ]
+    },
+    "holdout": {
+      "n": 70,
+      "classifier": {
+        "name": "classifier",
+        "precision": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null,
+          "ci95Lower": null,
+          "ci95Upper": null
+        },
+        "recall": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null,
+          "ci95Lower": null,
+          "ci95Upper": null
+        },
+        "flaggedRate": {
+          "numerator": 0,
+          "denominator": 70,
+          "value": 0,
+          "ci95Lower": 0,
+          "ci95Upper": 0.05202487486728348
+        }
+      },
+      "baselines": [
+        {
+          "name": "fixed_timeout",
+          "precision": {
+            "numerator": 0,
+            "denominator": 50,
+            "value": 0,
+            "ci95Lower": 0,
+            "ci95Upper": 0.07135003417431873
+          },
+          "recall": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null,
+            "ci95Lower": null,
+            "ci95Upper": null
+          },
+          "flaggedRate": {
+            "numerator": 50,
+            "denominator": 70,
+            "value": 0.7142857142857143,
+            "ci95Lower": 0.5994958195463385,
+            "ci95Upper": 0.8067792340819686
+          }
+        },
+        {
+          "name": "power_loss_alert",
+          "precision": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null,
+            "ci95Lower": null,
+            "ci95Upper": null
+          },
+          "recall": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null,
+            "ci95Lower": null,
+            "ci95Upper": null
+          },
+          "flaggedRate": {
+            "numerator": 0,
+            "denominator": 70,
+            "value": 0,
+            "ci95Lower": 0,
+            "ci95Upper": 0.05202487486728348
+          }
+        },
+        {
+          "name": "vendor_volume",
+          "precision": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null,
+            "ci95Lower": null,
+            "ci95Upper": null
+          },
+          "recall": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null,
+            "ci95Lower": null,
+            "ci95Upper": null
+          },
+          "flaggedRate": {
+            "numerator": 0,
+            "denominator": 70,
+            "value": 0,
+            "ci95Lower": 0,
+            "ci95Upper": 0.05202487486728348
+          }
+        }
+      ]
+    },
+    "excluded": 0
+  },
+  "targets": {
+    "holdoutPrecisionFloor": 0.5,
+    "holdoutRecallFloor": 0.5,
+    "minHoldoutCases": 100
+  },
+  "roi": {
+    "observed": {
+      "casesReviewed": 70,
+      "falseDispatchesAvoided": 12
+    },
+    "modeled": {
+      "dispatchCostKes": 1500,
+      "recoveryValueKes": 180000
+    },
+    "modeledSavingKes": 18000,
+    "note": "MODELED saving = observed avoided dispatches x customer-supplied cost. The dispatch cost and recovery value are inputs, not measurements, and must be shown as such (FR-RPT-006)."
+  },
+  "goNoGo": {
+    "verdict": "conditional",
+    "reasons": [
+      "holdout has 70 case(s); the protocol requires 100 — the interval bounds below are too wide to decide on"
+    ]
+  }
+}

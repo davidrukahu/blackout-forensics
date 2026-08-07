@@ -2,10 +2,10 @@
   "profile": "self-hosted-container",
   "exercise": {
     "id": "dr-2026-08-07",
-    "startedAt": "2026-08-07T22:30:26.698Z",
-    "finishedAt": "2026-08-07T22:30:26.977Z",
-    "recoveryTargetAt": "2026-08-07T22:30:26.698Z",
-    "recoveredThroughAt": "2026-08-07T22:30:26.698Z",
+    "startedAt": "2026-08-07T22:48:51.163Z",
+    "finishedAt": "2026-08-07T22:48:51.430Z",
+    "recoveryTargetAt": "2026-08-07T22:48:51.163Z",
+    "recoveredThroughAt": "2026-08-07T22:48:51.163Z",
     "verification": {
       "rowsRestored": 1,
       "rlsPolicies": 11,
@@ -13,7 +13,7 @@
       "objectSampleVerified": true
     },
     "passed": true,
-    "realizedRtoHours": 0.0000775,
+    "realizedRtoHours": 0.00007416666666666666,
     "realizedRpoMinutes": 0,
     "notes": []
   }

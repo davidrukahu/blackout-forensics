@@ -1,6 +1,6 @@
 {
   "profile": "OWASP ASVS L2 subset + PRD §15.1 layers",
-  "generatedAt": "2026-08-07T22:35:32.419Z",
+  "generatedAt": "2026-08-07T22:49:01.274Z",
   "checks": [
     "tenant-isolation: cross-tenant and contextless reads return nothing",
     "injection: hostile tenant id parameterized; schema intact",

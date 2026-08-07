@@ -1,19 +1,21 @@
 {
   "artifact": "blackout-forensics",
   "version": "0.1.0",
-  "commit": "0bfef4486137e2318d1535f48f6a743d40c7f67d",
-  "generatedAt": "2026-08-07T22:43:49.774Z",
+  "commit": "d62f51154a2f00ec1f28def6b300351d831a32d6",
+  "generatedAt": "2026-08-07T22:49:28.639Z",
   "evidence": {
-    "app-sbom.spdx.json": "3ef7accea1350ff00da3203a54f05a89af90992683dcbb19ddcdae2ab5120477",
+    "app-sbom.spdx.json": "dc1264e76a8a4df33a30ef30d0e1edd5b91b36c428b8f1799d4cb5bc2f3b942c",
     "audit-container-sbom.spdx.json": "793554747d916da84647949624cd10bee8ca4c8ce6b79f3a5921677a9cb4a7ee",
     "THIRD_PARTY_NOTICES.txt": "11e573b10664f07637d76e7b5e5a734d1a5c4b2acbdf23b7f5915d9c6814aad9",
     "release-a-acceptance.json": "baaa1e3522c3c8c67ec9f5ee52baf60d93985f8e1dc723220e1f5b9588a9ffe2",
     "release-b-acceptance.json": "62580b5126d8923bb2f3a542a8a66815d37387b5931fd65582d08f407a1f9b3b",
     "release-c-e2e.json": "493f285f35cad98c69f3c03f730ba058a583dd54db879f0ee59a61075ae40c38",
-    "security-verification.json": "2a752932a58aa0424319333a178d9e9d75c316e1d7e7588b63435e074d3cf9ee",
-    "dr-exercise.json": "8b619de316aceb701054511a6b316eb97a3954a223252961f8094fc1f73bd342",
+    "security-verification.json": "d275ae0236c058b78511a042dbbe1b0e4bba15f28e3515b09221f14536eee6cb",
+    "dr-exercise.json": "a62c83ae4c2339636211fda5af074e73be108ec3a156a666620e01556b935cf9",
     "benchmark-smoke.json": "a9db8c0bbbfb98c63c3f2f84f025cdeb9db9fd8ef15434a8a35fd2bcacbc9bc1",
-    "a11y-review.json": "6b0e427f94eda3b8eb9df6c145b2df03f4dcefc2d501f6a10fd49dc88e8d77a1"
+    "a11y-review.json": "6b0e427f94eda3b8eb9df6c145b2df03f4dcefc2d501f6a10fd49dc88e8d77a1",
+    "v1-acceptance-pack.json": "838e93165519c52e9ca4d0d6f3dc4e652ed58b049ed5a90845548a6679e4189a",
+    "pilot-dry-run.json": "cf4f9c535fc8e4cbde60c8395a0ffd8e5640f866e38542ec4c990631d6d54fc7"
   },
   "audit_container": {
     "image_id": "sha256:23d8edd67e0aaa2be584036f93b84e12488a5e9ba488ce89e5a730e6736773c5",

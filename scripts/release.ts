@@ -60,6 +60,8 @@ const EVIDENCE = [
   'dr-exercise.json',
   'benchmark-smoke.json',
   'a11y-review.json',
+  'v1-acceptance-pack.json',
+  'pilot-dry-run.json',
 ] as const
 
 const evidence: Record<string, string> = {}
