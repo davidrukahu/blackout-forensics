@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "lint:licences": "pipx run reuse lint",
     "export:spec": "tsx scripts/export-spec.ts",
-    "check": "npm run typecheck && npm run test"
+    "check": "npm run typecheck && npm run test && npm run build:schema && npm run export:spec",
+    "build:schema": "tsx scripts/build-schema.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

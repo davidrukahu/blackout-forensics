@@ -1,0 +1,16 @@
+{
+  "schema_version": "0.1.0",
+  "tenant_id": "synthetic_demo",
+  "source": "traccar_forwarder",
+  "event_identity": {
+    "basis": "synthesised",
+    "value": "h:abc"
+  },
+  "asset_ref": "ast_9a3f0011",
+  "device_ref": "dev_c8240022",
+  "received_at": "2026-08-05T09:20:04.000Z",
+  "quality": {
+    "raw_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "adapter_version": "traccar-1.0.0"
+  }
+}

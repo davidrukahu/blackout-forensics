@@ -1,0 +1,60 @@
+{
+  "schema_version": "0.1.0",
+  "tenant_id": "synthetic_demo",
+  "source": "traccar_forwarder",
+  "event_identity": {
+    "basis": "vendor_event_id",
+    "value": "evt_01JEXAMPLE"
+  },
+  "asset_ref": "ast_9a3f0011",
+  "device_ref": "dev_c8240022",
+  "received_at": "2026-08-05T09:20:04.000Z",
+  "quality": {
+    "raw_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "adapter_version": "traccar-1.0.0"
+  },
+  "sim_ref": "sim_118d0033",
+  "vendor_received_at": "2026-08-05T09:20:02.000Z",
+  "device_time": "2026-08-05T09:19:55.000Z",
+  "position": {
+    "lat": -1.2864,
+    "lon": 36.8172,
+    "accuracy_m": 18,
+    "fix_type": "gps",
+    "satellites": 11,
+    "hdop": 0.9,
+    "valid": true
+  },
+  "motion": {
+    "speed_kph": 21.4,
+    "heading_deg": 143.2,
+    "ignition": "on",
+    "motion_state": "moving",
+    "odometer_m": 184320
+  },
+  "power": {
+    "external_state": "present",
+    "external_v": 13.6,
+    "internal_pct": 88
+  },
+  "network": {
+    "mcc": 639,
+    "mnc": 2,
+    "radio": "4G",
+    "rssi_dbm": -91,
+    "registration": "registered"
+  },
+  "device": {
+    "vendor": "teltonika",
+    "model": "FMB920",
+    "firmware": "03.27.07",
+    "sleep_state": "awake"
+  },
+  "alerts": [],
+  "ext": {
+    "teltonika": {
+      "io_239": 1,
+      "io_240": 1
+    }
+  }
+}

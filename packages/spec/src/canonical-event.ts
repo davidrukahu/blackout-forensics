@@ -5,7 +5,7 @@
 /**
  * Canonical telemetry event, schema v0.
  *
- * Decisions this encodes (see .scratch/blackout-v1/issues/09-canonical-schema-v0.md):
+ * Decisions this encodes:
  *  - Absent, unknown and zero are distinct. Field omitted = never reported; explicit null =
  *    reported as unknown by the source; a value = measured. Adapters must not coerce between them.
  *  - Event identity is a structured object, not a scalar. Teltonika Codec 8/8E carry no record id
@@ -13,6 +13,8 @@
  *    duplicate and ordering claim depends on knowing which basis produced it.
  *  - Sleep state is carried explicitly with an explicit unknown, never inferred from silence.
  *    Deep Sleep disables jamming detectors, so absence of a jamming flag is not a measurement.
+ *
+ * Decision record: ADR 0008.
  */
 
 export const SCHEMA_VERSION = '0.1.0'
@@ -44,7 +46,11 @@ export const CANONICAL_EVENT_SCHEMA = {
       },
       allOf: [{
         if: { properties: { basis: { const: 'synthesised' } } },
-        then: { required: ['basis', 'value', 'algorithm'] },
+        // ajv strictRequired wants the branch to declare what it requires.
+        then: {
+          properties: { algorithm: { type: 'string', minLength: 1 } },
+          required: ['algorithm'],
+        },
       }],
     },
 

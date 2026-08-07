@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackout-forensics.org/schema/adapter-manifest/0.1.0.json",
+  "title": "Adapter capability manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_version",
+    "adapter",
+    "identity",
+    "times",
+    "delivery",
+    "fields",
+    "readiness"
+  ],
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "source_versions",
+        "provenance"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+"
+        },
+        "source_versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "provenance": {
+          "enum": [
+            "vendor_documentation_public",
+            "vendor_agreement",
+            "clean_room",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis"
+      ],
+      "properties": {
+        "basis": {
+          "enum": [
+            "vendor_event_id",
+            "vendor_sequence",
+            "synthesised"
+          ]
+        },
+        "algorithm": {
+          "type": "string"
+        },
+        "byte_identical_resends": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "basis": {
+                "const": "synthesised"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "algorithm": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          }
+        }
+      ]
+    },
+    "times": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "precedence"
+      ],
+      "properties": {
+        "precedence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "received_at",
+              "vendor_received_at",
+              "device_time"
+            ]
+          }
+        },
+        "device_clock_trusted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mechanisms",
+        "push_reliability",
+        "buffering"
+      ],
+      "properties": {
+        "mechanisms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "webhook",
+              "rest_poll",
+              "sftp",
+              "object_storage",
+              "raw_forward",
+              "database"
+            ]
+          }
+        },
+        "push_reliability": {
+          "enum": [
+            "buffered_and_confirmed",
+            "best_effort",
+            "drops_silently",
+            "not_applicable"
+          ]
+        },
+        "pull_reconciler": {
+          "type": "boolean"
+        },
+        "second_server_mode": {
+          "enum": [
+            "none",
+            "duplicate_both_ack",
+            "delete_on_first_ack",
+            "unknown"
+          ]
+        },
+        "buffering": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "offline_buffer"
+          ],
+          "properties": {
+            "offline_buffer": {
+              "type": "boolean"
+            },
+            "capacity_records": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "backfill_marked": {
+              "type": "boolean"
+            }
+          }
+        },
+        "normal_delay_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "worst_case_delay_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "write_time_destruction": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "setting",
+          "effect",
+          "default_enabled"
+        ],
+        "properties": {
+          "setting": {
+            "type": "string"
+          },
+          "effect": {
+            "type": "string"
+          },
+          "default_enabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "raw_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "decoded_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "customer_reducible": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "support"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^[a-z_]+(\\.[a-z_]+)*$"
+          },
+          "support": {
+            "enum": [
+              "supported",
+              "unsupported",
+              "conditional"
+            ]
+          },
+          "condition": {
+            "type": "string"
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "firmware_min": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "support": {
+                  "const": "conditional"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "condition": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "condition"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "evidence"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "parsed",
+            "forensics_ready",
+            "recovery_ready"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

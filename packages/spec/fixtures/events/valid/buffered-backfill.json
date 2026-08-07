@@ -1,0 +1,18 @@
+{
+  "schema_version": "0.1.0",
+  "tenant_id": "synthetic_demo",
+  "source": "traccar_forwarder",
+  "event_identity": {
+    "basis": "vendor_sequence",
+    "value": "44128"
+  },
+  "asset_ref": "ast_9a3f0011",
+  "device_ref": "dev_c8240022",
+  "received_at": "2026-08-05T11:40:00.000Z",
+  "quality": {
+    "raw_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "adapter_version": "queclink-0.1.0",
+    "clock_skew_s": -12285.0
+  },
+  "device_time": "2026-08-05T08:15:00.000Z"
+}

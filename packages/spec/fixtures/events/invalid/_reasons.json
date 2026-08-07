@@ -1,0 +1,10 @@
+{
+  "coerced-numeric-string": "speed as a string must not be coerced to a number (FR-TEL-001)",
+  "unknown-as-false": "ignition is tri-state; false is not a legal stand-in for unknown (FR-TEL-002)",
+  "synthesised-without-algorithm": "synthesised identity must declare how it was derived",
+  "unnamespaced-extension": "source-specific fields belong under ext.<adapter_id> (FR-SRC-007)",
+  "identifier-in-asset-ref": "references must be pseudonymous, never a plate or identity number",
+  "missing-provenance": "every event carries its raw hash and adapter version",
+  "impossible-latitude": "impossible coordinates are rejected, not silently clamped",
+  "wrong-schema-version": "schema version is pinned"
+}

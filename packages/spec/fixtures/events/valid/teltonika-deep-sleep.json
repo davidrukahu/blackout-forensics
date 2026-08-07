@@ -1,0 +1,40 @@
+{
+  "schema_version": "0.1.0",
+  "tenant_id": "synthetic_demo",
+  "source": "traccar_forwarder",
+  "event_identity": {
+    "basis": "vendor_event_id",
+    "value": "evt_01JEXAMPLE"
+  },
+  "asset_ref": "ast_9a3f0011",
+  "device_ref": "dev_c8240022",
+  "received_at": "2026-08-05T09:20:04.000Z",
+  "quality": {
+    "raw_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "adapter_version": "teltonika-0.1.0",
+    "parse_warnings": [
+      "io elements absent in deep sleep"
+    ]
+  },
+  "device_time": "2026-08-05T06:02:11.000Z",
+  "position": {
+    "lat": -1.3021,
+    "lon": 36.7845,
+    "fix_type": "gps",
+    "valid": false
+  },
+  "motion": {
+    "ignition": "off",
+    "motion_state": "stationary"
+  },
+  "power": {
+    "external_state": "present",
+    "external_v": 12.9
+  },
+  "network": null,
+  "device": {
+    "vendor": "teltonika",
+    "model": "FMB920",
+    "sleep_state": "deep_sleep"
+  }
+}

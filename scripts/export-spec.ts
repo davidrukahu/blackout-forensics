@@ -9,8 +9,8 @@
  * nothing may be exported that is not named here. See
  * .scratch/blackout-v1/issues/08-repo-layout-and-contributor-licensing.md
  */
-import { readdirSync, statSync } from 'node:fs'
-import { join, relative, resolve, sep } from 'node:path'
+import { copyFileSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
+import { dirname, join, relative, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 /** Only paths matching these patterns may ever reach the public repository. */
@@ -65,4 +65,24 @@ if (invokedDirectly) {
     process.exit(1)
   }
   console.log('\nAll files pass the allowlist. Export is safe.')
+}
+
+/**
+ * Build a clean public tree containing only allowlisted files.
+ *
+ * The public repository gets generated history — it is never a filtered copy of the private one,
+ * because a filtered history can still leak through reflogs, tags and merge parents.
+ */
+export function buildPublicTree(specRoot: string, dest: string): string[] {
+  const { allowed, rejected } = collect(specRoot)
+  if (rejected.length > 0) {
+    throw new Error(`refusing to publish: ${rejected.length} file(s) off the allowlist`)
+  }
+  rmSync(dest, { recursive: true, force: true })
+  for (const rel of allowed) {
+    const target = join(dest, rel)
+    mkdirSync(dirname(target), { recursive: true })
+    copyFileSync(join(specRoot, rel), target)
+  }
+  return allowed
 }

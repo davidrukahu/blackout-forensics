@@ -1,0 +1,94 @@
+{
+  "manifest_version": "0.1.0",
+  "adapter": {
+    "name": "traccar",
+    "version": "0.1.0",
+    "source_versions": [
+      "6.x"
+    ],
+    "provenance": "vendor_documentation_public"
+  },
+  "identity": {
+    "basis": "vendor_event_id"
+  },
+  "times": {
+    "precedence": [
+      "received_at",
+      "vendor_received_at",
+      "device_time"
+    ],
+    "device_clock_trusted": false
+  },
+  "delivery": {
+    "mechanisms": [
+      "raw_forward",
+      "webhook"
+    ],
+    "push_reliability": "best_effort",
+    "pull_reconciler": true,
+    "second_server_mode": "none",
+    "buffering": {
+      "offline_buffer": true,
+      "backfill_marked": false
+    },
+    "normal_delay_s": 2,
+    "worst_case_delay_s": 900
+  },
+  "write_time_destruction": [
+    {
+      "setting": "filter.past",
+      "effect": "discards positions older than the configured threshold before storage; no export can recover them",
+      "default_enabled": false
+    }
+  ],
+  "retention": {
+    "raw_days": null,
+    "decoded_days": null,
+    "customer_reducible": true,
+    "notes": "self-hosted; retention is whatever the operator configures"
+  },
+  "fields": [
+    {
+      "path": "position.lat",
+      "support": "supported"
+    },
+    {
+      "path": "position.lon",
+      "support": "supported"
+    },
+    {
+      "path": "position.valid",
+      "support": "supported"
+    },
+    {
+      "path": "motion.speed_kph",
+      "support": "supported"
+    },
+    {
+      "path": "motion.ignition",
+      "support": "conditional",
+      "condition": "present only when the device protocol reports an ignition IO element"
+    },
+    {
+      "path": "power.external_v",
+      "support": "conditional",
+      "condition": "device-dependent; absent on protocols without a power IO element"
+    },
+    {
+      "path": "network.cell_id",
+      "support": "conditional",
+      "condition": "device-dependent; many protocols omit cell identity"
+    },
+    {
+      "path": "device.sleep_state",
+      "support": "unsupported"
+    }
+  ],
+  "readiness": {
+    "level": "parsed",
+    "evidence": [
+      "conformance fixtures pass against a self-hosted Traccar 6.x rig",
+      "raw packet forwarding verified byte-lossless via server.forward"
+    ]
+  }
+}
