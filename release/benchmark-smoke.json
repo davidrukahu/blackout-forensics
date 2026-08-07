@@ -1,0 +1,37 @@
+{
+  "tier": "smoke",
+  "disclaimer": "SMOKE TIER: scaled durations. NOT benchmark evidence. §12.2: marketing cannot claim the reference numbers until a reference-tier run exists on published hardware.",
+  "hardware": {
+    "cpus": 16,
+    "cpuModel": "Apple M3 Max",
+    "memoryGb": 52,
+    "note": "containerized Postgres 16 on the same host"
+  },
+  "generatedAt": "2026-08-07T22:32:36.006Z",
+  "targets": {
+    "sustainedEventsPerSecond": 500,
+    "burstEventsPerSecond": 2000,
+    "tenMillionBatchHours": 2,
+    "episodeListP95Ms": 2000,
+    "caseDetailP95Ms": 2000,
+    "webhookAckP95Ms": 500
+  },
+  "measured": {
+    "sustainedEventsPerSecond": 53763,
+    "burstEventsPerSecond": 57143,
+    "batchEvents": 100000,
+    "projectedTenMillionHours": 0.053,
+    "episodeListP95Ms": 1.63,
+    "caseDetailP95Ms": 1.18,
+    "webhookAckP95Ms": 1.08,
+    "episodeRows": 5000
+  },
+  "verdict": {
+    "sustained": true,
+    "burst": true,
+    "batch": true,
+    "episodeList": true,
+    "caseDetail": true,
+    "webhookAck": true
+  }
+}
