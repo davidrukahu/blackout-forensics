@@ -1,0 +1,27 @@
+{
+  "standard": "WCAG 2.2 AA",
+  "flows": [
+    "queue",
+    "case"
+  ],
+  "queue_axe": {
+    "passes": 22,
+    "violations": 0
+  },
+  "queue_keyboard": {
+    "nativeControls": 50,
+    "nonNativeClickables": 0
+  },
+  "case_axe": {
+    "passes": 26,
+    "violations": 0
+  },
+  "case_structure": {
+    "sections": 8
+  },
+  "manual_review": {
+    "keyboardTraversal": "performed via accessibility-tree navigation of the running app: view switching, row claim, proposal and approval flows all operable without a mouse",
+    "screenReader": "automated semantics verified (landmarks, labels, captions, scope); a human screen-reader session remains the pilot-readiness item and is tracked in the acceptance pack",
+    "colourContrast": "token set uses ink #1a1c1e on #ffffff and badge pairs chosen above 4.5:1; verified in browser, not assertable in jsdom"
+  }
+}
