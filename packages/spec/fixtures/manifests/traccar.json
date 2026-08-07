@@ -9,7 +9,8 @@
     "provenance": "vendor_documentation_public"
   },
   "identity": {
-    "basis": "vendor_event_id"
+    "basis": "vendor_event_id",
+    "byte_identical_resends": false
   },
   "times": {
     "precedence": [
@@ -61,34 +62,71 @@
       "support": "supported"
     },
     {
+      "path": "position.hdop",
+      "support": "conditional",
+      "condition": "present when the device protocol reports hdop; OsmAnd does, many do not"
+    },
+    {
       "path": "motion.speed_kph",
+      "support": "supported"
+    },
+    {
+      "path": "motion.heading_deg",
       "support": "supported"
     },
     {
       "path": "motion.ignition",
       "support": "conditional",
-      "condition": "present only when the device protocol reports an ignition IO element"
+      "condition": "present only when the device protocol reports an ignition attribute"
+    },
+    {
+      "path": "motion.motion_state",
+      "support": "conditional",
+      "condition": "derived from Traccar's computed motion attribute, not from the device"
+    },
+    {
+      "path": "motion.odometer_m",
+      "support": "conditional",
+      "condition": "Traccar's totalDistance is server-computed unless the device reports odometer"
+    },
+    {
+      "path": "power.internal_pct",
+      "support": "conditional",
+      "condition": "present when the device reports battery level"
     },
     {
       "path": "power.external_v",
       "support": "conditional",
-      "condition": "device-dependent; absent on protocols without a power IO element"
+      "condition": "device-dependent; absent on protocols without a power attribute"
+    },
+    {
+      "path": "power.external_state",
+      "support": "conditional",
+      "condition": "derived from Traccar's charge attribute where the device reports it"
     },
     {
       "path": "network.cell_id",
       "support": "conditional",
-      "condition": "device-dependent; many protocols omit cell identity"
+      "condition": "device-dependent; many protocols omit cell identity entirely"
     },
     {
       "path": "device.sleep_state",
       "support": "unsupported"
+    },
+    {
+      "path": "device.firmware",
+      "support": "conditional",
+      "condition": "present only when the device reports a version attribute"
     }
   ],
   "readiness": {
     "level": "parsed",
     "evidence": [
-      "conformance fixtures pass against a self-hosted Traccar 6.x rig",
-      "raw packet forwarding verified byte-lossless via server.forward"
+      "Verified against a live Traccar 6.4 rig: a simulated device driven over the OsmAnd protocol produced positions that decode to schema-valid canonical events.",
+      "Traccar position id used as a vendor event id; every position in the rig run received a distinct identity.",
+      "Speed conversion from knots verified against values Traccar actually stored.",
+      "Device uniqueId (an IMEI in the rig) verified absent from every canonical event.",
+      "NOT forensics-ready: the pull reconciler is declared but untested, buffering and backfill behaviour has not been exercised, and timestamp behaviour has been checked only for the OsmAnd protocol rather than across the protocol range Traccar supports."
     ]
   }
 }

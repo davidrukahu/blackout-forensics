@@ -14,3 +14,5 @@ export type {
 export {
   MemoryObservationStore, MemoryQuarantineStore, MemoryReceiptStore, createMemoryStores,
 } from './stores/memory.js'
+export { TRACCAR_ADAPTER_VERSION, decodeTraccar } from './traccar/adapter.js'
+export type { TraccarAdapterOptions, TraccarForwardPayload } from './traccar/adapter.js'

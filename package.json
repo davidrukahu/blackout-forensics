@@ -21,13 +21,14 @@
     "check:synthetic": "tsx scripts/check-synthetic.ts",
     "sbom": "npm sbom --sbom-format spdx --omit dev > release/app-sbom.spdx.json",
     "check:licences": "tsx scripts/check-licences.ts",
-    "test:integration": "vitest run --fileParallelism=false --testTimeout=180000 --hookTimeout=240000 packages/core/src/db packages/core/src/replay packages/core/src/geo packages/core/src/acceptance",
+    "test:integration": "vitest run --fileParallelism=false --testTimeout=180000 --hookTimeout=300000 packages/core/src/db packages/core/src/replay packages/core/src/geo packages/core/src/acceptance packages/connectors/src/traccar",
     "fetch:osm": "tsx scripts/fetch-osm.ts"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^12.1.0",
     "@types/node": "^24.0.0",
     "fast-check": "^4.1.1",
+    "testcontainers": "^12.1.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^3.0.5"
