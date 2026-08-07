@@ -145,3 +145,11 @@ export {
 } from './evaluation/harness.js'
 export type { DeciderMetrics, HarnessReport, HypothesisMetrics, Rate, UrgencyDecider } from './evaluation/harness.js'
 export { InvalidRulePackageError } from './rules/classify.js'
+export {
+  BUILTIN_VIEWS, BULK_ACTIONS, DEFAULT_QUEUE_POLICY, applyView, assign, buildQueueItem, checkBulk,
+  computePriority, dueStateFor,
+} from './queue/queue.js'
+export type {
+  AssignmentOutcome, BuildQueueItemInput, BulkAction, BulkRefusal, DueState, PriorityTier,
+  QueueBucket, QueueItem, QueuePolicy, QueuePriority, SavedView,
+} from './queue/queue.js'

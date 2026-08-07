@@ -17,3 +17,7 @@ coverage/
 # redistribution, and PRD 13.3 forbids bundling country data into a source release.
 map-data/
 *.osm.pbf
+
+# React Router typegen and build output
+.react-router/
+packages/app/build/

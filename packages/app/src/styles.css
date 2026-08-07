@@ -1,0 +1,183 @@
+/*
+ * SPDX-FileCopyrightText: 2026 David Rukahu
+ * SPDX-License-Identifier: AGPL-3.0-only
+ *
+ * Minimal design tokens. No component framework: semantic HTML carries the structure, and the
+ * two accessibility rules that are design decisions live here — status is never colour-only
+ * (every band and due state has a text label; colour merely reinforces), and focus is always
+ * visible.
+ */
+
+:root {
+  --ink: #1a1c1e;
+  --paper: #ffffff;
+  --muted: #5f6368;
+  --line: #d5d8dc;
+  --accent: #0b57d0;
+  --warn-bg: #fef7e0;
+  --warn-ink: #5f4b00;
+  --urgent-bg: #fce8e6;
+  --urgent-ink: #8c1d18;
+  --focus: #0b57d0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.45;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  background: var(--paper);
+  padding: 0.5rem 1rem;
+  z-index: 10;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+.app-name {
+  font-weight: 600;
+}
+.app-tz {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+main {
+  padding: 1rem 1.25rem;
+  max-width: 90rem;
+}
+
+.view-nav ul {
+  display: flex;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1rem;
+  flex-wrap: wrap;
+}
+.view-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.25rem;
+}
+.view-nav a[aria-current='page'] {
+  border-color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+table.queue {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+.queue caption {
+  text-align: left;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+.queue th,
+.queue td {
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+.queue th {
+  background: #f1f3f4;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.badge.tier-urgent {
+  background: var(--urgent-bg);
+  color: var(--urgent-ink);
+  border-color: var(--urgent-ink);
+  font-weight: 600;
+}
+.badge.due-overdue {
+  background: var(--urgent-bg);
+  color: var(--urgent-ink);
+  border-color: var(--urgent-ink);
+}
+.badge.due-due {
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  border-color: var(--warn-ink);
+}
+
+.warnings {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--warn-ink);
+  font-size: 0.8rem;
+}
+
+.conflict,
+.refusals {
+  border: 1px solid var(--urgent-ink);
+  background: var(--urgent-bg);
+  color: var(--urgent-ink);
+  padding: 0.5rem 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.bulk-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 0.75rem 0;
+  flex-wrap: wrap;
+}
+
+button {
+  font: inherit;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+button:hover {
+  background: #f1f3f4;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

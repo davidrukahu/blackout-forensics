@@ -11,7 +11,7 @@
     "packages/*"
   ],
   "scripts": {
-    "typecheck": "tsc --build",
+    "typecheck": "tsc --build && npm run typecheck -w @blackout/app",
     "test": "vitest run --exclude '**/*.int.test.ts'",
     "test:watch": "vitest",
     "lint:licences": "pipx run reuse lint",
