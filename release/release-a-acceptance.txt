@@ -1,0 +1,19 @@
+Release A acceptance — 2026-09-05T09:00:00.000Z
+9 passed, 0 failed, 1 not met
+
+OUTSTANDING:
+  [NOT_MET] A-1 Two adapters forensics-ready and one recovery-ready (§17.1)
+      0/2 forensics-ready, 0/1 recovery-ready. The Traccar adapter has not been run against a live rig, and a second adapter is blocked on the protocol-specification licensing decision: only Teltonika publishes openly, and Queclink's notice forbids use rather than merely redistribution.
+
+PASSED:
+  [PASS] A-2 Every canonical event carries tenant, source, device, receipt time, identity, hash and adapter version
+  [PASS] A-3 Missing fields remain missing
+  [PASS] A-4 Duplicate, late and replay behaviour is measured and documented
+  [PASS] A-5 Effective assignment and policy changes reproduce past behaviour
+  [PASS] A-6 Open data has source, licence, snapshot, checksum and attribution metadata
+  [PASS] A-7 Cross-tenant isolation holds, including with no tenant context
+  [PASS] A-8 No tenant table can hold an OSM identifier
+  [PASS] A-9 An auditor can trace a normalized field to the bytes that arrived
+  [PASS] A-10 A dump restores with data, policies and triggers intact
+
+Release A is NOT complete. The items above must be resolved first.

@@ -75,3 +75,5 @@ export {
 export type {
   ExportManifestAttribution, SegmentGeometry, SnapshotCheck, SnapshotMetadata, SnapshotRejection,
 } from './geo/snapshot.js'
+export { runAcceptance, summarise } from './acceptance/release-a.js'
+export type { AcceptanceReport, Criterion, CriterionResult, CriterionStatus } from './acceptance/release-a.js'

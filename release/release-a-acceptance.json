@@ -1,0 +1,106 @@
+{
+  "release": "A",
+  "generatedAt": "2026-09-05T09:00:00.000Z",
+  "criteria": [
+    {
+      "id": "A-1",
+      "requirement": "§17.1",
+      "title": "Two adapters forensics-ready and one recovery-ready",
+      "status": "not_met",
+      "evidence": [
+        "traccar: parsed"
+      ],
+      "outstanding": "0/2 forensics-ready, 0/1 recovery-ready. The Traccar adapter has not been run against a live rig, and a second adapter is blocked on the protocol-specification licensing decision: only Teltonika publishes openly, and Queclink's notice forbids use rather than merely redistribution."
+    },
+    {
+      "id": "A-2",
+      "requirement": "§17.1",
+      "title": "Every canonical event carries tenant, source, device, receipt time, identity, hash and adapter version",
+      "status": "pass",
+      "evidence": [
+        "7 observations, 0 missing a required field"
+      ]
+    },
+    {
+      "id": "A-3",
+      "requirement": "FR-TEL-002",
+      "title": "Missing fields remain missing",
+      "status": "pass",
+      "evidence": [
+        "top-level keys: alerts, asset_ref, device, device_ref, device_time, event_identity, motion, network, position, power, quality, received_at, schema_version, sim_ref, source, tenant_id, vendor_received_at"
+      ]
+    },
+    {
+      "id": "A-4",
+      "requirement": "FR-SRC-003",
+      "title": "Duplicate, late and replay behaviour is measured and documented",
+      "status": "pass",
+      "evidence": [
+        "replay created a row: false",
+        "count before 7, after 7"
+      ]
+    },
+    {
+      "id": "A-5",
+      "requirement": "FR-AST-002 / FR-TEN-003",
+      "title": "Effective assignment and policy changes reproduce past behaviour",
+      "status": "pass",
+      "evidence": [
+        "February resolves to dev_a under policy 1.0.0",
+        "April resolves under policy 2.0.0 (300s)"
+      ]
+    },
+    {
+      "id": "A-6",
+      "requirement": "§17.1 / FR-ADM-003",
+      "title": "Open data has source, licence, snapshot, checksum and attribution metadata",
+      "status": "pass",
+      "evidence": [
+        "required columns enforced NOT NULL: source_url, licence, extract_date, sha256, attribution"
+      ]
+    },
+    {
+      "id": "A-7",
+      "requirement": "§17.5 / §11.1",
+      "title": "Cross-tenant isolation holds, including with no tenant context",
+      "status": "pass",
+      "evidence": [
+        "6 observations visible to synthetic_a, 1 to synthetic_b",
+        "0 tables without RLS forced"
+      ]
+    },
+    {
+      "id": "A-8",
+      "requirement": "ODbL boundary",
+      "title": "No tenant table can hold an OSM identifier",
+      "status": "pass",
+      "evidence": [
+        "109 columns checked, 0 forbidden"
+      ]
+    },
+    {
+      "id": "A-9",
+      "requirement": "FR-SRC-002",
+      "title": "An auditor can trace a normalized field to the bytes that arrived",
+      "status": "pass",
+      "evidence": [
+        "trace for acc-1: found=true, verified=true"
+      ]
+    },
+    {
+      "id": "A-10",
+      "requirement": "§16.1 restore",
+      "title": "A dump restores with data, policies and triggers intact",
+      "status": "pass",
+      "evidence": [
+        "restore exit 0",
+        "7 observations visible to synthetic_a after restore",
+        "10 RLS policies and 4 triggers restored"
+      ]
+    }
+  ],
+  "passed": 9,
+  "failed": 0,
+  "notMet": 1,
+  "complete": false
+}
