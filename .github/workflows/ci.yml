@@ -21,6 +21,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test
+      # PRD §15.4: customer telemetry must never enter the repository or CI.
+      - run: npm run check:synthetic
 
   # The licence boundary is the business model, so it is machine-checked.
   licences:
