@@ -171,10 +171,16 @@ CREATE TABLE IF NOT EXISTS audit.event (
 );
 
 -- Append-only by trigger rather than by convention (PRD §7.3). Corrections insert a superseding
--- row; nothing is ever updated or deleted.
+-- row; nothing is ever updated or deleted — with one documented exception: §11.4's retention
+-- jobs run as the dedicated bf_retention role, which may DELETE (never UPDATE) so that expiry
+-- can actually happen. Every retention deletion is evidenced by a tombstone written to
+-- audit.event in the same transaction; the application role remains fully append-only.
 CREATE OR REPLACE FUNCTION core.refuse_mutation() RETURNS trigger
   LANGUAGE plpgsql AS $$
 BEGIN
+  IF TG_OP = 'DELETE' AND current_user = 'bf_retention' THEN
+    RETURN OLD;
+  END IF;
   RAISE EXCEPTION 'append-only table: % is not permitted on %', TG_OP, TG_TABLE_NAME
     USING ERRCODE = 'restrict_violation';
 END $$;

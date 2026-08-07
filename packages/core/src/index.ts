@@ -170,3 +170,15 @@ export type {
   ActionKind, Adjudication, OutcomeCategory, OutcomeDefinition, RecordedActionOutcome,
   ReviewerLabel, VendorTicket,
 } from './queue/outcomes.js'
+export {
+  DEFAULT_RETENTION, InvalidRetentionPolicyError, MAX_BACKUP_WINDOW_DAYS,
+  MAX_NORMALIZED_TELEMETRY_DAYS, executeRetention, holdActive, overdueBackups, planRetention,
+  releaseHold, validateRetentionPolicy,
+} from './retention/retention.js'
+export type {
+  DataClass, DeletionExecutor, KeptItem, LegalHold, PlannedDeletion, RetainedItem, RetentionPlan,
+  RetentionPolicy, RetentionRunReport, Tombstone,
+} from './retention/retention.js'
+export {
+  PostgresRetentionExecutor, UnsupportedClassError, receiptInventory, tombstonedRefs,
+} from './db/retention-store.js'
