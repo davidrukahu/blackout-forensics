@@ -1,0 +1,16 @@
+{
+  "profile": "OWASP ASVS L2 subset + PRD §15.1 layers",
+  "generatedAt": "2026-08-07T22:35:32.419Z",
+  "checks": [
+    "tenant-isolation: cross-tenant and contextless reads return nothing",
+    "injection: hostile tenant id parameterized; schema intact",
+    "injection: hostile device refs stored and filtered as data",
+    "injection: cursors validated and parameterized",
+    "archive-traversal: non-hex object keys refused before filesystem access",
+    "replay: unbounded scope refused",
+    "support-bundle: allowlist construction plus outbound scan",
+    "logs: sensitive patterns redacted, redaction visible"
+  ],
+  "criticalOrHighOpen": 0,
+  "note": "authorization deny-by-default and RLS FORCE coverage are verified in the app suite and rls.int tests respectively; this file indexes the security-specific probes."
+}

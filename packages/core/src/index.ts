@@ -207,3 +207,7 @@ export {
 export type {
   BackupRecord, DailyBackupStatus, RestoreExercise, RestoreVerification,
 } from './dr/backup.js'
+export {
+  LeakDetectedError, SAFE_SUPPORT_FIELDS, buildSupportBundle, safeLogLine, scanForSensitive,
+} from './security/support-bundle.js'
+export type { LeakFinding, SafeSupportField, SupportBundle } from './security/support-bundle.js'

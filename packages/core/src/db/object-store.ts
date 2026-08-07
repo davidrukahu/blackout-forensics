@@ -56,6 +56,12 @@ export class FileObjectStore implements ObjectStore {
   }
 
   private path(sha: string): string {
+    // Keys are content hashes and nothing else. Anything that is not 64 hex characters never
+    // touches the filesystem — a key like "../../etc/passwd" must fail HERE, not at the
+    // integrity check after the read already happened.
+    if (!/^[0-9a-f]{64}$/.test(sha)) {
+      throw new Error(`object keys are lowercase sha256 hex; refusing "${sha.slice(0, 32)}"`)
+    }
     return join(this.root, sha.slice(0, 2), sha.slice(2, 4), sha)
   }
 
