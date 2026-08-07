@@ -182,3 +182,12 @@ export type {
 export {
   PostgresRetentionExecutor, UnsupportedClassError, receiptInventory, tombstonedRefs,
 } from './db/retention-store.js'
+export {
+  COHORT_SAMPLE_FLOOR, METRIC_DEFINITIONS, METRIC_DEFINITIONS_VERSION,
+  UnsupportedCarrierClaimError, assertCarrierClaimSupported, buildSlaReport, reportToCsv,
+  reportToPdf, sha256Canonical, signReport, verifyReportIntegrity, verifySignedReport,
+} from './reporting/sla.js'
+export type {
+  CohortComparison, RecoverySla, ReportManifest, SignedReport, SlaReport, SlaReportInput,
+  TelemetrySla,
+} from './reporting/sla.js'
