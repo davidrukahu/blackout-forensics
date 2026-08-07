@@ -38,9 +38,12 @@ import {
   type SamplerEvent,
   type SavedView,
 } from './core.server.js'
+import { buildCaseDetail, type CaseDetail } from './case.server.js'
 import { SCENARIO_NAMES, runScenario, type CanonicalEvent } from '@blackout/generator'
 
-const SEED_CTX = { seed: 91, startAt: '2026-08-05T06:00:00.000Z' }
+const SEED_START = '2026-08-05T06:00:00.000Z'
+/** Each scenario runs as its own device (distinct seed): the seeded queue is a small fleet. */
+const seedFor = (index: number) => ({ seed: 91 + index * 7, startAt: SEED_START })
 /** Classification date: after the shipped rules' effective-from, as production replay would use. */
 const CLASSIFY_AT = '2026-09-01T00:00:00.000Z'
 
@@ -53,6 +56,8 @@ interface StoredCase {
   owner: string | null
   version: number
   scenario: string
+  events: readonly CanonicalEvent[]
+  corridorId: string
 }
 
 interface AppStore {
@@ -65,8 +70,8 @@ function seed(): AppStore {
   const cases = new Map<string, StoredCase>()
   let assetCounter = 0
 
-  for (const name of SCENARIO_NAMES) {
-    const { events } = runScenario(name, SEED_CTX)
+  for (const [index, name] of SCENARIO_NAMES.entries()) {
+    const { events } = runScenario(name, seedFor(index))
     const byDevice = new Map<string, CanonicalEvent[]>()
     for (const event of events) {
       byDevice.set(event.device_ref, [...(byDevice.get(event.device_ref) ?? []), event])
@@ -127,6 +132,19 @@ function seed(): AppStore {
         policyVersion: sample.policyVersion,
         finalisationWatermarkAt: '2026-09-04T00:00:00.000Z',
       })
+      // An interior gap has already ended: the recovery that bounded the sample closes the
+      // provisional watch into monitoring, carrying the end — exactly what the watermark
+      // processor does when late records confirm the gap's edge.
+      if (sample.endAt !== null) {
+        episode = transition(episode, {
+          to: 'monitoring',
+          cause: 'evidence_updated',
+          actor: 'system:watermark',
+          reason: 'recovery observed; gap bounded',
+          at: sample.endAt,
+          endAt: sample.endAt,
+        }, sample.endAt)
+      }
       // A fired classification routes the episode to review, exactly as the pipeline would.
       if (classification.hypotheses.length > 0) {
         episode = transition(episode, {
@@ -151,6 +169,9 @@ function seed(): AppStore {
         owner: null,
         version: 1,
         scenario: name,
+        events: ordered,
+        // Every reference scenario drives the generator's default corridor.
+        corridorId: 'thika-road',
       })
     }
   }
@@ -302,4 +323,30 @@ export function saveView(params: {
 
 export function auditTrail(): readonly AppAuditEvent[] {
   return store().auditEvents
+}
+
+export function getCase(params: {
+  readonly scopes: readonly string[]
+  readonly actor: string
+  readonly episodeId: string
+  readonly now?: string
+}): CaseDetail | null {
+  requireScope(params.scopes, 'case:read')
+  const record = store().cases.get(params.episodeId)
+  if (record === undefined) return null
+
+  // §10.4: reading a case's full evidence is a sensitive view, recorded before it is returned.
+  store().auditEvents.push({
+    actor: params.actor,
+    action: 'case.sensitive_view',
+    at: new Date().toISOString(),
+    detail: { episode_id: params.episodeId, device_ref: record.episode.deviceRef },
+  })
+
+  const now = params.now ?? new Date().toISOString()
+  return buildCaseDetail({
+    record,
+    item: toQueueItem(record, now),
+    fleet: [...store().cases.values()],
+  })
 }

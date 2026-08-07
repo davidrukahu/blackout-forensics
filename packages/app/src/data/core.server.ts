@@ -9,6 +9,7 @@
  */
 
 export {
+  ALLOWED_TRANSITIONS,
   BUILTIN_VIEWS,
   BULK_ACTIONS,
   CONTRADICTIONS,
@@ -22,7 +23,10 @@ export {
   checkBulk,
   classify,
   computePriority,
+  correlate,
+  currentEpisodeVersion,
   expectedNextReport,
+  projectCorridor,
   factsForScenario,
   openEpisode,
   sampleEpisodes,
@@ -31,8 +35,12 @@ export {
 export type {
   BulkRefusal,
   ClassificationResult,
+  CorrelationCandidate,
+  CorridorResult,
   Episode,
+  PeerCluster,
   QueueItem,
+  RoadGraph,
   SamplerEvent,
   SavedView,
 } from '@blackout/core'
