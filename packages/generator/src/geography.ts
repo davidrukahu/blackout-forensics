@@ -139,35 +139,62 @@ export function walkCorridor(
   let alongLegM = 0
   let odometerM = 0
 
+  let arrived = false
+  let lastHeading = 0
+
   for (let i = 0; i < pointCount; i++) {
-    const from = corridor.waypoints[legIndex]
-    const to = corridor.waypoints[legIndex + 1]
-    if (from === undefined || to === undefined) break
+    if (!arrived) {
+      const from = corridor.waypoints[legIndex]
+      const to = corridor.waypoints[legIndex + 1]
+      if (from === undefined || to === undefined) break
 
-    const legLengthM = distanceM(from, to)
-    const speedKph = rng.float(corridor.typicalSpeedKph * 0.65, corridor.typicalSpeedKph * 1.25)
-    const stepM = (speedKph / 3.6) * intervalS
+      const legLengthM = distanceM(from, to)
+      const speedKph = rng.float(corridor.typicalSpeedKph * 0.65, corridor.typicalSpeedKph * 1.25)
+      const stepM = (speedKph / 3.6) * intervalS
 
-    alongLegM += stepM
-    odometerM += stepM
+      alongLegM += stepM
+      odometerM += stepM
 
-    while (alongLegM > legLengthM && legIndex + 2 < corridor.waypoints.length) {
-      alongLegM -= legLengthM
-      legIndex += 1
+      while (alongLegM > legLengthM && legIndex + 2 < corridor.waypoints.length) {
+        alongLegM -= legLengthM
+        legIndex += 1
+      }
+
+      const current = corridor.waypoints[legIndex]
+      const nextPoint = corridor.waypoints[legIndex + 1]
+      if (current === undefined || nextPoint === undefined) break
+
+      const remaining = distanceM(current, nextPoint)
+      if (alongLegM >= remaining && legIndex + 2 >= corridor.waypoints.length) {
+        // The route is exhausted: the vehicle has arrived. An earlier version pinned the track at
+        // the final waypoint while KEEPING its jittered speed — bit-identical coordinates under a
+        // claimed 40 km/h, which is precisely the frozen-fix-while-moving signature the stale-
+        // position rule exists to catch. The generator was fabricating a GNSS fault at the end of
+        // every track. An arrived vehicle parks: zero speed, stationary, and coordinates that
+        // wander by a few metres the way a real parked GPS does.
+        arrived = true
+      }
+
+      const fraction = Math.min(1, alongLegM / Math.max(1, remaining))
+      lastHeading = Math.round(bearingDeg(current, nextPoint) * 10) / 10
+      points.push({
+        lat: current.lat + (nextPoint.lat - current.lat) * fraction,
+        lon: current.lon + (nextPoint.lon - current.lon) * fraction,
+        odometerM: Math.round(odometerM),
+        headingDeg: lastHeading,
+        speedKph: arrived ? 0 : Math.round(speedKph * 10) / 10,
+      })
+    } else {
+      const end = corridor.waypoints[corridor.waypoints.length - 1] as LatLon
+      points.push({
+        // ~±2 m of jitter: a parked receiver never repeats a fix to the sixth decimal.
+        lat: end.lat + rng.float(-0.00002, 0.00002),
+        lon: end.lon + rng.float(-0.00002, 0.00002),
+        odometerM: Math.round(odometerM),
+        headingDeg: lastHeading,
+        speedKph: 0,
+      })
     }
-
-    const current = corridor.waypoints[legIndex]
-    const nextPoint = corridor.waypoints[legIndex + 1]
-    if (current === undefined || nextPoint === undefined) break
-
-    const fraction = Math.min(1, alongLegM / Math.max(1, distanceM(current, nextPoint)))
-    points.push({
-      lat: current.lat + (nextPoint.lat - current.lat) * fraction,
-      lon: current.lon + (nextPoint.lon - current.lon) * fraction,
-      odometerM: Math.round(odometerM),
-      headingDeg: Math.round(bearingDeg(current, nextPoint) * 10) / 10,
-      speedKph: Math.round(speedKph * 10) / 10,
-    })
   }
 
   return points

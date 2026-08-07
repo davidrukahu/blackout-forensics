@@ -139,6 +139,28 @@ CREATE TABLE IF NOT EXISTS core.replay_run (
   CHECK (interval_end > interval_start)
 );
 
+-- Episodes as the API reads them: the version chain is the episode (§7.3), and the current row
+-- exists so a queue can be listed without unfolding history. Placed before the RLS section so the
+-- apply-to-every-table loop covers it — the quarantine lesson, kept learned.
+CREATE TABLE IF NOT EXISTS core.episode (
+  id            text        NOT NULL,
+  tenant_id     text        NOT NULL,
+  device_ref    text        NOT NULL,
+  current_state text        NOT NULL,
+  episode_type  text        NOT NULL,
+  start_at      timestamptz NOT NULL,
+  end_at        timestamptz,
+  -- The full version chain and recorded actions, exactly as the lifecycle module shapes them.
+  versions      jsonb       NOT NULL,
+  actions       jsonb       NOT NULL DEFAULT '[]'::jsonb,
+  finalisation_watermark_at timestamptz NOT NULL,
+  PRIMARY KEY (tenant_id, id)
+);
+
+-- The pagination contract (§10.5): stable cursor over (start_at, id). An index matching the sort
+-- is what keeps the cursor stable under concurrent inserts.
+CREATE INDEX IF NOT EXISTS episode_list_order ON core.episode (tenant_id, start_at, id);
+
 CREATE TABLE IF NOT EXISTS audit.event (
   id          bigserial PRIMARY KEY,
   tenant_id   text        NOT NULL,

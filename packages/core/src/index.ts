@@ -128,3 +128,19 @@ export type {
   CorridorManifest, CorridorRequest, CorridorResult, CorridorTableRow, FleetExposure, RoadEdge,
   RoadGraph, RoadNode,
 } from './geo/corridor.js'
+export {
+  InvalidCursorError, LOCATION_SCOPE, MemoryEpisodeStore, MissingScopeError, decodeCursor,
+  encodeCursor, getEpisode, listEpisodes,
+} from './api/episodes.js'
+export type {
+  AuditSink, CallerContext, EpisodeDetail, EpisodeFilters, EpisodeListItem, EpisodePage,
+  EpisodeReadStore, ListEpisodesRequest,
+} from './api/episodes.js'
+export { CORPUS_POLICY, buildCorpus, factsForScenario } from './evaluation/corpus.js'
+export type { LabelledCase } from './evaluation/corpus.js'
+export {
+  BASELINES, classifierDecider, classifierResult, evaluateDecider, rate, runHarness,
+  wilsonUpperBound,
+} from './evaluation/harness.js'
+export type { DeciderMetrics, HarnessReport, HypothesisMetrics, Rate, UrgencyDecider } from './evaluation/harness.js'
+export { InvalidRulePackageError } from './rules/classify.js'

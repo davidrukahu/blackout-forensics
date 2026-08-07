@@ -181,8 +181,10 @@ export function generateBaseline(options: BaselineOptions): Baseline {
       motion: {
         speed_kph: point.speedKph,
         heading_deg: point.headingDeg,
-        ignition: 'on',
-        motion_state: 'moving',
+        // An arrived, parked vehicle reports itself parked. Claiming motion at zero speed was the
+        // other half of the fabricated frozen-fix signature.
+        ignition: point.speedKph > 0 ? 'on' : 'off',
+        motion_state: point.speedKph > 0 ? 'moving' : 'stationary',
         odometer_m: point.odometerM,
       },
       power: {

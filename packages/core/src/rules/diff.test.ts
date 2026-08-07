@@ -12,90 +12,16 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { SCENARIO_NAMES, runScenario, type CanonicalEvent } from '@blackout/generator'
+import { SCENARIO_NAMES, runScenario } from '@blackout/generator'
 
-import { sampleEpisodes, type SamplerEvent } from '../episodes/sampler.js'
-import type { ReportingPolicyRecord } from '../reporting-policy.js'
-import { FACT_VOCABULARY_VERSION, deriveFacts, type FactSet } from './facts.js'
+import { FACT_VOCABULARY_VERSION } from './facts.js'
 import { classify } from './classify.js'
 import { CONTRADICTIONS, RULE_PACKAGES } from './packages.js'
+import { factsForScenario } from '../evaluation/corpus.js'
 import { diffClassifications, summariseClassification, type ClassificationSnapshot } from './diff.js'
 
 const CTX = { seed: 91, startAt: '2026-08-05T06:00:00.000Z' }
 const AT = '2026-09-01T00:00:00.000Z'
-
-const POLICY: ReportingPolicyRecord = {
-  cohort: 'corpus',
-  intervals: { moving: 60, ignition_on: 120, parked: 300, sleep: 3600, exception: 30 },
-  provenance: 'declared',
-  sleepAfterStationaryS: 900,
-  graceFactor: 1.5,
-  version: '1.0.0',
-}
-
-/**
- * Derive facts for one scenario from its events alone — never from its ground-truth labels, which
- * would be the classifier grading its own homework.
- *
- * Peer, corridor and maintenance context are single-device unknowns here, so those facts arrive
- * unavailable — which is itself part of what the baseline pins: the classifications below are what
- * the rules say *with* that evidence missing.
- */
-function factsForScenario(events: readonly CanonicalEvent[]): FactSet {
-  const byDevice = new Map<string, CanonicalEvent[]>()
-  for (const event of events) {
-    byDevice.set(event.device_ref, [...(byDevice.get(event.device_ref) ?? []), event])
-  }
-  const primary = [...byDevice.values()].sort((a, b) => b.length - a.length)[0] ?? []
-  const ordered = [...primary].sort((a, b) => Date.parse(a.received_at) - Date.parse(b.received_at))
-
-  const episodes = sampleEpisodes(ordered as unknown as SamplerEvent[], { policy: POLICY })
-  const first = episodes[0]
-
-  const anyAlert = (code: string): boolean =>
-    ordered.some((e) => (e.alerts ?? []).some((a) => a.code === code))
-  const sleepStates = ordered
-    .map((e) => (e.device as { sleep_state?: string } | undefined)?.sleep_state)
-    .filter((s): s is string => typeof s === 'string')
-  const lastMotion = [...ordered].reverse()
-    .map((e) => (e.motion as { motion_state?: string } | null | undefined)?.motion_state)
-    .find((m) => typeof m === 'string')
-  const lastPower = [...ordered].reverse()
-    .map((e) => (e.power as { external_state?: string } | null | undefined)?.external_state)
-    .find((p) => typeof p === 'string')
-  const rebooted = ordered.some(
-    (e) => (e.device as { reboot_reason?: string | null } | undefined)?.reboot_reason != null,
-  )
-
-  return deriveFacts({
-    ...(first !== undefined
-      ? {
-          episode: {
-            type: first.type,
-            durationS: first.durationS,
-            missedReports: first.missedReports,
-            weakBasis: first.weakBasis,
-            policyState: 'moving',
-            sleepProvenance: POLICY.provenance,
-          },
-        }
-      : {}),
-    lastObservations: {
-      moving: lastMotion === undefined ? null : lastMotion === 'moving',
-      externalPowerState: (lastPower ?? null) as 'present' | 'absent' | 'unknown' | null,
-      sleepState: sleepStates.includes('deep_sleep')
-        ? 'deep_sleep'
-        : ((sleepStates[sleepStates.length - 1] ?? null) as 'awake' | null),
-    },
-    alerts: {
-      powerCut: anyAlert('power_cut'),
-      tamper: anyAlert('tamper') || anyAlert('unplug'),
-      gnssJamming: anyAlert('gnss_jamming'),
-      networkJamming: anyAlert('network_jamming'),
-    },
-    recovery: { rebootReported: rebooted, sequenceReset: false },
-  })
-}
 
 function currentSnapshot(): ClassificationSnapshot {
   const snapshot: Record<string, ReturnType<typeof summariseClassification>> = {}

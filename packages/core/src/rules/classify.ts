@@ -10,6 +10,15 @@
  * statements about the same gap, and forcing a single label would manufacture certainty. H-UNKNOWN
  * is not a rule but the classifier's own conclusion when nothing fired — evidence missing,
  * conflicting or below threshold is a valid result, never an error (PRD §1.2).
+ *
+ * Two rules here were rewritten after adversarial verification demonstrated them broken:
+ *
+ *   * Suppression is decided PER FIRED ENTRY, never per hypothesis code. The first version kept a
+ *     code-keyed map, so suppressing a weak inference also suppressed a direct alert that happened
+ *     to share its hypothesis — the exact §17.2 violation the design document called absolute.
+ *   * Urgency has VALENCE. Evidence whose own priority effect is 'lower' explains a gap; letting it
+ *     corroborate urgency meant two benign explanations could jointly demand a field dispatch.
+ *     Only evidence arguing FOR anomaly (effect 'raise') can support urgent action.
  */
 
 import { canSupportUrgentAction, type EvidenceItem, type EvidenceStrength } from '../evidence.js'
@@ -17,6 +26,7 @@ import type { FactSet } from './facts.js'
 import {
   evaluateRule,
   isEffectiveAt,
+  validateRulePackage,
   type CounterNote,
   type HypothesisCode,
   type Predicate,
@@ -62,15 +72,26 @@ export interface ClassificationResult {
   readonly notApplicable: readonly InapplicableRule[]
   /** §5.3: priority is a versioned policy result made from named factors, never a hidden score. */
   readonly priorityFactors: readonly PriorityFactor[]
-  /** FR-CLS-007 via the shared evidence threshold: suppressed hypotheses cannot contribute. */
+  /** FR-CLS-007 via the shared evidence threshold, over non-suppressed 'raise' evidence only. */
   readonly urgentEligible: boolean
   readonly factVocabularyVersion: string
 }
 
-function predicateHolds(predicate: Predicate, facts: FactSet): boolean {
-  if ('anyOf' in predicate) return predicate.anyOf.some((p) => predicateHolds(p, facts))
+type Tri = true | false | 'unknown'
+
+/** Tri-state predicate check for `unless` clauses: an unread exception is not a checked one. */
+function predicateTri(predicate: Predicate, facts: FactSet): Tri {
+  if ('anyOf' in predicate) {
+    let sawUnknown = false
+    for (const branch of predicate.anyOf) {
+      const result = predicateTri(branch, facts)
+      if (result === true) return true
+      if (result === 'unknown') sawUnknown = true
+    }
+    return sawUnknown ? 'unknown' : false
+  }
   const fact = facts[predicate.fact]
-  if (fact === undefined || fact.status === 'unavailable') return false
+  if (fact === undefined || fact.status === 'unavailable') return 'unknown'
   const value = fact.value
   switch (predicate.op) {
     case 'eq': return value === predicate.value
@@ -78,6 +99,32 @@ function predicateHolds(predicate: Predicate, facts: FactSet): boolean {
     case 'gte': return typeof value === 'number' && value >= predicate.value
     case 'lte': return typeof value === 'number' && value <= predicate.value
     case 'in': return predicate.values.includes(value)
+  }
+}
+
+const BAND_RANK: Readonly<Record<EvidenceStrength, number>> = {
+  direct: 3,
+  corroborated: 2,
+  weak: 1,
+  indeterminate: 0,
+}
+
+/** A cap, not an assignment: suppression can only lower a band (finding L11). */
+function capBand(band: EvidenceStrength, cap: EvidenceStrength): EvidenceStrength {
+  return BAND_RANK[band] <= BAND_RANK[cap] ? band : cap
+}
+
+/** Packages already validated this process — validation executes fixtures, so run it once each. */
+const validated = new WeakSet<object>()
+
+export class InvalidRulePackageError extends Error {
+  constructor(readonly ruleId: string, readonly violations: readonly { code: string; detail: string }[]) {
+    super(
+      `refusing to classify with invalid package ${ruleId}: ${violations
+        .map((v) => v.code)
+        .join(', ')}. The governance invariants hold at runtime, not only in the test suite.`,
+    )
+    this.name = 'InvalidRulePackageError'
   }
 }
 
@@ -89,14 +136,43 @@ export function classify(params: {
   readonly at: string
   readonly factVocabularyVersion: string
 }): ClassificationResult {
+  // A malformed timestamp would silently drop every closed-window rule and keep every open one —
+  // a plausible-looking classification from the wrong era (finding L13). Refuse instead.
+  if (Number.isNaN(Date.parse(params.at))) {
+    throw new Error(`classify() requires a parseable timestamp, got "${params.at}"`)
+  }
+
+  for (const rule of params.packages) {
+    if (validated.has(rule)) continue
+    const violations = validateRulePackage(rule)
+    if (violations.length > 0) throw new InvalidRulePackageError(rule.id, violations)
+    validated.add(rule)
+  }
+
   const effective = params.packages.filter((rule) => isEffectiveAt(rule, params.at))
 
-  const fired: {
+  // Two effective versions of one rule id would double-fire a hypothesis and misattribute its
+  // priority factor (findings M18/L0). Overlapping windows are a governance defect; say so.
+  const seenIds = new Set<string>()
+  for (const rule of effective) {
+    if (seenIds.has(rule.id)) {
+      throw new Error(
+        `two versions of ${rule.id} are simultaneously effective at ${params.at}: their ` +
+          'governance windows overlap, which publication should have prevented',
+      )
+    }
+    seenIds.add(rule.id)
+  }
+
+  interface FiredEntry {
     rule: RulePackage
     evidence: EvidenceItem
     counterevidence: CounterNote[]
     missingExpected: readonly string[]
-  }[] = []
+    suppressedBy: HypothesisCode | null
+  }
+
+  const fired: FiredEntry[] = []
   const notApplicable: InapplicableRule[] = []
   const allMissing = new Set<string>()
 
@@ -108,6 +184,7 @@ export function classify(params: {
         evidence: outcome.evidence,
         counterevidence: [...outcome.counterevidence],
         missingExpected: outcome.missingExpected,
+        suppressedBy: null,
       })
       outcome.missingExpected.forEach((name) => allMissing.add(name))
     } else if (outcome.kind === 'not_applicable') {
@@ -122,41 +199,50 @@ export function classify(params: {
     }
   }
 
-  // Suppression. Direct evidence is never suppressed (§17.2): a source-wide incident earns a note
-  // on a direct signal, and nothing more — the note is visible, the signal survives intact.
+  // Suppression, per fired entry. Direct evidence is never suppressed (§17.2): it gains a visible
+  // note and loses nothing — not its band, not its urgency, not its priority factor.
   const firedCodes = new Set<HypothesisCode>(fired.map((f) => f.rule.hypothesis))
-  const suppression = new Map<HypothesisCode, HypothesisCode>()
 
   for (const contradiction of params.contradictions) {
     if (!firedCodes.has(contradiction.suppressor) || !firedCodes.has(contradiction.suppressed)) {
       continue
     }
-    if (contradiction.unless.some((p) => predicateHolds(p, params.facts))) continue
+
+    const unlessResults = contradiction.unless.map((p) => predicateTri(p, params.facts))
+    if (unlessResults.includes(true)) continue
+    const unlessUnknown = unlessResults.includes('unknown')
 
     for (const entry of fired) {
       if (entry.rule.hypothesis !== contradiction.suppressed) continue
+
       if (entry.evidence.strength === 'direct') {
         entry.counterevidence.push({
           summary:
             `a ${contradiction.suppressor} incident is concurrently active; this direct signal ` +
             'is preserved and shown alongside it',
         })
-      } else {
-        suppression.set(contradiction.suppressed, contradiction.suppressor)
-        entry.counterevidence.push({
-          summary: `suppressed: ${contradiction.rationale}`,
-        })
+        continue
       }
+
+      if (unlessUnknown) {
+        // The exception could not be read. Suppressing anyway would collapse "could not check"
+        // into "checked and found false" — the inversion FR-CLS-006 forbids (finding M16).
+        entry.counterevidence.push({
+          summary:
+            `suppression by ${contradiction.suppressor} withheld: its exception condition could ` +
+            'not be evaluated from the available facts',
+        })
+        continue
+      }
+
+      entry.suppressedBy = contradiction.suppressor
+      entry.counterevidence.push({ summary: `suppressed: ${contradiction.rationale}` })
     }
   }
 
   const hypotheses: ClassifiedHypothesis[] = fired.map((entry) => {
-    const suppressedBy = suppression.get(entry.rule.hypothesis) ?? null
-
-    // §8.2: corroborated requires material counterevidence to be absent. Direct is a statement
-    // about the source's design, not about agreement, and stays direct.
     let band: EvidenceStrength = entry.evidence.strength
-    if (suppressedBy !== null) band = 'weak'
+    if (entry.suppressedBy !== null) band = capBand(band, 'weak')
     else if (band === 'corroborated' && entry.counterevidence.length > 0) band = 'weak'
 
     return {
@@ -168,27 +254,28 @@ export function classify(params: {
       counterevidence: entry.counterevidence,
       missingExpected: entry.missingExpected,
       humanReview: entry.rule.humanReview,
-      suppressedBy,
+      suppressedBy: entry.suppressedBy,
     }
   })
 
-  // Urgent eligibility over the surviving evidence: a suppressed hypothesis cannot contribute,
-  // and the shared threshold already refuses weak-only sets (FR-CLS-007) and cell priors.
-  const admissible = hypotheses
-    .filter((h) => h.suppressedBy === null)
-    .map((h) => ({ ...h.evidence, strength: h.band }))
+  // Urgency, with valence. Evidence whose priority effect is 'lower' explains the gap — it argues
+  // AGAINST dispatch, and cannot simultaneously corroborate a case for one. Only non-suppressed
+  // 'raise' evidence reaches the shared FR-CLS-007 threshold.
+  const admissible: EvidenceItem[] = []
+  for (const [index, entry] of fired.entries()) {
+    if (entry.suppressedBy !== null) continue
+    if (entry.rule.priorityEffect.effect !== 'raise') continue
+    admissible.push({ ...entry.evidence, strength: (hypotheses[index] as ClassifiedHypothesis).band })
+  }
   const urgentEligible = canSupportUrgentAction(admissible)
 
-  const priorityFactors: PriorityFactor[] = hypotheses.map((h) => {
-    const rule = effective.find((r) => r.id === h.ruleId) as RulePackage
-    return {
-      factor: rule.priorityEffect.factor,
-      // A suppressed hypothesis no longer moves priority; the factor stays visible with no effect,
-      // so the queue can show what was considered and set aside rather than hiding it.
-      effect: h.suppressedBy === null ? rule.priorityEffect.effect : 'none',
-      fromRule: rule.id,
-    }
-  })
+  const priorityFactors: PriorityFactor[] = fired.map((entry) => ({
+    factor: entry.rule.priorityEffect.factor,
+    // A suppressed hypothesis no longer moves priority; the factor stays visible with no effect,
+    // so the queue can show what was considered and set aside rather than hiding it.
+    effect: entry.suppressedBy === null ? entry.rule.priorityEffect.effect : 'none',
+    fromRule: entry.rule.id,
+  }))
 
   const unknown =
     hypotheses.length === 0

@@ -75,6 +75,11 @@ export const FACT_VOCABULARY: readonly FactDefinition[] = [
 
 const FACT_NAMES = new Set(FACT_VOCABULARY.map((f) => f.name))
 
+/** Declared type per fact, for the evaluator's type gate: a mistyped value is unreadable, not false. */
+export const FACT_TYPES: ReadonlyMap<string, 'string' | 'number' | 'boolean'> = new Map(
+  FACT_VOCABULARY.map((f) => [f.name, f.type]),
+)
+
 export function isVocabularyFact(name: string): boolean {
   return FACT_NAMES.has(name)
 }
@@ -228,7 +233,11 @@ export function deriveFacts(input: FactDerivationInput): FactSet {
     facts['network.identity_known'] = available(input.peers.networkIdentityKnown)
     facts['network.independent_devices'] =
       input.peers.networkIndependentDevices === null
-        ? unavailable('serving network identity was not observed before the gap')
+        ? unavailable(
+            input.peers.networkIdentityKnown
+              ? 'peer cluster count is unavailable for the observed network identity'
+              : 'serving network identity was not observed before the gap',
+          )
         : available(input.peers.networkIndependentDevices)
   } else {
     for (const name of [

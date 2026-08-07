@@ -28,7 +28,7 @@
  */
 
 import type { EvidenceFamily, EvidenceItem, EvidenceStrength } from '../evidence.js'
-import { isVocabularyFact, type FactSet, type FactValue } from './facts.js'
+import { FACT_TYPES, isVocabularyFact, type FactSet, type FactValue } from './facts.js'
 
 export type HypothesisCode =
   | 'H-EXPECTED' | 'H-GNSS' | 'H-VENDOR' | 'H-NETWORK' | 'H-CORRIDOR'
@@ -72,6 +72,12 @@ export interface RulePackage {
   readonly version: string
   readonly purpose: string
   readonly hypothesis: Exclude<HypothesisCode, 'H-UNKNOWN'>
+  /**
+   * Cohorts this package applies to — §8.3(5)'s cohort window, declared rather than implicit.
+   * 'all' is a legal and visible choice; an undeclared scope was silently the same thing without
+   * anyone having chosen it. Runtime cohort filtering lands with cohort-aware fact derivation.
+   */
+  readonly cohorts: readonly string[]
   readonly requiredFacts: readonly string[]
   readonly optionalFacts: readonly string[]
   readonly positive: readonly Predicate[]
@@ -109,17 +115,31 @@ type Tri = true | false | 'unknown'
 
 function evalPredicate(predicate: Predicate, facts: FactSet, unknownFacts: Set<string>): Tri {
   if ('anyOf' in predicate) {
+    // A branch that read FALSE is a determination: two indicators found clean and a third
+    // unreadable is "we checked and found nothing", with the unreadable one recorded as missing.
+    // Only when EVERY branch is unreadable has the disjunction not been evaluated at all.
+    let sawFalse = false
     let sawUnknown = false
     for (const branch of predicate.anyOf) {
       const result = evalPredicate(branch, facts, unknownFacts)
       if (result === true) return true
       if (result === 'unknown') sawUnknown = true
+      else sawFalse = true
     }
-    return sawUnknown ? 'unknown' : false
+    return sawFalse ? false : sawUnknown ? 'unknown' : false
   }
 
   const fact = facts[predicate.fact]
   if (fact === undefined || fact.status === 'unavailable') {
+    unknownFacts.add(predicate.fact)
+    return 'unknown'
+  }
+
+  // A value that violates the vocabulary's declared type is unreadable, not false: a power cut
+  // arriving as the string "true" after a serialization defect must surface as could-not-read,
+  // never as we-checked-and-found-nothing (findings M2/L1/L3).
+  const declaredType = FACT_TYPES.get(predicate.fact)
+  if (declaredType !== undefined && typeof fact.value !== declaredType) {
     unknownFacts.add(predicate.fact)
     return 'unknown'
   }
@@ -150,7 +170,9 @@ function evalPredicate(predicate: Predicate, facts: FactSet, unknownFacts: Set<s
 export function evaluateRule(rule: RulePackage, facts: FactSet): RuleOutcome {
   const missingRequired = rule.requiredFacts.filter((name) => {
     const fact = facts[name]
-    return fact === undefined || fact.status === 'unavailable'
+    if (fact === undefined || fact.status === 'unavailable') return true
+    const declaredType = FACT_TYPES.get(name)
+    return declaredType !== undefined && typeof fact.value !== declaredType
   })
   if (missingRequired.length > 0) {
     return { kind: 'not_applicable', missingFacts: missingRequired }
@@ -158,11 +180,26 @@ export function evaluateRule(rule: RulePackage, facts: FactSet): RuleOutcome {
 
   const unknownTouched = new Set<string>()
 
-  let firedPositive = true
+  // Three-valued positives: a positive that is FALSE means the rule genuinely did not fire; a
+  // positive that could not be read means the rule could not be evaluated. Collapsing unknown into
+  // false made unknown block harder than a known negative — finding H0's inversion, where a rule
+  // fired on a clean resumption but fell silent when resumption was merely unknown.
+  let anyFalse = false
+  let anyUnknownPositive = false
+  const unknownPositives = new Set<string>()
   for (const predicate of rule.positive) {
+    const before = new Set(unknownTouched)
     const result = evalPredicate(predicate, facts, unknownTouched)
-    if (result !== true) firedPositive = false
+    if (result === false) anyFalse = true
+    if (result === 'unknown') {
+      anyUnknownPositive = true
+      for (const name of unknownTouched) if (!before.has(name)) unknownPositives.add(name)
+    }
   }
+  if (!anyFalse && anyUnknownPositive) {
+    return { kind: 'not_applicable', missingFacts: [...unknownPositives].sort() }
+  }
+  const firedPositive = !anyFalse
 
   let blocked = false
   for (const predicate of rule.negative) {
@@ -220,8 +257,10 @@ export const PROHIBITED_BY_HYPOTHESIS: Readonly<Partial<Record<HypothesisCode, r
   'H-GNSS': ['cellular outage'],
   'H-VENDOR': ['operator outage', 'mobile operator'],
   'H-NETWORK': ['confirmed outage'],
-  'H-CORRIDOR': ['path taken'],
+  'H-CORRIDOR': ['path taken', 'route taken', 'coverage'],
   'H-TAMPER': ['confirmed tamper'],
+  // §8.1: H-POWER never attributes cause to a person. Finding M3: this row was simply missing.
+  'H-POWER': ['driver', 'rider', 'deliberate', 'intentional', 'person '],
 }
 
 /** §11.5: H-TAMPER uses this exact phrase, no paraphrase. */
@@ -252,6 +291,17 @@ export function validateRulePackage(rule: RulePackage): RuleViolation[] {
   if (rule.purpose.trim() === '') violate('purpose', 'purpose is empty')
   if (!HYPOTHESIS_CODES.includes(rule.hypothesis)) {
     violate('hypothesis', `unknown hypothesis ${rule.hypothesis}`)
+  }
+  if ((rule.hypothesis as HypothesisCode) === 'H-UNKNOWN') {
+    // H-UNKNOWN is the classifier's own conclusion. A rule that could fire it would invite tuning
+    // the safe outcome away (finding M11) — and §8.1 prohibits any cause-specific statement for it.
+    violate('hypothesis', 'H-UNKNOWN is not a rule and no package may claim it')
+  }
+  if (rule.cohorts.length === 0 || rule.cohorts.some((c) => c.trim() === '')) {
+    violate('cohorts', '§8.3(5): the cohort window must be declared, even when the choice is "all"')
+  }
+  if (rule.produces.strength === 'indeterminate') {
+    violate('strength', 'a rule may not produce indeterminate evidence — indeterminate is the absence of a result, not a result')
   }
 
   for (const name of [...rule.requiredFacts, ...rule.optionalFacts]) {
@@ -290,8 +340,19 @@ export function validateRulePackage(rule: RulePackage): RuleViolation[] {
     violate('priority-factor', '§5.3 forbids hidden scores: the priority factor must be named')
   }
 
-  if (rule.fixtures.length < 2) {
-    violate('fixtures', 'at least one firing and one non-firing fixture are required')
+  // Findings M4/L8/L12: the count check promised kind coverage it never verified. A rule must
+  // demonstrate both that it fires and that it declines, or drift in either direction is invisible.
+  const kinds = new Set(rule.fixtures.map((f) => f.expected))
+  if (!kinds.has('fired')) {
+    violate('fixtures', 'no fixture demonstrates the rule firing')
+  }
+  if (!kinds.has('did_not_fire') && !kinds.has('not_applicable')) {
+    violate('fixtures', 'no fixture demonstrates the rule declining')
+  }
+  if (rule.hypothesis !== 'H-EXPECTED' && rule.positive.length > 0 && !kinds.has('did_not_fire')) {
+    // A rule with positive conditions must pin its discriminating boundary — the case where the
+    // facts were readable and the answer was no (findings L4/L7).
+    violate('fixtures', 'no did_not_fire fixture pins the rule\'s discriminating boundary')
   }
   for (const fixture of rule.fixtures) {
     const outcome = evaluateRule(rule, fixture.facts)
@@ -316,10 +377,15 @@ export function validateRulePackage(rule: RulePackage): RuleViolation[] {
     ...GLOBAL_PROHIBITED,
     ...(PROHIBITED_BY_HYPOTHESIS[rule.hypothesis] ?? []),
   ]
+  // Findings M17/L9: the factor is surfaced verbatim in the §5.3 queue display, and fixture names
+  // reach reviewers — every human-readable string is scanned, as the doc always claimed.
   const texts = [
+    rule.id,
     rule.purpose,
     rule.produces.summary,
+    rule.priorityEffect.factor,
     ...rule.counterevidence.map((c) => c.summary),
+    ...rule.fixtures.map((f) => f.name),
   ]
   for (const text of texts) {
     const lowered = text.toLowerCase()

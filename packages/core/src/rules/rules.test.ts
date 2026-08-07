@@ -56,7 +56,7 @@ describe('the vocabulary is closed', () => {
   it('rejects a condition on an undeclared fact', () => {
     const sneaky: RulePackage = {
       ...tamperRule,
-      positive: [{ fact: 'maintenance.window_active', op: 'eq', value: false }],
+      positive: [{ fact: 'corridor.recurrence_qualified', op: 'eq', value: false }],
     }
     expect(validateRulePackage(sneaky).map((v) => v.code)).toContain('undeclared-fact')
   })
@@ -137,6 +137,7 @@ describe('three-valued evaluation', () => {
       'episode.type': available('total_silence'),
       'policy.state_at_gap': available('parked'),
       'policy.weak_basis': available(false),
+      'policy.sleep_provenance': available('declared'),
       'power.cut_alert_present': unavailable('unsupported'),
       'tamper.alert_present': unavailable('unsupported'),
     })

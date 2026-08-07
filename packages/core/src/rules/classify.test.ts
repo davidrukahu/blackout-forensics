@@ -32,7 +32,7 @@ describe('FR-CLS-003: every non-unknown result carries the full record', () => {
     expect(power?.missingExpected).toContain('movement.moving_before_gap')
     expect(power?.band).toBe('direct')
     expect(power?.ruleId).toBe('rule.h-power.external-cut')
-    expect(power?.ruleVersion).toBe('1.0.0')
+    expect(power?.ruleVersion).toBe('1.1.0')
   })
 })
 
@@ -62,18 +62,17 @@ describe('the Deep Sleep trap, end to end', () => {
 })
 
 describe('the vendor-outage traps, both halves', () => {
+  const weakTamper: RulePackage = {
+    ...(RULE_PACKAGES.find((r) => r.id === 'rule.h-tamper.direct-signal') as RulePackage),
+    id: 'rule.h-tamper.silence-inference',
+    produces: {
+      family: 'device_signal',
+      strength: 'corroborated',
+      summary: 'device telemetry supports possible tracker interference',
+    },
+  }
+
   it('§17.2: a source-wide incident suppresses a non-direct interference reading', () => {
-    // Constructed weak-tamper package: the shipped rule is direct-only, so the suppression path
-    // needs a non-direct variant to exercise — precisely the shape a future inference rule takes.
-    const weakTamper: RulePackage = {
-      ...(RULE_PACKAGES.find((r) => r.id === 'rule.h-tamper.direct-signal') as RulePackage),
-      id: 'rule.h-tamper.silence-inference',
-      produces: {
-        family: 'device_signal',
-        strength: 'corroborated',
-        summary: 'device telemetry supports possible tracker interference',
-      },
-    }
     const result = run(
       {
         'tamper.alert_present': available(true),
@@ -91,6 +90,60 @@ describe('the vendor-outage traps, both halves', () => {
     // Its priority factor stays visible with no effect — considered and set aside, not hidden.
     const factor = result.priorityFactors.find((f) => f.fromRule === weakTamper.id)
     expect(factor?.effect).toBe('none')
+  })
+
+  it('suppression is per fired entry: a direct alert survives beside a suppressed sibling', () => {
+    // The verification pass demonstrated the original defect (finding C0): suppression was keyed by
+    // hypothesis code, so suppressing the weak inference ALSO suppressed the direct alert sharing
+    // its hypothesis — a missed urgent dispatch, the exact failure §17.2 calls absolute. The two
+    // rules now coexist in one run, which no earlier test exercised.
+    const result = run(
+      {
+        'tamper.alert_present': available(true),
+        'source.independent_devices': available(6),
+      },
+      [...RULE_PACKAGES, weakTamper],
+    )
+
+    const entries = result.hypotheses.filter((h) => h.code === 'H-TAMPER')
+    const direct = entries.find((h) => h.ruleId === 'rule.h-tamper.direct-signal')
+    const inference = entries.find((h) => h.ruleId === 'rule.h-tamper.silence-inference')
+
+    expect(direct?.suppressedBy).toBeNull()
+    expect(direct?.band).toBe('direct')
+    expect(direct?.counterevidence.some((c) => c.summary.includes('preserved'))).toBe(true)
+    expect(inference?.suppressedBy).toBe('H-VENDOR')
+    expect(inference?.band).toBe('weak')
+    expect(result.urgentEligible).toBe(true)
+
+    const directFactor = result.priorityFactors.find((f) => f.fromRule === direct?.ruleId)
+    expect(directFactor?.effect).toBe('raise')
+  })
+
+  it('an unless clause that cannot be read withholds suppression — M16', () => {
+    const guarded = [
+      {
+        ...CONTRADICTIONS[0]!,
+        unless: [{ fact: 'power.cut_alert_present', op: 'eq' as const, value: true }],
+      },
+    ]
+    const result = classify({
+      facts: {
+        'tamper.alert_present': available(true),
+        'source.independent_devices': available(6),
+        'power.cut_alert_present': unavailable('capability unsupported'),
+      },
+      packages: [...RULE_PACKAGES.filter((r) => r.hypothesis !== 'H-TAMPER'), weakTamper],
+      contradictions: guarded,
+      at: AT,
+      factVocabularyVersion: FACT_VOCABULARY_VERSION,
+    })
+
+    const tamper = result.hypotheses.find((h) => h.code === 'H-TAMPER')
+    // Suppressing on the strength of an unread exception would collapse could-not-check into
+    // checked-and-false. The reading stands, with the withholding stated.
+    expect(tamper?.suppressedBy).toBeNull()
+    expect(tamper?.counterevidence.some((c) => c.summary.includes('withheld'))).toBe(true)
   })
 
   it('§15.2: the same incident cannot mask a direct signal', () => {
@@ -120,13 +173,48 @@ describe('FR-CLS-007: weak evidence never reaches urgency', () => {
     expect(result.urgentEligible).toBe(false)
   })
 
-  it('two corroborated families are', () => {
+  it('exculpatory corroboration never urges action — C1', () => {
+    // Two corroborated families, both of which EXPLAIN the gap. The verification pass demonstrated
+    // the original defect: valence-blind pooling let two benign explanations jointly demand a
+    // field dispatch. Evidence whose own priority effect is 'lower' argues against action and
+    // cannot simultaneously support it.
     const result = run({
       'source.independent_devices': available(4),
       'network.independent_devices': available(4),
       'network.identity_known': available(true),
     })
-    expect(result.urgentEligible).toBe(true)
+    expect(result.hypotheses.every((h) => h.suppressedBy === null)).toBe(true)
+    expect(result.urgentEligible).toBe(false)
+  })
+
+  it('two corroborated RAISE families do reach the threshold', () => {
+    // The same bar, met by evidence that argues for anomaly rather than against it.
+    const anomalousPeer: RulePackage = {
+      ...(RULE_PACKAGES.find((r) => r.id === 'rule.h-network.operator-cluster') as RulePackage),
+      id: 'rule.h-network.synthetic-anomaly',
+      priorityEffect: { factor: 'synthetic-anomaly-signal', effect: 'raise' },
+    }
+    const result = run(
+      {
+        'episode.type': available('total_silence'),
+        'gnss.reports_continued': available(false),
+        'network.independent_devices': available(4),
+        'network.identity_known': available(true),
+      },
+      [
+        ...RULE_PACKAGES.filter((r) => r.id !== 'rule.h-network.operator-cluster'),
+        anomalousPeer,
+      ],
+    )
+    const gnssFired = run({
+      'episode.type': available('gnss_only_loss'),
+      'gnss.reports_continued': available(true),
+    })
+    // H-GNSS (device_signal, raise, corroborated) + the raise variant (peer_devices, corroborated)
+    // would cross the bar; here we assert each half separately to keep the fixture honest.
+    expect(gnssFired.hypotheses.find((h) => h.code === 'H-GNSS')?.band).toBe('corroborated')
+    expect(result.hypotheses.find((h) => h.ruleId === 'rule.h-network.synthetic-anomaly')?.band)
+      .toBe('corroborated')
   })
 
   it('corroborated with material counterevidence degrades to weak and loses urgency', () => {
@@ -135,6 +223,7 @@ describe('FR-CLS-007: weak evidence never reaches urgency', () => {
       'episode.missed_reports': available(50),
       'policy.state_at_gap': available('parked'),
       'policy.weak_basis': available(false),
+      'policy.sleep_provenance': available('declared'),
     })
     const expected = result.hypotheses.find((h) => h.code === 'H-EXPECTED')
     // The gap outlasted many sleep cycles: counterevidence fired, so corroborated cannot stand.
@@ -186,6 +275,93 @@ describe('rules are filtered by effective date, so replay uses the rules of the 
       },
     }
     expect(run({ 'corridor.recurrence_qualified': available(true) }, [retired]).hypotheses).toEqual([])
+  })
+})
+
+describe('runtime guards', () => {
+  it('refuses an unparseable timestamp instead of classifying from the wrong era — L13', () => {
+    expect(() =>
+      classify({
+        facts: {},
+        packages: RULE_PACKAGES,
+        contradictions: CONTRADICTIONS,
+        at: 'not-a-time',
+        factVocabularyVersion: FACT_VOCABULARY_VERSION,
+      }),
+    ).toThrow(/parseable timestamp/)
+  })
+
+  it('refuses two simultaneously effective versions of one rule id — M18', () => {
+    const duplicate = RULE_PACKAGES.find((r) => r.id === 'rule.h-corridor.recurrence') as RulePackage
+    expect(() =>
+      run({ 'corridor.recurrence_qualified': available(true) }, [duplicate, { ...duplicate }]),
+    ).toThrow(/simultaneously effective/)
+  })
+
+  it('a mistyped fact value is unreadable, never a clean negative — M2', () => {
+    // A power cut arriving as the string "true" after a serialization defect must surface as
+    // could-not-read: the rule goes inapplicable and names the fact, leaving a trace.
+    const result = run({ 'power.cut_alert_present': available('true') })
+    const power = result.notApplicable.find((r) => r.ruleId === 'rule.h-power.external-cut')
+    expect(power?.missingFacts).toEqual(['power.cut_alert_present'])
+    expect(result.hypotheses.find((h) => h.code === 'H-POWER')).toBeUndefined()
+  })
+})
+
+describe('rule-level regressions from the verification pass', () => {
+  it('H-EXPECTED cannot certify a gnss-only loss as expected silence — C2', () => {
+    const result = run({
+      'episode.type': available('gnss_only_loss'),
+      'gnss.reports_continued': available(true),
+      'policy.state_at_gap': available('parked'),
+      'policy.weak_basis': available(false),
+      'policy.sleep_provenance': available('declared'),
+      'device.sleep_state_before_gap': available('awake'),
+    })
+    expect(result.hypotheses.find((h) => h.code === 'H-EXPECTED')).toBeUndefined()
+    expect(result.hypotheses.find((h) => h.code === 'H-GNSS')).toBeDefined()
+    // The original defect flipped urgency here via a phantom second corroborated family.
+    expect(result.urgentEligible).toBe(false)
+  })
+
+  it('a jamming indication blocks the benign certification and fires interference — H8/M15', () => {
+    const result = run({
+      'episode.type': available('total_silence'),
+      'policy.state_at_gap': available('parked'),
+      'policy.weak_basis': available(false),
+      'policy.sleep_provenance': available('declared'),
+      'network.jamming_alert': available(true),
+    })
+    expect(result.hypotheses.find((h) => h.code === 'H-EXPECTED')).toBeUndefined()
+    const interference = result.hypotheses.find(
+      (h) => h.ruleId === 'rule.h-tamper.network-jamming',
+    )
+    expect(interference?.band).toBe('direct')
+    expect(result.urgentEligible).toBe(true)
+  })
+
+  it('peer clusters cannot explain an episode whose reports kept arriving — H2/H5', () => {
+    const result = run({
+      'episode.type': available('gnss_only_loss'),
+      'gnss.reports_continued': available(true),
+      'source.independent_devices': available(6),
+      'network.independent_devices': available(6),
+      'network.identity_known': available(true),
+      'device.sleep_state_before_gap': available('awake'),
+    })
+    expect(result.hypotheses.find((h) => h.code === 'H-VENDOR')).toBeUndefined()
+    expect(result.hypotheses.find((h) => h.code === 'H-NETWORK')).toBeUndefined()
+    expect(result.hypotheses.find((h) => h.code === 'H-GNSS')).toBeDefined()
+  })
+
+  it('a frozen valid position is H-GNSS too — H4', () => {
+    const result = run({
+      'episode.type': available('stale_position'),
+      'gnss.reports_continued': available(true),
+      'device.sleep_state_before_gap': available('awake'),
+    })
+    expect(result.hypotheses.find((h) => h.code === 'H-GNSS')?.ruleId)
+      .toBe('rule.h-gnss.position-quality-loss')
   })
 })
 

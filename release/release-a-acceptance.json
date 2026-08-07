@@ -75,7 +75,7 @@
       "title": "No tenant table can hold an OSM identifier",
       "status": "pass",
       "evidence": [
-        "109 columns checked, 0 forbidden"
+        "119 columns checked, 0 forbidden"
       ]
     },
     {
@@ -95,7 +95,7 @@
       "evidence": [
         "restore exit 0",
         "7 observations visible to synthetic_a after restore",
-        "10 RLS policies and 4 triggers restored"
+        "11 RLS policies and 4 triggers restored"
       ]
     }
   ],
