@@ -18,8 +18,12 @@ export {
   SelfApprovalError,
   StaleBasisError,
   UnknownDecisionError,
+  ACTION_KINDS,
+  OUTCOME_TAXONOMY,
   approveProposal,
+  completeAction,
   decisionById,
+  recordAction,
   propose,
   rejectProposal,
   suggestFor,
@@ -45,6 +49,7 @@ export {
   transition,
 } from '@blackout/core'
 export type {
+  ActionKind,
   BulkRefusal,
   DecisionDefinition,
   DecisionProposal,
@@ -56,6 +61,8 @@ export type {
   PeerCluster,
   QueueItem,
   RoadGraph,
+  OutcomeDefinition,
+  RecordedActionOutcome,
   SamplerEvent,
   SavedView,
 } from '@blackout/core'

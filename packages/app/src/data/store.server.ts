@@ -38,9 +38,13 @@ import {
   type SamplerEvent,
   type SavedView,
   approveProposal,
+  completeAction,
   propose,
+  recordAction,
   rejectProposal,
+  type ActionKind,
   type DecisionProposal,
+  type RecordedActionOutcome,
 } from './core.server.js'
 import { buildCaseDetail, type CaseDetail } from './case.server.js'
 import { SCENARIO_NAMES, runScenario, type CanonicalEvent } from '@blackout/generator'
@@ -63,6 +67,7 @@ interface StoredCase {
   events: readonly CanonicalEvent[]
   corridorId: string
   proposals: DecisionProposal[]
+  actions: RecordedActionOutcome[]
 }
 
 interface AppStore {
@@ -178,6 +183,7 @@ function seed(): AppStore {
         // Every reference scenario drives the generator's default corridor.
         corridorId: 'thika-road',
         proposals: [],
+        actions: [],
       })
     }
   }
@@ -428,6 +434,74 @@ export function resolveProposal(params: {
   }
 }
 
+export type OutcomeRecordResult =
+  | { readonly kind: 'recorded'; readonly actionId: string }
+  | { readonly kind: 'refused'; readonly message: string }
+
+/**
+ * Record an externally-performed action and its §22 outcome. The domain refuses OUT-RECOVERY
+ * without an external authorization reference (FR-OUT-002); the refusal is screen content.
+ */
+export function recordCaseOutcome(params: {
+  readonly scopes: readonly string[]
+  readonly actor: string
+  readonly episodeId: string
+  readonly actionKind: ActionKind
+  readonly outcomeCode: string | undefined
+  readonly note: string | undefined
+  readonly externalAuthorizationRef: string | undefined
+  readonly vendorTicketRef: string | undefined
+  readonly evidencePackSha256: string | undefined
+}): OutcomeRecordResult {
+  requireScope(params.scopes, 'case:propose')
+  const record = store().cases.get(params.episodeId)
+  if (record === undefined) return { kind: 'refused', message: 'no such case' }
+  const now = new Date().toISOString()
+
+  try {
+    const started = recordAction({
+      id: `act-${params.episodeId}-${record.actions.length + 1}`,
+      episodeId: params.episodeId,
+      actionKind: params.actionKind,
+      owner: params.actor,
+      startedAt: now,
+      ...(params.vendorTicketRef === undefined || params.vendorTicketRef === ''
+        ? {}
+        : {
+            vendorTicket: {
+              vendor: record.source,
+              reference: params.vendorTicketRef,
+              openedAt: now,
+              evidencePackSha256: params.evidencePackSha256 ?? '',
+            },
+          }),
+    })
+    const completed = completeAction(started, {
+      completedAt: now,
+      ...(params.outcomeCode === undefined || params.outcomeCode === ''
+        ? {}
+        : { outcomeCode: params.outcomeCode }),
+      ...(params.note === undefined || params.note === '' ? {} : { note: params.note }),
+      ...(params.externalAuthorizationRef === undefined || params.externalAuthorizationRef === ''
+        ? {}
+        : { externalAuthorizationRef: params.externalAuthorizationRef }),
+    })
+    record.actions.push(completed)
+    store().auditEvents.push({
+      actor: params.actor,
+      action: 'case.outcome_recorded',
+      at: now,
+      detail: {
+        episode_id: params.episodeId, action_id: completed.id,
+        outcome: completed.outcomeCode, action_kind: completed.actionKind,
+      },
+    })
+    return { kind: 'recorded', actionId: completed.id }
+  } catch (error) {
+    return { kind: 'refused', message: error instanceof Error ? error.message : 'refused' }
+  }
+}
+
 export function getCase(params: {
   readonly scopes: readonly string[]
   readonly actor: string
@@ -452,5 +526,6 @@ export function getCase(params: {
     item: toQueueItem(record, now),
     fleet: [...store().cases.values()],
     proposals: record.proposals,
+    actions: record.actions,
   })
 }

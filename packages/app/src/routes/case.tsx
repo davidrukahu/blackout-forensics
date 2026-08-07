@@ -14,7 +14,7 @@
 import { Form, Link, useActionData, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 
 import { requireUser } from '../auth.server.js'
-import { getCase, proposeDecision, resolveProposal } from '../data/store.server.js'
+import { getCase, proposeDecision, recordCaseOutcome, resolveProposal } from '../data/store.server.js'
 import type { CaseDetail, CaseSection } from '../data/case.server.js'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -74,6 +74,28 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<C
       case 'refused':
         return { refusal: result.message }
     }
+  }
+
+  if (intent === 'record_outcome') {
+    const user = requireUser(request, ['case:propose'])
+    const optional = (name: string): string | undefined => {
+      const value = form.get(name)
+      return typeof value === 'string' && value !== '' ? value : undefined
+    }
+    const result = recordCaseOutcome({
+      scopes: user.scopes,
+      actor: user.actor,
+      episodeId,
+      actionKind: String(form.get('actionKind') ?? 'field_verification') as never,
+      outcomeCode: optional('outcomeCode'),
+      note: optional('note'),
+      externalAuthorizationRef: optional('externalAuthorizationRef'),
+      vendorTicketRef: optional('vendorTicketRef'),
+      evidencePackSha256: optional('evidencePackSha256'),
+    })
+    return result.kind === 'recorded'
+      ? { notice: `Outcome recorded (${result.actionId}).` }
+      : { refusal: result.message }
   }
 
   throw new Response('Unknown intent', { status: 400 })
@@ -307,6 +329,74 @@ export default function CaseScreen() {
             ))}
           </ul>
         )}
+
+        <h3>Recorded actions and outcomes</h3>
+        {detail.decisions.recordedActions.length === 0 ? (
+          <p>No externally-performed action has been recorded.</p>
+        ) : (
+          <ul>
+            {detail.decisions.recordedActions.map((recorded) => (
+              <li key={recorded.id}>
+                {recorded.actionKind.replaceAll('_', ' ')} by {recorded.owner} —{' '}
+                {recorded.outcomeCode ?? 'no outcome label (honestly unlabelled)'}
+                {recorded.externalAuthorizationRef !== null &&
+                  ` (authorization: ${recorded.externalAuthorizationRef})`}
+                {recorded.vendorTicket !== null &&
+                  ` (vendor ticket ${recorded.vendorTicket.reference})`}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <h4>Record an outcome</h4>
+        <Form method="post">
+          <input type="hidden" name="intent" value="record_outcome" />
+          <p>
+            <label>
+              Action performed externally{' '}
+              <select name="actionKind">
+                {detail.decisions.actionKinds.map((kind) => (
+                  <option key={kind} value={kind}>
+                    {kind.replaceAll('_', ' ')}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </p>
+          <p>
+            <label>
+              Outcome (§22; leave empty when honestly unlabelled){' '}
+              <select name="outcomeCode" defaultValue="">
+                <option value="">— none yet —</option>
+                {detail.decisions.outcomeTaxonomy.map((outcome) => (
+                  <option key={outcome.code} value={outcome.code}>
+                    {outcome.code}: {outcome.meaning}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </p>
+          <p>
+            <label>
+              External authorization reference (required for OUT-RECOVERY){' '}
+              <input type="text" name="externalAuthorizationRef" />
+            </label>
+          </p>
+          <p>
+            <label>
+              Vendor ticket reference <input type="text" name="vendorTicketRef" />
+            </label>{' '}
+            <label>
+              Evidence-pack SHA-256 <input type="text" name="evidencePackSha256" />
+            </label>
+          </p>
+          <p>
+            <label>
+              Note <input type="text" name="note" />
+            </label>{' '}
+            <button type="submit">Record</button>
+          </p>
+        </Form>
 
         <h3>Machine suggestions</h3>
         {detail.decisions.machineSuggestions.length === 0 ? (

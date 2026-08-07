@@ -161,3 +161,12 @@ export {
 export type {
   ApprovalOutcome, DecisionDefinition, DecisionProposal, MachineSuggestion,
 } from './queue/decisions.js'
+export {
+  ACTION_KINDS, IncoherentTimesError, MissingAuthorizationError, OUTCOME_TAXONOMY,
+  PROHIBITED_PRODUCT_CAPABILITIES, UnknownOutcomeError, actionMetrics, addLabel, adjudicate,
+  agingReport, completeAction, datasetView, isDisputed, outcomeByCode, recordAction,
+} from './queue/outcomes.js'
+export type {
+  ActionKind, Adjudication, OutcomeCategory, OutcomeDefinition, RecordedActionOutcome,
+  ReviewerLabel, VendorTicket,
+} from './queue/outcomes.js'

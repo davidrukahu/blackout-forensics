@@ -14,9 +14,11 @@
 import { CORRIDORS, distanceM, type CanonicalEvent, type Corridor } from '@blackout/generator'
 
 import {
+  ACTION_KINDS,
   ALLOWED_TRANSITIONS,
   CORPUS_POLICY,
   DECISIONS,
+  OUTCOME_TAXONOMY,
   RULE_PACKAGES,
   correlate,
   currentEpisodeVersion,
@@ -25,9 +27,12 @@ import {
   type ClassificationResult,
   type CorrelationCandidate,
   type CorridorResult,
+  type ActionKind,
   type DecisionDefinition,
   type DecisionProposal,
   type MachineSuggestion,
+  type OutcomeDefinition,
+  type RecordedActionOutcome,
   type Episode,
   type PeerCluster,
   type QueueItem,
@@ -110,6 +115,10 @@ export interface CaseDetail {
     readonly proposable: readonly DecisionDefinition[]
     /** Version count the screen renders; every proposal must hand it back (stale-UI guard). */
     readonly seenVersionCount: number
+    /** §22: recorded actions with outcomes, and the taxonomy the record form offers. */
+    readonly recordedActions: readonly RecordedActionOutcome[]
+    readonly outcomeTaxonomy: readonly OutcomeDefinition[]
+    readonly actionKinds: readonly ActionKind[]
   }
 }
 
@@ -233,6 +242,7 @@ export function buildCaseDetail(params: {
   readonly item: QueueItem
   readonly fleet: readonly CaseSource[]
   readonly proposals?: readonly DecisionProposal[]
+  readonly actions?: readonly RecordedActionOutcome[]
 }): CaseDetail {
   const { record, item, fleet } = params
   const { classification, episode } = record
@@ -370,6 +380,9 @@ export function buildCaseDetail(params: {
         (ALLOWED_TRANSITIONS[version.state] ?? []).includes(decision.transitionTo),
       ),
       seenVersionCount: episode.versions.length,
+      recordedActions: params.actions ?? [],
+      outcomeTaxonomy: OUTCOME_TAXONOMY,
+      actionKinds: ACTION_KINDS,
     },
   }
 }

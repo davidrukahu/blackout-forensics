@@ -137,3 +137,47 @@ describe('§9.4 propose → approve through the route', () => {
     }
   })
 })
+
+describe('§22 outcomes through the route', () => {
+  it('refuses OUT-RECOVERY without an authorization reference, records it with one', async () => {
+    const { id } = await reviewRequiredCase()
+
+    const refused = await caseAction(post(id, 'analyst', {
+      intent: 'record_outcome', actionKind: 'record_external_recovery', outcomeCode: 'OUT-RECOVERY',
+    }))
+    expect(refused.refusal).toContain('FR-OUT-002')
+
+    const recorded = await caseAction(post(id, 'analyst', {
+      intent: 'record_outcome', actionKind: 'record_external_recovery', outcomeCode: 'OUT-RECOVERY',
+      externalAuthorizationRef: 'court-order-2026-1441',
+    }))
+    expect(recorded.notice).toContain('recorded')
+
+    const { detail } = await caseLoader(get(id))
+    const action = detail.decisions.recordedActions[0]!
+    expect(action.outcomeCode).toBe('OUT-RECOVERY')
+    expect(action.externalAuthorizationRef).toBe('court-order-2026-1441')
+  })
+
+  it('links a vendor ticket with its evidence-pack hash', async () => {
+    const { id } = await reviewRequiredCase()
+    await caseAction(post(id, 'analyst', {
+      intent: 'record_outcome', actionKind: 'vendor_ticket', outcomeCode: 'OUT-VENDOR',
+      vendorTicketRef: 'TCK-4471', evidencePackSha256: 'a'.repeat(64),
+    }))
+    const { detail } = await caseLoader(get(id))
+    expect(detail.decisions.recordedActions[0]!.vendorTicket).toMatchObject({
+      reference: 'TCK-4471',
+      evidencePackSha256: 'a'.repeat(64),
+    })
+  })
+
+  it('an unlabelled completion stays unlabelled — no forced outcome (FR-OUT-004)', async () => {
+    const { id } = await reviewRequiredCase()
+    await caseAction(post(id, 'analyst', {
+      intent: 'record_outcome', actionKind: 'field_verification',
+    }))
+    const { detail } = await caseLoader(get(id))
+    expect(detail.decisions.recordedActions[0]!.outcomeCode).toBeNull()
+  })
+})
