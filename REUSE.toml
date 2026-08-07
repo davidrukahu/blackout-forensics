@@ -34,3 +34,10 @@ SPDX-License-Identifier = "AGPL-3.0-only"
 path = ["DCO.txt"]
 SPDX-FileCopyrightText = "2004, 2006 The Linux Foundation and its contributors"
 SPDX-License-Identifier = "LicenseRef-DCO-1.1"
+
+# JSON has no comment syntax. Fixtures and emitted schema artefacts are Apache-2.0 with the rest
+# of the spec package, which is the package that exists to be adopted.
+[[annotations]]
+path = ["packages/spec/fixtures/**", "packages/spec/schema/**"]
+SPDX-FileCopyrightText = "2026 David Rukahu"
+SPDX-License-Identifier = "Apache-2.0"
