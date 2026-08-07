@@ -153,3 +153,11 @@ export type {
   AssignmentOutcome, BuildQueueItemInput, BulkAction, BulkRefusal, DueState, PriorityTier,
   QueueBucket, QueueItem, QueuePolicy, QueuePriority, SavedView,
 } from './queue/queue.js'
+export {
+  DECISIONS, MachineOriginError, NonCanonicalReasonError, ProposalNotPendingError,
+  SelfApprovalError, StaleBasisError, UnknownDecisionError, approveProposal, decisionById, propose,
+  rejectProposal, suggestFor,
+} from './queue/decisions.js'
+export type {
+  ApprovalOutcome, DecisionDefinition, DecisionProposal, MachineSuggestion,
+} from './queue/decisions.js'

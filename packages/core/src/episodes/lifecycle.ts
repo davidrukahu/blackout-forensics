@@ -156,17 +156,24 @@ export function transition(episode: Episode, request: TransitionRequest, now: st
   }
 
   const previous = currentVersion(episode)
+  // "Controlled reopening" is specifically the edge out of a terminal state (§5.2). An approval
+  // on any other transition — a maker-checker decision, say — keeps its own cause and actor;
+  // relabelling it as a reopening would misdescribe what happened in the one record that counts.
+  const isReopening =
+    request.approvedBy !== undefined && (from === 'resolved' || from === 'retracted')
   const next: EpisodeVersion = {
     version: previous.version + 1,
     state: request.to,
     type: request.type ?? previous.type,
     startAt: previous.startAt,
     endAt: request.endAt === undefined ? previous.endAt : request.endAt,
-    cause: request.approvedBy !== undefined ? 'controlled_reopening' : request.cause,
-    actor: request.approvedBy ?? request.actor,
-    reason: request.approvedBy !== undefined
+    cause: isReopening ? 'controlled_reopening' : request.cause,
+    actor: isReopening ? (request.approvedBy as string) : request.actor,
+    reason: isReopening
       ? `${request.reason} (controlled reopening approved by ${request.approvedBy})`
-      : request.reason,
+      : request.approvedBy !== undefined
+        ? `${request.reason} (approved by ${request.approvedBy})`
+        : request.reason,
     at: request.at,
     supersedes: previous.version,
     clockBasis: previous.clockBasis,

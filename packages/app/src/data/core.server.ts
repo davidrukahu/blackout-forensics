@@ -11,6 +11,18 @@
 export {
   ALLOWED_TRANSITIONS,
   BUILTIN_VIEWS,
+  DECISIONS,
+  MachineOriginError,
+  NonCanonicalReasonError,
+  ProposalNotPendingError,
+  SelfApprovalError,
+  StaleBasisError,
+  UnknownDecisionError,
+  approveProposal,
+  decisionById,
+  propose,
+  rejectProposal,
+  suggestFor,
   BULK_ACTIONS,
   CONTRADICTIONS,
   CORPUS_POLICY,
@@ -34,6 +46,9 @@ export {
 } from '@blackout/core'
 export type {
   BulkRefusal,
+  DecisionDefinition,
+  DecisionProposal,
+  MachineSuggestion,
   ClassificationResult,
   CorrelationCandidate,
   CorridorResult,

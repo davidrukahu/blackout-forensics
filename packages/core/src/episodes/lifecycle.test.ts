@@ -144,7 +144,7 @@ describe('revision is gated on action, not on elapsed time', () => {
     }, AFTER_WATERMARK)).toThrow(ApprovalRequiredError)
   })
 
-  it('permits the same revision with an approval, and records it as a controlled reopening', () => {
+  it('permits the same revision with an approval, keeping its true cause and recording both people', () => {
     const e = episode({
       actions: [{ kind: 'escalation', at: BEFORE_WATERMARK, reference: 'ESC-3' }],
     })
@@ -153,10 +153,32 @@ describe('revision is gated on action, not on elapsed time', () => {
       reason: 'buffered records arrived', at: AFTER_WATERMARK, approvedBy: 'supervisor_2',
     }, AFTER_WATERMARK)
 
+    // "Controlled reopening" names the terminal edge (§5.2). An approved revision elsewhere
+    // keeps the cause that actually produced it — relabelling would misdescribe the record —
+    // and the approval is carried in the reason.
     const v = currentVersion(revised)
+    expect(v.cause).toBe('late_data_retracted')
+    expect(v.actor).toBe('worker')
+    expect(v.reason).toContain('approved by supervisor_2')
+  })
+
+  it('records the terminal edge itself as a controlled reopening', () => {
+    const e = episode({
+      actions: [{ kind: 'escalation', at: BEFORE_WATERMARK, reference: 'ESC-3' }],
+    })
+    const retracted = transition(e, {
+      to: 'retracted', cause: 'late_data_retracted', actor: 'worker',
+      reason: 'buffered records arrived', at: AFTER_WATERMARK, approvedBy: 'supervisor_2',
+    }, AFTER_WATERMARK)
+    const reopened = transition(retracted, {
+      to: 'classified', cause: 'human_decision', actor: 'worker',
+      reason: 'new evidence reopens the case', at: AFTER_WATERMARK, approvedBy: 'supervisor_2',
+    }, AFTER_WATERMARK)
+
+    const v = currentVersion(reopened)
     expect(v.cause).toBe('controlled_reopening')
     expect(v.actor).toBe('supervisor_2')
-    expect(v.reason).toContain('approved by supervisor_2')
+    expect(v.reason).toContain('controlled reopening approved by supervisor_2')
   })
 })
 

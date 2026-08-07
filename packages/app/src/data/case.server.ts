@@ -16,13 +16,18 @@ import { CORRIDORS, distanceM, type CanonicalEvent, type Corridor } from '@black
 import {
   ALLOWED_TRANSITIONS,
   CORPUS_POLICY,
+  DECISIONS,
   RULE_PACKAGES,
   correlate,
   currentEpisodeVersion,
   projectCorridor,
+  suggestFor,
   type ClassificationResult,
   type CorrelationCandidate,
   type CorridorResult,
+  type DecisionDefinition,
+  type DecisionProposal,
+  type MachineSuggestion,
   type Episode,
   type PeerCluster,
   type QueueItem,
@@ -99,6 +104,12 @@ export interface CaseDetail {
   readonly decisions: {
     readonly prior: readonly { kind: string; at: string; reference: string }[]
     readonly available: readonly string[]
+    /** §9.4's three voices, visually and structurally distinct. */
+    readonly machineSuggestions: readonly MachineSuggestion[]
+    readonly proposals: readonly DecisionProposal[]
+    readonly proposable: readonly DecisionDefinition[]
+    /** Version count the screen renders; every proposal must hand it back (stale-UI guard). */
+    readonly seenVersionCount: number
   }
 }
 
@@ -221,6 +232,7 @@ export function buildCaseDetail(params: {
   readonly record: CaseSource
   readonly item: QueueItem
   readonly fleet: readonly CaseSource[]
+  readonly proposals?: readonly DecisionProposal[]
 }): CaseDetail {
   const { record, item, fleet } = params
   const { classification, episode } = record
@@ -349,6 +361,15 @@ export function buildCaseDetail(params: {
     decisions: {
       prior: episode.actions.map((a) => ({ kind: a.kind, at: a.at, reference: a.reference })),
       available: [...(ALLOWED_TRANSITIONS[version.state] ?? [])],
+      machineSuggestions: suggestFor({
+        firedCodes: classification.hypotheses.map((h) => h.code),
+        unknown: classification.unknown !== null,
+      }),
+      proposals: params.proposals ?? [],
+      proposable: DECISIONS.filter((decision) =>
+        (ALLOWED_TRANSITIONS[version.state] ?? []).includes(decision.transitionTo),
+      ),
+      seenVersionCount: episode.versions.length,
     },
   }
 }

@@ -17,8 +17,8 @@ export interface AppUser {
 }
 
 const ROLE_SCOPES: Readonly<Record<AppUser['role'], readonly string[]>> = {
-  analyst: ['queue:read', 'queue:assign', 'case:read'],
-  supervisor: ['queue:read', 'queue:assign', 'case:read', 'case:approve'],
+  analyst: ['queue:read', 'queue:assign', 'case:read', 'case:propose'],
+  supervisor: ['queue:read', 'queue:assign', 'case:read', 'case:propose', 'case:approve'],
   administrator: ['queue:read', 'case:read', 'admin:manage'],
 }
 

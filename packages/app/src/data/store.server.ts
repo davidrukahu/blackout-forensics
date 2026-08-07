@@ -37,6 +37,10 @@ import {
   type QueueItem,
   type SamplerEvent,
   type SavedView,
+  approveProposal,
+  propose,
+  rejectProposal,
+  type DecisionProposal,
 } from './core.server.js'
 import { buildCaseDetail, type CaseDetail } from './case.server.js'
 import { SCENARIO_NAMES, runScenario, type CanonicalEvent } from '@blackout/generator'
@@ -58,6 +62,7 @@ interface StoredCase {
   scenario: string
   events: readonly CanonicalEvent[]
   corridorId: string
+  proposals: DecisionProposal[]
 }
 
 interface AppStore {
@@ -172,6 +177,7 @@ function seed(): AppStore {
         events: ordered,
         // Every reference scenario drives the generator's default corridor.
         corridorId: 'thika-road',
+        proposals: [],
       })
     }
   }
@@ -325,6 +331,103 @@ export function auditTrail(): readonly AppAuditEvent[] {
   return store().auditEvents
 }
 
+export type ProposalResult =
+  | { readonly kind: 'proposed'; readonly proposalId: string }
+  | { readonly kind: 'refused'; readonly message: string }
+
+export function proposeDecision(params: {
+  readonly scopes: readonly string[]
+  readonly actor: string
+  readonly episodeId: string
+  readonly decisionId: string
+  readonly reason: string
+  readonly note: string | undefined
+  readonly seenVersionCount: number
+}): ProposalResult {
+  requireScope(params.scopes, 'case:propose')
+  const record = store().cases.get(params.episodeId)
+  if (record === undefined) return { kind: 'refused', message: 'no such case' }
+
+  try {
+    const proposal = propose({
+      episode: record.episode,
+      decisionId: params.decisionId,
+      reason: params.reason,
+      ...(params.note === undefined || params.note === '' ? {} : { note: params.note }),
+      proposedBy: params.actor,
+      at: new Date().toISOString(),
+      seenVersionCount: params.seenVersionCount,
+      proposalId: `prop-${params.episodeId}-${record.proposals.length + 1}`,
+    })
+    record.proposals.push(proposal)
+    store().auditEvents.push({
+      actor: params.actor,
+      action: 'case.decision_proposed',
+      at: new Date().toISOString(),
+      detail: { episode_id: params.episodeId, decision: params.decisionId, proposal_id: proposal.id },
+    })
+    return { kind: 'proposed', proposalId: proposal.id }
+  } catch (error) {
+    // Domain refusals are honest UI content, not stack traces: the message names the control.
+    return { kind: 'refused', message: error instanceof Error ? error.message : 'refused' }
+  }
+}
+
+export type ResolutionResult =
+  | { readonly kind: 'applied' }
+  | { readonly kind: 'rejected' }
+  | { readonly kind: 'superseded'; readonly message: string }
+  | { readonly kind: 'refused'; readonly message: string }
+
+export function resolveProposal(params: {
+  readonly scopes: readonly string[]
+  readonly actor: string
+  readonly episodeId: string
+  readonly proposalId: string
+  readonly resolution: 'approve' | 'reject'
+}): ResolutionResult {
+  requireScope(params.scopes, 'case:approve')
+  const record = store().cases.get(params.episodeId)
+  const index = record?.proposals.findIndex((p) => p.id === params.proposalId) ?? -1
+  if (record === undefined || index < 0) return { kind: 'refused', message: 'no such proposal' }
+  const proposal = record.proposals[index]!
+  const now = new Date().toISOString()
+
+  try {
+    if (params.resolution === 'reject') {
+      record.proposals[index] = rejectProposal({ proposal, rejectedBy: params.actor, at: now })
+      store().auditEvents.push({
+        actor: params.actor, action: 'case.decision_rejected', at: now,
+        detail: { episode_id: params.episodeId, proposal_id: proposal.id },
+      })
+      return { kind: 'rejected' }
+    }
+
+    const outcome = approveProposal({
+      episode: record.episode, proposal, approvedBy: params.actor, at: now, now,
+    })
+    record.proposals[index] = outcome.proposal
+    if (outcome.kind === 'superseded') {
+      return {
+        kind: 'superseded',
+        message: 'the episode was revised after this proposal; it was superseded, nothing applied',
+      }
+    }
+    record.episode = outcome.episode
+    record.version += 1
+    store().auditEvents.push({
+      actor: params.actor, action: 'case.decision_applied', at: now,
+      detail: {
+        episode_id: params.episodeId, proposal_id: proposal.id,
+        decision: proposal.decisionId, proposed_by: proposal.proposedBy,
+      },
+    })
+    return { kind: 'applied' }
+  } catch (error) {
+    return { kind: 'refused', message: error instanceof Error ? error.message : 'refused' }
+  }
+}
+
 export function getCase(params: {
   readonly scopes: readonly string[]
   readonly actor: string
@@ -348,5 +451,6 @@ export function getCase(params: {
     record,
     item: toQueueItem(record, now),
     fleet: [...store().cases.values()],
+    proposals: record.proposals,
   })
 }

@@ -11,10 +11,10 @@
  * active (§9.3 — a point on a map creates false confidence).
  */
 
-import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router'
+import { Form, Link, useActionData, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 
 import { requireUser } from '../auth.server.js'
-import { getCase } from '../data/store.server.js'
+import { getCase, proposeDecision, resolveProposal } from '../data/store.server.js'
 import type { CaseDetail, CaseSection } from '../data/case.server.js'
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -26,6 +26,57 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   })
   if (detail === null) throw new Response('No such case', { status: 404 })
   return { detail }
+}
+
+interface CaseActionResult {
+  readonly notice?: string
+  readonly refusal?: string
+}
+
+export async function action({ request, params }: ActionFunctionArgs): Promise<CaseActionResult> {
+  const form = await request.formData()
+  const intent = form.get('intent')
+  const episodeId = params['id'] ?? ''
+
+  if (intent === 'propose') {
+    const user = requireUser(request, ['case:propose'])
+    const note = form.get('note')
+    const result = proposeDecision({
+      scopes: user.scopes,
+      actor: user.actor,
+      episodeId,
+      decisionId: String(form.get('decisionId') ?? ''),
+      reason: String(form.get('reason') ?? ''),
+      note: typeof note === 'string' && note !== '' ? note : undefined,
+      seenVersionCount: Number(form.get('seenVersionCount') ?? Number.NaN),
+    })
+    return result.kind === 'proposed'
+      ? { notice: `Proposed (${result.proposalId}); awaiting a different approver where required.` }
+      : { refusal: result.message }
+  }
+
+  if (intent === 'resolve') {
+    const user = requireUser(request, ['case:approve'])
+    const result = resolveProposal({
+      scopes: user.scopes,
+      actor: user.actor,
+      episodeId,
+      proposalId: String(form.get('proposalId') ?? ''),
+      resolution: form.get('resolution') === 'approve' ? 'approve' : 'reject',
+    })
+    switch (result.kind) {
+      case 'applied':
+        return { notice: 'Decision applied. The timeline records proposer and approver.' }
+      case 'rejected':
+        return { notice: 'Proposal rejected; the episode is untouched.' }
+      case 'superseded':
+        return { refusal: result.message }
+      case 'refused':
+        return { refusal: result.message }
+    }
+  }
+
+  throw new Response('Unknown intent', { status: 400 })
 }
 
 function ReasonSection({ detail }: { detail: CaseDetail }) {
@@ -174,6 +225,7 @@ function CorridorSectionView({ detail }: { detail: CaseDetail }) {
 
 export default function CaseScreen() {
   const { detail } = useLoaderData<typeof loader>()
+  const actionData = useActionData<typeof action>()
 
   const renderers: Record<CaseSection, () => React.ReactNode> = {
     reason_and_uncertainty: () => <ReasonSection key="reason" detail={detail} />,
@@ -242,7 +294,7 @@ export default function CaseScreen() {
     ),
     actions_and_decisions: () => (
       <section key="actions" aria-labelledby="s-actions">
-        <h2 id="s-actions">Prior actions and available decisions</h2>
+        <h2 id="s-actions">Prior actions and decisions</h2>
         {detail.decisions.prior.length === 0 ? (
           <p>No action has been taken in the world on this episode.</p>
         ) : (
@@ -255,11 +307,96 @@ export default function CaseScreen() {
             ))}
           </ul>
         )}
-        <p>
-          Available transitions from “{detail.item.bucket.replaceAll('_', ' ')}”:{' '}
-          {detail.decisions.available.join(', ') || 'none'}. Decisions are made through the
-          maker-checker flow.
-        </p>
+
+        <h3>Machine suggestions</h3>
+        {detail.decisions.machineSuggestions.length === 0 ? (
+          <p>The machine suggests nothing here. It can never suggest action against the asset.</p>
+        ) : (
+          <ul>
+            {detail.decisions.machineSuggestions.map((suggestion) => (
+              <li key={suggestion.decisionId}>
+                <span className="badge">machine suggestion</span> {suggestion.decisionId}: {suggestion.basis}.
+                {' '}Advice only — a human must propose it to make it a decision.
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <h3>Proposals</h3>
+        {detail.decisions.proposals.length === 0 ? (
+          <p>None yet.</p>
+        ) : (
+          <ul>
+            {detail.decisions.proposals.map((proposal) => (
+              <li key={proposal.id}>
+                <span className="badge">human proposal</span> <strong>{proposal.decisionId}</strong>{' '}
+                — “{proposal.reason}” by {proposal.proposedBy}, status <strong>{proposal.status}</strong>
+                {proposal.resolvedBy !== null && ` (resolved by ${proposal.resolvedBy})`}
+                {proposal.status === 'proposed' && (
+                  <Form method="post" style={{ display: 'inline' }}>
+                    <input type="hidden" name="proposalId" value={proposal.id} />
+                    <input type="hidden" name="intent" value="resolve" />
+                    {' '}
+                    <button type="submit" name="resolution" value="approve">
+                      Approve
+                    </button>{' '}
+                    <button type="submit" name="resolution" value="reject">
+                      Reject
+                    </button>
+                  </Form>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <h3>Propose a decision</h3>
+        {detail.decisions.proposable.length === 0 ? (
+          <p>No decision applies in the “{detail.item.bucket.replaceAll('_', ' ')}” state.</p>
+        ) : (
+          <Form method="post">
+            <input type="hidden" name="intent" value="propose" />
+            <input
+              type="hidden"
+              name="seenVersionCount"
+              value={detail.decisions.seenVersionCount}
+            />
+            <p>
+              <label>
+                Decision{' '}
+                <select name="decisionId" required>
+                  {detail.decisions.proposable.map((decision) => (
+                    <option key={decision.id} value={decision.id}>
+                      {decision.label}
+                      {decision.highImpact ? ' (requires a second approver)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </p>
+            <p>
+              <label>
+                Canonical reason{' '}
+                <select name="reason" required>
+                  {[...new Set(detail.decisions.proposable.flatMap((d) => d.canonicalReasons))].map(
+                    (reason) => (
+                      <option key={reason} value={reason}>
+                        {reason}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </label>
+            </p>
+            <p>
+              <label>
+                Note (explains; never substitutes for the reason){' '}
+                <input type="text" name="note" />
+              </label>
+            </p>
+            <button type="submit">Propose</button>
+          </Form>
+        )}
       </section>
     ),
   }
@@ -276,6 +413,12 @@ export default function CaseScreen() {
         <span className={`badge tier-${detail.item.priority.tier}`}>{detail.item.priority.tier}</span>{' '}
         {detail.item.priority.reason}
       </p>
+      {actionData?.notice !== undefined && <p role="status">{actionData.notice}</p>}
+      {actionData?.refusal !== undefined && (
+        <p className="conflict" role="alert">
+          {actionData.refusal}
+        </p>
+      )}
       {detail.sections.map((section) => renderers[section]())}
     </article>
   )
