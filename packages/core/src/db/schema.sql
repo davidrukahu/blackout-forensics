@@ -58,6 +58,11 @@ CREATE TABLE IF NOT EXISTS core.observation (
   device_time    timestamptz,
   payload        jsonb        NOT NULL,
   adapter_version text        NOT NULL,
+  -- Traceability to the immutable receipt. Not a foreign key: raw_receipt is partitioned, and a
+  -- cross-partition FK would force every partition to be attached before any insert. The hash is
+  -- the durable link and is verified on read.
+  raw_receipt_id bigint,
+  raw_sha256     text         NOT NULL,
   PRIMARY KEY (id, received_at)
 ) PARTITION BY RANGE (received_at);
 
@@ -79,6 +84,21 @@ CREATE TABLE IF NOT EXISTS core.assignment (
   valid_from     timestamptz NOT NULL,
   valid_to       timestamptz,
   CHECK (valid_to IS NULL OR valid_to > valid_from)
+);
+
+-- Rows that could not be normalized. Carries a code, field paths and a row hash — never values.
+-- PRD §10.5 forbids coordinates, raw packets, IMSI, ICCID or borrower data in a rejection code, and
+-- a diagnostic queue is exactly where such a value would be least controlled.
+CREATE TABLE IF NOT EXISTS core.quarantine (
+  id          bigserial PRIMARY KEY,
+  tenant_id   text        NOT NULL,
+  source      text        NOT NULL,
+  batch_id    text        NOT NULL,
+  code        text        NOT NULL,
+  row_number  integer     NOT NULL,
+  row_sha256  text        NOT NULL,
+  field_paths text[]      NOT NULL DEFAULT '{}',
+  received_at timestamptz NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS audit.event (
@@ -127,67 +147,35 @@ CREATE TABLE IF NOT EXISTS core.observation_2026_09
 
 -- FORCE applies the policy to the table owner too. Without it an owner silently reads everything,
 -- which would make the whole boundary decorative.
-ALTER TABLE core.raw_receipt  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE core.raw_receipt  FORCE ROW LEVEL SECURITY;
-ALTER TABLE core.observation  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE core.observation  FORCE ROW LEVEL SECURITY;
-ALTER TABLE core.assignment   ENABLE ROW LEVEL SECURITY;
-ALTER TABLE core.assignment   FORCE ROW LEVEL SECURITY;
-ALTER TABLE audit.event       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE audit.event       FORCE ROW LEVEL SECURITY;
-
--- Partitions do NOT inherit their parent's row-level security. Querying core.observation_2026_08
--- directly bypasses a policy defined only on core.observation, so every partition needs its own
--- ENABLE, FORCE and policy. This is applied by function so a new partition cannot be added without
--- it, and so the same call can be made from the partition-creation path.
+--
+-- Partitions do NOT inherit their parent's row-level security: a policy on core.observation does
+-- nothing for a query against core.observation_2026_08. Applied by function, over EVERY table in
+-- the tenant schemas rather than an enumerated list — a list is how a new table ships without a
+-- policy, which is precisely what happened to core.quarantine and what the isolation test caught.
 CREATE OR REPLACE FUNCTION core.apply_tenant_rls(target regclass) RETURNS void
   LANGUAGE plpgsql AS $$
 BEGIN
   EXECUTE format('ALTER TABLE %s ENABLE ROW LEVEL SECURITY', target);
   EXECUTE format('ALTER TABLE %s FORCE ROW LEVEL SECURITY', target);
   EXECUTE format('DROP POLICY IF EXISTS tenant_isolation ON %s', target);
+  -- A NULL tenant context matches nothing. A job that forgets to set the context sees an empty
+  -- database rather than every tenant's data — the failure mode is loud and safe, not silent.
   EXECUTE format(
     'CREATE POLICY tenant_isolation ON %s USING (tenant_id = core.current_tenant()) '
     'WITH CHECK (tenant_id = core.current_tenant())', target);
 END $$;
 
--- A NULL tenant context matches nothing. A job that forgets to set the context sees an empty
--- database rather than every tenant's data — the failure mode is loud and safe, not silent.
-DROP POLICY IF EXISTS tenant_isolation ON core.raw_receipt;
-CREATE POLICY tenant_isolation ON core.raw_receipt
-  USING (tenant_id = core.current_tenant())
-  WITH CHECK (tenant_id = core.current_tenant());
-
-DROP POLICY IF EXISTS tenant_isolation ON core.observation;
-CREATE POLICY tenant_isolation ON core.observation
-  USING (tenant_id = core.current_tenant())
-  WITH CHECK (tenant_id = core.current_tenant());
-
-DROP POLICY IF EXISTS tenant_isolation ON core.assignment;
-CREATE POLICY tenant_isolation ON core.assignment
-  USING (tenant_id = core.current_tenant())
-  WITH CHECK (tenant_id = core.current_tenant());
-
-DROP POLICY IF EXISTS tenant_isolation ON audit.event;
-CREATE POLICY tenant_isolation ON audit.event
-  USING (tenant_id = core.current_tenant())
-  WITH CHECK (tenant_id = core.current_tenant());
-
--- Apply to every existing partition. A partition added later must call core.apply_tenant_rls on
--- itself; the isolation test asserts that no relation in core or audit is left uncovered, so
--- forgetting fails the release gate rather than shipping a hole.
 DO $$
-DECLARE part regclass;
+DECLARE rel regclass;
 BEGIN
-  FOR part IN
+  FOR rel IN
     SELECT c.oid::regclass
     FROM pg_class c
-    JOIN pg_inherits i ON i.inhrelid = c.oid
     JOIN pg_namespace n ON n.oid = c.relnamespace
-    -- Tables only: pg_inherits also lists partitioned indexes, which cannot carry RLS.
+    -- Tables and partitioned tables only: pg_class also lists indexes, which cannot carry RLS.
     WHERE n.nspname IN ('core', 'audit') AND c.relkind IN ('r', 'p')
   LOOP
-    PERFORM core.apply_tenant_rls(part);
+    PERFORM core.apply_tenant_rls(rel);
   END LOOP;
 END $$;
 

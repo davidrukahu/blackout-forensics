@@ -74,9 +74,10 @@ beforeAll(async () => {
   for (const tenant of [TENANT_A, TENANT_B]) {
     await withTenant(owner, tenant, async (tx) => {
       await tx`INSERT INTO core.observation
-        (tenant_id, source, device_ref, identity_basis, identity_value, received_at, payload, adapter_version)
+        (tenant_id, source, device_ref, identity_basis, identity_value, received_at, payload,
+         adapter_version, raw_sha256)
         VALUES (${tenant}, 'traccar', ${`dev_${tenant}`}, 'vendor_sequence', '1',
-                '2026-08-05T06:00:00Z', '{}'::jsonb, 'traccar-0.1.0')`
+                '2026-08-05T06:00:00Z', '{}'::jsonb, 'traccar-0.1.0', ${'a'.repeat(64)})`
       await tx`INSERT INTO core.assignment
         (tenant_id, asset_ref, device_ref, role, valid_from)
         VALUES (${tenant}, ${`ast_${tenant}`}, ${`dev_${tenant}`}, 'primary', '2026-01-01T00:00:00Z')`
@@ -219,9 +220,10 @@ describe('idempotency and partitioning', () => {
     await expect(
       withTenant(app, TENANT_A, async (tx) => {
         await tx`INSERT INTO core.observation
-          (tenant_id, source, device_ref, identity_basis, identity_value, received_at, payload, adapter_version)
+          (tenant_id, source, device_ref, identity_basis, identity_value, received_at, payload,
+           adapter_version, raw_sha256)
           VALUES (${TENANT_A}, 'traccar', 'dev_dup', 'vendor_sequence', '1',
-                  '2026-08-05T06:00:00Z', '{}'::jsonb, 'traccar-0.1.0')`
+                  '2026-08-05T06:00:00Z', '{}'::jsonb, 'traccar-0.1.0', ${'b'.repeat(64)})`
       }),
     ).rejects.toThrow(/duplicate key/)
   })
@@ -231,9 +233,10 @@ describe('idempotency and partitioning', () => {
     // fabricate agreement between sources meant to be independent evidence.
     await withTenant(app, TENANT_A, async (tx) => {
       await tx`INSERT INTO core.observation
-        (tenant_id, source, device_ref, identity_basis, identity_value, received_at, payload, adapter_version)
+        (tenant_id, source, device_ref, identity_basis, identity_value, received_at, payload,
+         adapter_version, raw_sha256)
         VALUES (${TENANT_A}, 'wialon', 'dev_a', 'vendor_sequence', '1',
-                '2026-08-05T06:00:00Z', '{}'::jsonb, 'wialon-0.1.0')`
+                '2026-08-05T06:00:00Z', '{}'::jsonb, 'wialon-0.1.0', ${'c'.repeat(64)})`
     })
     const rows = await withTenant(app, TENANT_A, async (tx) =>
       tx<{ n: number }[]>`SELECT count(*)::int AS n FROM core.observation WHERE identity_value = '1'`)

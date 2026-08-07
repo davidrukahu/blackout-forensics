@@ -46,3 +46,9 @@ export {
   MissingTenantContextError, checkTenantIsolation, withTenant, withoutTenantForTesting,
 } from './db/tenant.js'
 export type { TenantContextCheck } from './db/tenant.js'
+export { FileObjectStore, IntegrityError, sha256Hex, verifySample } from './db/object-store.js'
+export type { ObjectStore, VerificationReport } from './db/object-store.js'
+export {
+  PostgresObservationStore, PostgresQuarantineStore, PostgresReceiptStore, traceToReceipt,
+} from './db/stores.js'
+export type { AuditTrace, StoredQuarantine, StoredReceipt } from './db/stores.js'
