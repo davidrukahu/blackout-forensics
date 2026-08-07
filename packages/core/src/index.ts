@@ -15,3 +15,15 @@ export type {
   EffectivePolicy, ExpectedReport, MotionState, PolicyIntervals, PolicyProvenance,
   ReportingPolicyRecord, SuppressionWindow,
 } from './reporting-policy.js'
+export {
+  addExclusion, emptyDenominated, percentiles, ratio,
+} from './analysers/distribution.js'
+export type { Denominated, Percentiles } from './analysers/distribution.js'
+export {
+  FIELD_GROUPS, analyseCompleteness, analyseIntegrity, analysePlatformConfiguration, analyseTiming,
+  cohortKey, cohortOf,
+} from './analysers/quality.js'
+export type {
+  Cohort, CompletenessReport, DestructiveSetting, FieldGroup, IntegrityReport, ObservedEvent,
+  RetentionFinding, TimingReport,
+} from './analysers/quality.js'
