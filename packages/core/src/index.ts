@@ -27,3 +27,7 @@ export type {
   Cohort, CompletenessReport, DestructiveSetting, FieldGroup, IntegrityReport, ObservedEvent,
   RetentionFinding, TimingReport,
 } from './analysers/quality.js'
+export { sampleEpisodes, summariseEpisodes } from './episodes/sampler.js'
+export type {
+  EpisodeSample, EpisodeSummary, EpisodeType, SamplerEvent, SamplerOptions,
+} from './episodes/sampler.js'
