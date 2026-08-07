@@ -68,3 +68,10 @@ export type {
 } from './replay/replay.js'
 export { postgresHooks, startOrResumeRun } from './replay/postgres-replay.js'
 export type { StartedRun } from './replay/postgres-replay.js'
+export {
+  ACCEPTED_MAP_LICENCES, FORBIDDEN_IN_TENANT_SCHEMA, MissingAttributionError, OSM_ATTRIBUTION,
+  TENANT_SAFE_SEGMENT_FIELDS, assertAttributed, attributionFor, checkSnapshot, surrogateKeyFor,
+} from './geo/snapshot.js'
+export type {
+  ExportManifestAttribution, SegmentGeometry, SnapshotCheck, SnapshotMetadata, SnapshotRejection,
+} from './geo/snapshot.js'

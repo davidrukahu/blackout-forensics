@@ -17,6 +17,9 @@
 -- licence boundary is expressed as an absent foreign key, which is checkable.
 CREATE SCHEMA IF NOT EXISTS core;
 CREATE SCHEMA IF NOT EXISTS audit;
+-- Open data lives in its own schema, its own lineage class. ODbL and CC BY-SA are incompatible
+-- copylefts, so OSM and cell data never share a derived database either.
+CREATE SCHEMA IF NOT EXISTS osm_snapshot;
 
 -- ---------------------------------------------------------------- tenant context
 
@@ -214,3 +217,40 @@ END $$;
 -- FORCE. No policy in this file constrains one. Production must therefore run as a non-superuser —
 -- bf_migrator owns objects, bf_app uses them, and neither is a superuser. PRD §11.1's requirement
 -- that production roles not hold BYPASSRLS is necessary but not sufficient on its own.
+
+-- ---------------------------------------------------------------- open map data
+
+-- A snapshot cannot activate without complete provenance (FR-ADM-003). The NOT NULLs are the
+-- enforcement: an import that cannot state its source, licence, version and checksum is not a
+-- licensed extract, it is an unattributed copy.
+CREATE TABLE IF NOT EXISTS osm_snapshot.snapshot (
+  id            bigserial PRIMARY KEY,
+  source_url    text        NOT NULL,
+  licence       text        NOT NULL,
+  extract_date  date        NOT NULL,
+  sha256        text        NOT NULL CHECK (char_length(sha256) = 64),
+  attribution   text        NOT NULL,
+  imported_at   timestamptz NOT NULL,
+  -- Activation is separate from import: an imported snapshot with a failed checksum must be
+  -- inspectable without being usable.
+  active        boolean     NOT NULL DEFAULT false,
+  UNIQUE (source_url, extract_date, sha256)
+);
+
+-- The mapping from a stable internal key to the OSM way it came from. This table is the ONLY place
+-- an OSM identifier appears. Tenant tables reference segments by surrogate key, so no
+-- customer-derived attribute is ever keyed on an OSM feature — the shape ODbL's Horizontal Map
+-- Layers guideline treats as a Derivative Database.
+CREATE TABLE IF NOT EXISTS osm_snapshot.segment (
+  snapshot_id   bigint      NOT NULL REFERENCES osm_snapshot.snapshot(id),
+  -- Derived from geometry, not from the OSM id: way ids are reassigned when a way is split or
+  -- merged, and an episode's corridor evidence must stay resolvable after that happens (FR-GEO-005).
+  surrogate_key text        NOT NULL,
+  osm_way_id    bigint      NOT NULL,
+  h3_cell       text        NOT NULL,
+  highway_class text,
+  PRIMARY KEY (snapshot_id, surrogate_key)
+);
+
+CREATE INDEX IF NOT EXISTS segment_by_key ON osm_snapshot.segment (surrogate_key);
+CREATE INDEX IF NOT EXISTS segment_by_h3 ON osm_snapshot.segment (h3_cell);

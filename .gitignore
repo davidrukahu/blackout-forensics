@@ -12,3 +12,8 @@ coverage/
 *.bundle.tar
 *.parquet
 !packages/spec/fixtures/**/*.parquet
+
+# OSM extracts are fetched, never committed: an extract in the repository is
+# redistribution, and PRD 13.3 forbids bundling country data into a source release.
+map-data/
+*.osm.pbf
