@@ -1,0 +1,18 @@
+Release B acceptance — 2026-08-08T00:00:00.000Z
+12 passed, 0 failed, 0 not met
+
+PASSED:
+  [PASS] B-1 Reference blackouts open, revise and close at expected boundaries
+  [PASS] B-2 Normal sleep and approved maintenance do not become actionable cases
+  [PASS] B-3 Source-wide failure suppresses inappropriate individual tamper escalation
+  [PASS] B-4 Every non-unknown hypothesis shows evidence, counterevidence, missing evidence and rule version
+  [PASS] B-5 Weak OpenCellID evidence cannot independently create an urgent case
+  [PASS] B-6 No output states borrower intent or a carrier-confirmed outage without qualifying evidence
+  [PASS] B-7 Map snapshot and routing profile are versioned
+  [PASS] B-8 Ambiguous paths are withheld
+  [PASS] B-9 Corridor outputs use "possible corridor"
+  [PASS] B-10 Exposure denominators are present
+  [PASS] B-11 OSM and OpenCellID attribution appears wherever applicable
+  [PASS] B-12 Map results have a complete text and table alternative
+
+Release B exit criteria are met.

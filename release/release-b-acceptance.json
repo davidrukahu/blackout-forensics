@@ -1,0 +1,140 @@
+{
+  "release": "B",
+  "generatedAt": "2026-08-08T00:00:00.000Z",
+  "criteria": [
+    {
+      "id": "B-1",
+      "requirement": "PRD §16.2 / §17.2",
+      "title": "Reference blackouts open, revise and close at expected boundaries",
+      "status": "pass",
+      "evidence": [
+        "duplicates-and-out-of-order: no episode, as truth expects",
+        "very-late-backfill: 1 episode(s) at the labelled gap",
+        "drifting-device-clock: no episode, as truth expects",
+        "reboot-and-sequence-reset: no episode, as truth expects",
+        "device-swap-mid-episode: trailing silence — deadline 2026-08-05T06:20:30.000Z falls inside the labelled gap, so the deadline monitor opens it",
+        "maintenance-window-overlap: 1 episode(s) suppressed by the approved window, still sampled and auditable (FR-POL-004)",
+        "vendor-outage-with-individual-power-cut: trailing silence — deadline 2026-08-05T06:23:30.000Z falls inside the labelled gap, so the deadline monitor opens it",
+        "gnss-loss-cellular-continues: 14 episode(s) at the labelled gap",
+        "transient-heartbeat-mid-blackout: 2 episode(s) at the labelled gap",
+        "duplicated-data-path: no episode, as truth expects",
+        "ambiguous-corridor: 1 episode(s) at the labelled gap",
+        "teltonika-deep-sleep: 2 mechanical episode(s) sampled (gnss_only_loss), none became an actionable case",
+        "byte-identical-resends: no episode, as truth expects",
+        "write-time-destruction: 1 episode(s) at the labelled gap",
+        "late records confirming recovery after the gap close the episode",
+        "buffered records covering the gap retract the episode"
+      ]
+    },
+    {
+      "id": "B-2",
+      "requirement": "PRD §17.2",
+      "title": "Normal sleep and approved maintenance do not become actionable cases",
+      "status": "pass",
+      "evidence": [
+        "maintenance-window-overlap: not urgent-eligible; fired []",
+        "teltonika-deep-sleep: not urgent-eligible; fired []"
+      ]
+    },
+    {
+      "id": "B-3",
+      "requirement": "PRD §17.2 / FR-CLS-007",
+      "title": "Source-wide failure suppresses inappropriate individual tamper escalation",
+      "status": "pass",
+      "evidence": [
+        "vendor-outage-with-individual-power-cut: no weak tamper fired at all"
+      ]
+    },
+    {
+      "id": "B-4",
+      "requirement": "PRD §17.2 / FR-CLS-003",
+      "title": "Every non-unknown hypothesis shows evidence, counterevidence, missing evidence and rule version",
+      "status": "pass",
+      "evidence": [
+        "3 fired entries across the corpus, every one carrying rule id+version, evidence, counterevidence and missing-evidence lists"
+      ]
+    },
+    {
+      "id": "B-5",
+      "requirement": "PRD §17.2 / FR-CLS-005",
+      "title": "Weak OpenCellID evidence cannot independently create an urgent case",
+      "status": "pass",
+      "evidence": [
+        "the fact vocabulary contains no cell-derived fact, so no rule can read one",
+        "cell_prior evidence is excluded from urgency even labelled direct"
+      ]
+    },
+    {
+      "id": "B-6",
+      "requirement": "PRD §17.2 / §11.5",
+      "title": "No output states borrower intent or a carrier-confirmed outage without qualifying evidence",
+      "status": "pass",
+      "evidence": [
+        "10 shipped packages validate clean, including wording checks",
+        "3 corpus outputs scanned; none states borrower intent or a carrier-confirmed outage"
+      ]
+    },
+    {
+      "id": "B-7",
+      "requirement": "PRD §17.3 / FR-GEO-002",
+      "title": "Map snapshot and routing profile are versioned",
+      "status": "pass",
+      "evidence": [
+        "every projection carries its manifest: snapshot snap-acceptance-riverside, profile motorcycle, budget 13333m"
+      ]
+    },
+    {
+      "id": "B-8",
+      "requirement": "PRD §17.3 / FR-GEO-004",
+      "title": "Ambiguous paths are withheld",
+      "status": "pass",
+      "evidence": [
+        "two disjoint routes produce status=corridor_ambiguous: no line is drawn, the feasible region is context only"
+      ]
+    },
+    {
+      "id": "B-9",
+      "requirement": "PRD §17.3 / §12.4",
+      "title": "Corridor outputs use \"possible corridor\"",
+      "status": "pass",
+      "evidence": [
+        "the corridor result type fixes the claim to \"possible corridor\" — renaming it stronger is a type error"
+      ]
+    },
+    {
+      "id": "B-10",
+      "requirement": "PRD §17.3 / FR-GEO-007",
+      "title": "Exposure denominators are present",
+      "status": "pass",
+      "evidence": [
+        "both denominators always travel together: per-traversal 0.0700, per-device-hour 0.0292",
+        "disagreement between them is surfaced as its own field (currently false)"
+      ]
+    },
+    {
+      "id": "B-11",
+      "requirement": "PRD §17.3 / ODbL & CC BY-SA",
+      "title": "OSM and OpenCellID attribution appears wherever applicable",
+      "status": "pass",
+      "evidence": [
+        "a map snapshot without attribution is refused at activation — attribution cannot be lost downstream because unattributed data never enters",
+        "maps carry \"© OpenStreetMap contributors, licensed under ODbL 1.0\"",
+        "cell context carries \"© OpenCellID contributors, licensed under CC BY-SA 4.0\""
+      ]
+    },
+    {
+      "id": "B-12",
+      "requirement": "PRD §17.3 / §12.4",
+      "title": "Map results have a complete text and table alternative",
+      "status": "pass",
+      "evidence": [
+        "the table is the primary representation: 3 rows covering every corridor cell; the map is supplementary",
+        "non-corridor outcomes carry their explanation as prose"
+      ]
+    }
+  ],
+  "passed": 12,
+  "failed": 0,
+  "notMet": 0,
+  "complete": true
+}

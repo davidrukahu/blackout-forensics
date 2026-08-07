@@ -27,7 +27,7 @@ export interface CriterionResult {
 }
 
 export interface AcceptanceReport {
-  readonly release: 'A'
+  readonly release: 'A' | 'B'
   readonly generatedAt: string
   readonly criteria: readonly CriterionResult[]
   readonly passed: number
@@ -47,6 +47,7 @@ export interface Criterion {
 export async function runAcceptance(
   criteria: readonly Criterion[],
   generatedAt: string,
+  release: 'A' | 'B' = 'A',
 ): Promise<AcceptanceReport> {
   const results: CriterionResult[] = []
 
@@ -77,7 +78,7 @@ export async function runAcceptance(
   const notMet = results.filter((r) => r.status === 'not_met').length
 
   return {
-    release: 'A',
+    release,
     generatedAt,
     criteria: results,
     passed,
@@ -113,8 +114,8 @@ export function summarise(report: AcceptanceReport): string {
   lines.push('')
   lines.push(
     report.complete
-      ? 'Release A exit criteria are met.'
-      : 'Release A is NOT complete. The items above must be resolved first.',
+      ? `Release ${report.release} exit criteria are met.`
+      : `Release ${report.release} is NOT complete. The items above must be resolved first.`,
   )
   return lines.join('\n')
 }

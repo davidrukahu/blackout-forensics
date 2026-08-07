@@ -80,9 +80,18 @@ export interface CorridorTableRow {
   readonly roadNames: readonly string[]
 }
 
+/**
+ * §17.3: the exact language a corridor claim ships under. A corridor is a constraint on where the
+ * vehicle could have been, never a statement of where it was — the phrase carries that epistemic
+ * limit into every rendering, the same way the tamper phrase does for H-TAMPER.
+ */
+export const CORRIDOR_CLAIM_LABEL = 'possible corridor'
+
 export type CorridorResult =
   | {
       readonly status: 'corridor'
+      /** Always `CORRIDOR_CLAIM_LABEL`: outputs may not rename the claim into something stronger. */
+      readonly claim: typeof CORRIDOR_CLAIM_LABEL
       /** Cells every feasible path must cross — the claim that holds whichever route was taken. */
       readonly corridorCells: readonly string[]
       /** The whole feasible region, for context rendering. Union, clearly weaker, never the claim. */
@@ -294,6 +303,7 @@ export function projectCorridor(request: CorridorRequest): CorridorResult {
 
   return {
     status: 'corridor',
+    claim: CORRIDOR_CLAIM_LABEL,
     corridorCells,
     feasibleCells,
     table: corridorCells.map((cell) => ({
