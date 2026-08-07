@@ -48,3 +48,9 @@ SPDX-License-Identifier = "Apache-2.0"
 path = ["release/**", "Dockerfile", ".dockerignore"]
 SPDX-FileCopyrightText = "2026 David Rukahu"
 SPDX-License-Identifier = "AGPL-3.0-only"
+
+# The committed classification baseline is a generated fixture; JSON carries no comment syntax.
+[[annotations]]
+path = ["packages/core/src/rules/fixtures/**"]
+SPDX-FileCopyrightText = "2026 David Rukahu"
+SPDX-License-Identifier = "AGPL-3.0-only"

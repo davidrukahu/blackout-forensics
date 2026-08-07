@@ -94,3 +94,25 @@ export type {
   ConfirmationPolicy, Episode, EpisodeState, EpisodeVersion, LateDataOutcome, LateReport,
   RecordedAction, RevisionCause, TransitionRequest,
 } from './episodes/lifecycle.js'
+export {
+  FACT_VOCABULARY, FACT_VOCABULARY_VERSION, available, deriveFacts, isVocabularyFact, unavailable,
+} from './rules/facts.js'
+export type { Fact, FactDefinition, FactDerivationInput, FactSet, FactValue } from './rules/facts.js'
+export {
+  GLOBAL_PROHIBITED, HYPOTHESIS_CODES, PROHIBITED_BY_HYPOTHESIS, TAMPER_REQUIRED_PHRASE,
+  evaluateRule, isEffectiveAt, validateRulePackage,
+} from './rules/package.js'
+export type {
+  CounterCondition, CounterNote, HypothesisCode, Predicate, RuleFixture, RuleGovernance,
+  RuleOutcome, RulePackage, RuleViolation,
+} from './rules/package.js'
+export { CONTRADICTIONS, RULE_PACKAGES } from './rules/packages.js'
+export type { Contradiction } from './rules/packages.js'
+export { classify } from './rules/classify.js'
+export type {
+  ClassificationResult, ClassifiedHypothesis, InapplicableRule, PriorityFactor,
+} from './rules/classify.js'
+export { diffClassifications, summariseClassification } from './rules/diff.js'
+export type {
+  ClassificationChange, ClassificationSnapshot, ClassificationSummary,
+} from './rules/diff.js'

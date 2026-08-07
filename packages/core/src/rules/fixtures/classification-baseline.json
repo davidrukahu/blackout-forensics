@@ -1,0 +1,112 @@
+{
+  "duplicates-and-out-of-order": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "very-late-backfill": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "drifting-device-clock": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "reboot-and-sequence-reset": {
+    "fired": [
+      "H-DEVICE"
+    ],
+    "bands": {
+      "H-DEVICE": "weak"
+    },
+    "suppressed": [],
+    "unknown": false,
+    "urgentEligible": false
+  },
+  "device-swap-mid-episode": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "maintenance-window-overlap": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "vendor-outage-with-individual-power-cut": {
+    "fired": [
+      "H-POWER"
+    ],
+    "bands": {
+      "H-POWER": "direct"
+    },
+    "suppressed": [],
+    "unknown": false,
+    "urgentEligible": true
+  },
+  "gnss-loss-cellular-continues": {
+    "fired": [
+      "H-GNSS"
+    ],
+    "bands": {
+      "H-GNSS": "corroborated"
+    },
+    "suppressed": [],
+    "unknown": false,
+    "urgentEligible": false
+  },
+  "transient-heartbeat-mid-blackout": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "duplicated-data-path": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "ambiguous-corridor": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "teltonika-deep-sleep": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "byte-identical-resends": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  },
+  "write-time-destruction": {
+    "fired": [],
+    "bands": {},
+    "suppressed": [],
+    "unknown": true,
+    "urgentEligible": false
+  }
+}

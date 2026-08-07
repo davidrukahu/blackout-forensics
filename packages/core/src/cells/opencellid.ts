@@ -19,22 +19,20 @@
  * record therefore locates *where a device was heard from*, approximately, and never the device.
  */
 
-export type EvidenceStrength = 'direct' | 'corroborated' | 'weak' | 'indeterminate'
-
-/** Independent families of evidence. Two facts from one family are not corroboration. */
-export type EvidenceFamily =
-  | 'device_signal'
-  | 'platform_health'
-  | 'peer_devices'
-  | 'route_history'
-  | 'reviewed_outcome'
-  | 'cell_prior'
-
-export interface EvidenceItem {
-  readonly family: EvidenceFamily
-  readonly strength: EvidenceStrength
-  readonly summary: string
-}
+// Evidence primitives moved to ../evidence.ts when the rule engine landed — ticket 37 requires the
+// rule vocabulary to fold these in rather than duplicate them. Re-exported here so existing
+// importers keep working; the definitions live in one place.
+export {
+  canSupportUrgentAction,
+  explainActionability,
+} from '../evidence.js'
+export type {
+  ActionabilityExplanation,
+  EvidenceFamily,
+  EvidenceItem,
+  EvidenceStrength,
+} from '../evidence.js'
+import type { EvidenceItem as _EvidenceItem } from '../evidence.js'
 
 export interface CellKey {
   readonly mcc: number
@@ -100,7 +98,7 @@ export function assertAcquisitionPermitted(acquisition: CellAcquisition): void {
  * limit is what the measurement *is*, not how many times it was taken. A missing record produces no
  * evidence item at all rather than a negative one.
  */
-export function cellEvidenceFrom(result: CellLookupResult): EvidenceItem | undefined {
+export function cellEvidenceFrom(result: CellLookupResult): _EvidenceItem | undefined {
   if (result.status !== 'found') return undefined
   return {
     family: 'cell_prior',
@@ -109,56 +107,6 @@ export function cellEvidenceFrom(result: CellLookupResult): EvidenceItem | undef
       `serving cell has a community-contributed location prior within ` +
       `${result.record.rangeM ?? 'an unstated'} m, averaged from reception measurements`,
   }
-}
-
-/**
- * Whether an evidence set can support an urgent, field-affecting action.
- *
- * FR-CLS-007 requires direct evidence, or corroboration across independent families. The rule is
- * written so that cell evidence cannot contribute to the threshold at all — not weighted low, but
- * excluded — because a weight can always be tuned upward by someone who wants a case to clear the
- * bar, and the whole point is that it must not be tunable.
- */
-export function canSupportUrgentAction(evidence: readonly EvidenceItem[]): boolean {
-  const admissible = evidence.filter((e) => e.family !== 'cell_prior')
-
-  if (admissible.some((e) => e.strength === 'direct')) return true
-
-  const corroboratingFamilies = new Set(
-    admissible.filter((e) => e.strength === 'corroborated').map((e) => e.family),
-  )
-  return corroboratingFamilies.size >= 2
-}
-
-export interface ActionabilityExplanation {
-  readonly actionable: boolean
-  readonly reason: string
-  /** Evidence that counted, and evidence that was present but could not count. */
-  readonly counted: readonly EvidenceItem[]
-  readonly excluded: readonly EvidenceItem[]
-}
-
-/** The same decision, with its reasoning — what the UI must show rather than a bare verdict. */
-export function explainActionability(
-  evidence: readonly EvidenceItem[],
-): ActionabilityExplanation {
-  const counted = evidence.filter((e) => e.family !== 'cell_prior')
-  const excluded = evidence.filter((e) => e.family === 'cell_prior')
-  const actionable = canSupportUrgentAction(evidence)
-
-  const direct = counted.filter((e) => e.strength === 'direct')
-  const families = new Set(counted.filter((e) => e.strength === 'corroborated').map((e) => e.family))
-
-  const reason = actionable
-    ? direct.length > 0
-      ? `direct evidence from ${direct[0]!.family}`
-      : `corroborated across ${families.size} independent evidence families`
-    : excluded.length > 0
-      ? 'no direct or independently corroborated evidence; a cell prior is present but is context ' +
-        'only and cannot meet the threshold on its own'
-      : 'no direct or independently corroborated evidence'
-
-  return { actionable, reason, counted, excluded }
 }
 
 /**
