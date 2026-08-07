@@ -25,7 +25,8 @@
     "fetch:osm": "tsx scripts/fetch-osm.ts",
     "bench": "tsx scripts/benchmark.ts",
     "bench:reference": "tsx scripts/benchmark.ts reference",
-    "release": "tsx scripts/release.ts"
+    "release": "tsx scripts/release.ts",
+    "acceptance-pack": "tsx scripts/acceptance-pack.ts"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^12.1.0",

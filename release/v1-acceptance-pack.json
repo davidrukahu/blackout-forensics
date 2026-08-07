@@ -1,0 +1,360 @@
+{
+  "title": "Blackout Forensics v1 acceptance evidence pack (PRD §17)",
+  "generatedAt": "2026-08-07T22:45:36.993Z",
+  "summary": {
+    "total": 36,
+    "met": 34,
+    "not_met": 1,
+    "external": 1
+  },
+  "declaration": "v1 is technically complete per §1.3 EXCEPT the 1 item(s) listed under not_met, each with what remains stated. §15.5 gates on the named items, not on rounded-up claims.",
+  "items": [
+    {
+      "section": "17.1",
+      "requirement": "Two adapters are forensics-ready and one is recovery-ready",
+      "status": "not_met",
+      "evidence": [
+        "release/release-a-acceptance.json",
+        "packages/connectors/src/traccar"
+      ],
+      "outstanding": "One adapter (Traccar) is built and live-rig tested. The second forensics-ready adapter and the recovery-ready designation need a pilot vendor commitment — tracked for the pilot, not claimable now."
+    },
+    {
+      "section": "17.1",
+      "requirement": "Every canonical event has tenant, source, device reference, receipt time, event ID, raw hash and adapter version",
+      "status": "met",
+      "evidence": [
+        "packages/spec/src",
+        "packages/core/src/normalize/normalizer.ts",
+        "release/release-a-acceptance.json"
+      ]
+    },
+    {
+      "section": "17.1",
+      "requirement": "Missing fields remain missing",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/rules/facts.ts",
+        "packages/core/src/analysers/quality.ts"
+      ]
+    },
+    {
+      "section": "17.1",
+      "requirement": "Duplicate, late and replay behaviour is measured and documented",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/db/stores.int.test.ts",
+        "packages/core/src/replay/replay.test.ts",
+        "packages/generator/src/scenarios.ts"
+      ]
+    },
+    {
+      "section": "17.1",
+      "requirement": "Effective assignment and policy changes reproduce past behaviour correctly",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/assignments.ts",
+        "packages/core/src/reporting-policy.ts",
+        "packages/core/src/temporal.ts"
+      ]
+    },
+    {
+      "section": "17.1",
+      "requirement": "Open data has source, licence, snapshot, checksum and attribution metadata",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/geo/snapshot.ts",
+        "release/release-b-acceptance.json"
+      ]
+    },
+    {
+      "section": "17.2",
+      "requirement": "Every reference blackout opens, revises and closes at the expected boundaries",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/acceptance/release-b.ts"
+      ]
+    },
+    {
+      "section": "17.2",
+      "requirement": "Normal sleep and approved maintenance do not become actionable cases",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/acceptance/release-b.ts"
+      ]
+    },
+    {
+      "section": "17.2",
+      "requirement": "Source-wide failure suppresses inappropriate individual tamper escalation",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/acceptance/release-b.ts"
+      ]
+    },
+    {
+      "section": "17.2",
+      "requirement": "Every non-unknown hypothesis shows evidence, counterevidence, missing evidence and rule version",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/acceptance/release-b.ts"
+      ]
+    },
+    {
+      "section": "17.2",
+      "requirement": "Weak OpenCellID evidence cannot independently create an urgent case",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/acceptance/release-b.ts"
+      ]
+    },
+    {
+      "section": "17.2",
+      "requirement": "No output states borrower intent or a carrier-confirmed outage without qualifying evidence",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/acceptance/release-b.ts"
+      ]
+    },
+    {
+      "section": "17.3",
+      "requirement": "Map snapshot and routing profile are versioned",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/geo/corridor.ts"
+      ]
+    },
+    {
+      "section": "17.3",
+      "requirement": "Ambiguous paths are withheld",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/geo/corridor.ts"
+      ]
+    },
+    {
+      "section": "17.3",
+      "requirement": "Corridor outputs use \"possible corridor\"",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/geo/corridor.ts"
+      ]
+    },
+    {
+      "section": "17.3",
+      "requirement": "Exposure denominators are present",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/geo/corridor.ts"
+      ]
+    },
+    {
+      "section": "17.3",
+      "requirement": "OSM and OpenCellID attribution appears wherever applicable",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/geo/corridor.ts"
+      ]
+    },
+    {
+      "section": "17.3",
+      "requirement": "Map results have a complete text and table alternative",
+      "status": "met",
+      "evidence": [
+        "release/release-b-acceptance.json",
+        "packages/core/src/geo/corridor.ts"
+      ]
+    },
+    {
+      "section": "17.4",
+      "requirement": "Analyst decisions, overrides and approvals are attributed and immutable",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/episodes/lifecycle.ts",
+        "packages/core/src/db/episode-store.int.test.ts",
+        "release/release-c-e2e.json"
+      ]
+    },
+    {
+      "section": "17.4",
+      "requirement": "Maker-checker cannot be bypassed through UI, API or replay",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/queue/decisions.test.ts",
+        "packages/app/src/routes/decisions.test.ts"
+      ]
+    },
+    {
+      "section": "17.4",
+      "requirement": "The product cannot immobilize, message, dispatch, repossess or change credit state",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/queue/outcomes.test.ts",
+        "release/release-c-e2e.json"
+      ]
+    },
+    {
+      "section": "17.4",
+      "requirement": "Outcomes use the controlled taxonomy and can remain unresolved",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/queue/outcomes.ts",
+        "packages/core/src/queue/outcomes.test.ts"
+      ]
+    },
+    {
+      "section": "17.4",
+      "requirement": "Counts reconcile to source snapshots and all denominators and exclusions are visible",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/reporting/sla.ts",
+        "packages/core/src/analysers/distribution.ts"
+      ]
+    },
+    {
+      "section": "17.4",
+      "requirement": "Report content and manifest hashes reproduce",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/reporting/sla.test.ts",
+        "release/release-c-e2e.json"
+      ]
+    },
+    {
+      "section": "17.5",
+      "requirement": "Cross-tenant read, write, export and background-job tests pass",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/db/rls.int.test.ts",
+        "packages/core/src/security/asvs.int.test.ts"
+      ]
+    },
+    {
+      "section": "17.5",
+      "requirement": "Production services do not use owner or RLS-bypass roles",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/db/schema.sql",
+        "documentation/operator.md"
+      ]
+    },
+    {
+      "section": "17.5",
+      "requirement": "Exact location and identifiers do not appear in logs, metrics or safe support bundles",
+      "status": "met",
+      "evidence": [
+        "packages/core/src/security/support-bundle.ts",
+        "release/security-verification.json"
+      ]
+    },
+    {
+      "section": "17.5",
+      "requirement": "DPA, DPIA, retention, transfer and human-authority boundaries are approved before live use",
+      "status": "external",
+      "evidence": [
+        "documentation/dpo.md"
+      ],
+      "outstanding": "Legal approvals are the customer's and counsel's act, per deployment. The technical substrate (retention automation, holds, tombstones, human-authority controls) is built and tested; the approvals themselves cannot be produced by this repository."
+    },
+    {
+      "section": "17.5",
+      "requirement": "Backup restore and disaster-recovery exercises pass",
+      "status": "met",
+      "evidence": [
+        "release/dr-exercise.json",
+        "packages/core/src/dr/restore-exercise.int.test.ts"
+      ]
+    },
+    {
+      "section": "17.5",
+      "requirement": "The approved application-security control profile passes",
+      "status": "met",
+      "evidence": [
+        "release/security-verification.json",
+        "packages/core/src/security/asvs.int.test.ts"
+      ]
+    },
+    {
+      "section": "17.5",
+      "requirement": "Signed artifacts, SBOM and third-party notices are complete",
+      "status": "met",
+      "evidence": [
+        "release/RELEASE.json",
+        "release/RELEASE.json.sig",
+        "release/app-sbom.spdx.json",
+        "release/THIRD_PARTY_NOTICES.txt",
+        "scripts/release.ts"
+      ]
+    },
+    {
+      "section": "17.6",
+      "requirement": "User, supervisor, administrator, integration and privacy guides are complete",
+      "status": "met",
+      "evidence": [
+        "documentation/README.md",
+        "documentation/administrator.md",
+        "documentation/dpo.md",
+        "documentation/operator.md"
+      ]
+    },
+    {
+      "section": "17.6",
+      "requirement": "API, schemas, migrations and conformance fixtures are published",
+      "status": "met",
+      "evidence": [
+        "packages/spec",
+        "scripts/export-spec.ts",
+        "documentation/README.md"
+      ]
+    },
+    {
+      "section": "17.6",
+      "requirement": "Architecture decisions and threat model are current",
+      "status": "met",
+      "evidence": [
+        "docs/adr",
+        "documentation/threat-model.md"
+      ]
+    },
+    {
+      "section": "17.6",
+      "requirement": "Upgrade, rollback, restore, incident and data-deletion runbooks are tested",
+      "status": "met",
+      "evidence": [
+        "documentation/runbooks.md",
+        "packages/core/src/dr/restore-exercise.int.test.ts",
+        "packages/core/src/db/retention.int.test.ts"
+      ]
+    },
+    {
+      "section": "17.6",
+      "requirement": "A new engineer can run the synthetic end-to-end demonstration from documented steps",
+      "status": "met",
+      "evidence": [
+        "documentation/developer.md",
+        "packages/app/src/release-c.e2e.test.ts"
+      ]
+    }
+  ],
+  "artifactHashes": {
+    "release/release-a-acceptance.json": "baaa1e3522c3c8c67ec9f5ee52baf60d93985f8e1dc723220e1f5b9588a9ffe2",
+    "release/release-b-acceptance.json": "62580b5126d8923bb2f3a542a8a66815d37387b5931fd65582d08f407a1f9b3b",
+    "release/release-c-e2e.json": "493f285f35cad98c69f3c03f730ba058a583dd54db879f0ee59a61075ae40c38",
+    "release/security-verification.json": "2a752932a58aa0424319333a178d9e9d75c316e1d7e7588b63435e074d3cf9ee",
+    "release/dr-exercise.json": "8b619de316aceb701054511a6b316eb97a3954a223252961f8094fc1f73bd342",
+    "release/RELEASE.json": "1936edfa49d456c894d84413035fffbb22201cb257026cd24d81dce2021b8a11",
+    "release/RELEASE.json.sig": "7ae73bdbc8a07e76f24623dd79f040a29a0f1645e8b03e32b70a43c8fce4656a",
+    "release/app-sbom.spdx.json": "3ef7accea1350ff00da3203a54f05a89af90992683dcbb19ddcdae2ab5120477",
+    "release/THIRD_PARTY_NOTICES.txt": "11e573b10664f07637d76e7b5e5a734d1a5c4b2acbdf23b7f5915d9c6814aad9"
+  }
+}
