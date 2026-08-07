@@ -77,3 +77,11 @@ export type {
 } from './geo/snapshot.js'
 export { runAcceptance, summarise } from './acceptance/release-a.js'
 export type { AcceptanceReport, Criterion, CriterionResult, CriterionStatus } from './acceptance/release-a.js'
+export {
+  DisabledCellLookup, ForbiddenAcquisitionError, OPENCELLID_ATTRIBUTION, assertAcquisitionPermitted,
+  canSupportUrgentAction, cellEvidenceFrom, describeAbsence, explainActionability,
+} from './cells/opencellid.js'
+export type {
+  ActionabilityExplanation, CellAcquisition, CellKey, CellLookup, CellLookupResult, CellRecord,
+  EvidenceFamily, EvidenceItem, EvidenceStrength,
+} from './cells/opencellid.js'

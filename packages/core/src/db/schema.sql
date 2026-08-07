@@ -20,6 +20,10 @@ CREATE SCHEMA IF NOT EXISTS audit;
 -- Open data lives in its own schema, its own lineage class. ODbL and CC BY-SA are incompatible
 -- copylefts, so OSM and cell data never share a derived database either.
 CREATE SCHEMA IF NOT EXISTS osm_snapshot;
+-- Cell data is a separate lineage class again. OSM is ODbL, OpenCellID is CC BY-SA 4.0, and
+-- Creative Commons has never designated ODbL as BY-SA-compatible — a derived database holding both
+-- would owe two irreconcilable copylefts, so they never share one.
+CREATE SCHEMA IF NOT EXISTS cell_snapshot;
 
 -- ---------------------------------------------------------------- tenant context
 
@@ -254,3 +258,39 @@ CREATE TABLE IF NOT EXISTS osm_snapshot.segment (
 
 CREATE INDEX IF NOT EXISTS segment_by_key ON osm_snapshot.segment (surrogate_key);
 CREATE INDEX IF NOT EXISTS segment_by_h3 ON osm_snapshot.segment (h3_cell);
+
+-- ---------------------------------------------------------------- open cell data
+
+CREATE TABLE IF NOT EXISTS cell_snapshot.snapshot (
+  id            bigserial PRIMARY KEY,
+  source_url    text        NOT NULL,
+  licence       text        NOT NULL,
+  extract_date  date        NOT NULL,
+  sha256        text        NOT NULL CHECK (char_length(sha256) = 64),
+  attribution   text        NOT NULL,
+  -- How the snapshot was obtained. The community API is not permitted for commercial production
+  -- without contributing data or being whitelisted, and access may be withdrawn at any time, so the
+  -- acquisition route is recorded rather than assumed.
+  acquisition   text        NOT NULL
+                CHECK (acquisition IN ('self_hosted_download', 'commercial_provider')),
+  imported_at   timestamptz NOT NULL,
+  active        boolean     NOT NULL DEFAULT false,
+  UNIQUE (source_url, extract_date, sha256)
+);
+
+CREATE TABLE IF NOT EXISTS cell_snapshot.cell (
+  snapshot_id bigint  NOT NULL REFERENCES cell_snapshot.snapshot(id),
+  mcc         integer NOT NULL,
+  mnc         integer NOT NULL,
+  lac         integer NOT NULL,
+  cell_id     bigint  NOT NULL,
+  -- Averaged from reception measurements, not surveyed. One physical tower can contain several
+  -- logical cells, so this is a prior over where a device might have been heard, never a position.
+  lat         double precision NOT NULL,
+  lon         double precision NOT NULL,
+  range_m     integer,
+  samples     integer,
+  PRIMARY KEY (snapshot_id, mcc, mnc, lac, cell_id)
+);
+
+CREATE INDEX IF NOT EXISTS cell_by_identity ON cell_snapshot.cell (mcc, mnc, lac, cell_id);
