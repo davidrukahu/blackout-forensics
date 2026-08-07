@@ -63,13 +63,20 @@ CREATE TABLE IF NOT EXISTS core.observation (
   -- the durable link and is verified on read.
   raw_receipt_id bigint,
   raw_sha256     text         NOT NULL,
+  -- Re-decoding the same receipt with a newer adapter creates a NEW version rather than replacing
+  -- the old one (FR-TEL-007). The original stays exactly as it was decoded, because an episode
+  -- already classified from it must remain reproducible.
+  version        integer      NOT NULL DEFAULT 1,
+  superseded     boolean      NOT NULL DEFAULT false,
   PRIMARY KEY (id, received_at)
 ) PARTITION BY RANGE (received_at);
 
 -- Idempotency is scoped by tenant AND source: the same vendor sequence from two platforms is two
 -- observations, and merging them would fabricate agreement between independent sources.
+-- Idempotency holds per adapter version: replaying the same payload through the same adapter is a
+-- duplicate, while re-decoding through a newer one is a new version of the same observation.
 CREATE UNIQUE INDEX IF NOT EXISTS observation_idempotency
-  ON core.observation (tenant_id, source, identity_basis, identity_value, received_at);
+  ON core.observation (tenant_id, source, identity_basis, identity_value, received_at, version);
 
 CREATE TABLE IF NOT EXISTS core.assignment (
   id             bigserial PRIMARY KEY,

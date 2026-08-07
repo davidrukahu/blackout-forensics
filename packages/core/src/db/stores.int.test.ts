@@ -19,6 +19,7 @@ import {
   PostgresObservationStore,
   PostgresQuarantineStore,
   PostgresReceiptStore,
+  redecode,
   traceToReceipt,
 } from './stores.js'
 
@@ -245,5 +246,111 @@ describe('the stores respect tenant isolation', () => {
   it('another tenant sees none of these observations', async () => {
     const theirs = new PostgresObservationStore(app, OTHER)
     expect(await theirs.count()).toBe(0)
+  })
+})
+
+describe('re-decoding creates a new version, never a correction — FR-TEL-007', () => {
+  const IDENTITY = 'redecode-1'
+  const payload = '{"vendor":"raw","seq":7}'
+
+  it('stores version 1 from the original adapter', async () => {
+    const receipts = new PostgresReceiptStore(app, objects, TENANT)
+    const observations = new PostgresObservationStore(app, TENANT)
+
+    await receipts.append(receiptFor(payload, 'batch_redecode'), payload)
+    await observations.putIfAbsent('k', {
+      ...observationFor(IDENTITY, payload),
+      payload: { schema_version: '0.1.0', decoded_by: 'v1', network: null },
+      adapterVersion: 'traccar-1.0.0',
+    })
+
+    const versions = await observations.versionsOf(IDENTITY)
+    expect(versions).toHaveLength(1)
+    expect(versions[0]?.version).toBe(1)
+  })
+
+  it('a newer adapter adds version 2 and leaves version 1 byte-identical', async () => {
+    const receipts = new PostgresReceiptStore(app, objects, TENANT)
+    const observations = new PostgresObservationStore(app, TENANT)
+
+    const before = (await observations.versionsOf(IDENTITY))[0]!
+    const beforeJson = JSON.stringify(before.payload)
+
+    const outcome = await redecode(observations, receipts, {
+      identityValue: IDENTITY,
+      adapterVersion: 'traccar-1.1.0',
+      // The newer adapter recovers a field the old one dropped.
+      decode: () => ({ schema_version: '0.1.0', decoded_by: 'v2', network: { rssi_dbm: -91 } }),
+      source: 'traccar',
+      deviceRef: 'dev_trace',
+      receivedAt: '2026-08-05T06:00:00.000Z',
+    })
+
+    expect(outcome.created).toBe(true)
+    expect(outcome.version).toBe(2)
+
+    const versions = await observations.versionsOf(IDENTITY)
+    expect(versions).toHaveLength(2)
+
+    // The original is untouched: an episode already classified from version 1 stays reproducible.
+    const after = versions.find((v) => v.version === 1)!
+    expect(JSON.stringify(after.payload)).toBe(beforeJson)
+    expect(after.adapterVersion).toBe('traccar-1.0.0')
+
+    const v2 = versions.find((v) => v.version === 2)!
+    expect((v2.payload as { decoded_by: string }).decoded_by).toBe('v2')
+    // Both versions decode the same receipt.
+    expect(v2.rawSha256).toBe(after.rawSha256)
+  })
+
+  it('refuses to re-run the same adapter version', async () => {
+    const receipts = new PostgresReceiptStore(app, objects, TENANT)
+    const observations = new PostgresObservationStore(app, TENANT)
+
+    const outcome = await redecode(observations, receipts, {
+      identityValue: IDENTITY,
+      adapterVersion: 'traccar-1.1.0',
+      decode: () => ({ schema_version: '0.1.0', decoded_by: 'v2-again' }),
+      source: 'traccar',
+      deviceRef: 'dev_trace',
+      receivedAt: '2026-08-05T06:00:00.000Z',
+    })
+
+    expect(outcome.created).toBe(false)
+    expect(outcome.reason).toBe('already_decoded_by_this_adapter')
+    expect(await observations.versionsOf(IDENTITY)).toHaveLength(2)
+  })
+
+  it('reports a decode failure without creating a version', async () => {
+    const receipts = new PostgresReceiptStore(app, objects, TENANT)
+    const observations = new PostgresObservationStore(app, TENANT)
+
+    const outcome = await redecode(observations, receipts, {
+      identityValue: IDENTITY,
+      adapterVersion: 'traccar-2.0.0',
+      decode: () => { throw new Error('unsupported codec') },
+      source: 'traccar',
+      deviceRef: 'dev_trace',
+      receivedAt: '2026-08-05T06:00:00.000Z',
+    })
+
+    expect(outcome.created).toBe(false)
+    expect(outcome.reason).toBe('decode_failed')
+    expect(await observations.versionsOf(IDENTITY)).toHaveLength(2)
+  })
+
+  it('reports a missing receipt rather than inventing one', async () => {
+    const receipts = new PostgresReceiptStore(app, objects, TENANT)
+    const observations = new PostgresObservationStore(app, TENANT)
+
+    const outcome = await redecode(observations, receipts, {
+      identityValue: 'never-seen',
+      adapterVersion: 'traccar-1.0.0',
+      decode: () => ({}),
+      source: 'traccar',
+      deviceRef: 'dev_x',
+      receivedAt: '2026-08-05T06:00:00.000Z',
+    })
+    expect(outcome.reason).toBe('receipt_not_found')
   })
 })

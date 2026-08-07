@@ -52,3 +52,10 @@ export {
   PostgresObservationStore, PostgresQuarantineStore, PostgresReceiptStore, traceToReceipt,
 } from './db/stores.js'
 export type { AuditTrace, StoredQuarantine, StoredReceipt } from './db/stores.js'
+export {
+  IMMUTABLE_TIME_FIELDS, TimeOverwriteError, currentVersion, diffVersions, enrich, nextVersionFor,
+  normalize,
+} from './normalize/normalizer.js'
+export type { Adapter, NormalizeResult, ObservationVersion, VersionDiff } from './normalize/normalizer.js'
+export { redecode } from './db/stores.js'
+export type { RedecodeOutcome } from './db/stores.js'

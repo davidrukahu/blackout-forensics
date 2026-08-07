@@ -17,6 +17,7 @@
 
 import type { Sql } from 'postgres'
 
+import { nextVersionFor, type ObservationVersion } from '../normalize/normalizer.js'
 import type { ObjectStore } from './object-store.js'
 import { withTenant } from './tenant.js'
 
@@ -114,20 +115,21 @@ export class PostgresObservationStore {
       payload: unknown
       adapterVersion: string
       rawSha256: string
+      version?: number
     },
   ): Promise<boolean> {
     void key
     return withTenant(this.sql, this.tenantId, async (tx) => {
       const rows = await tx`INSERT INTO core.observation
         (tenant_id, source, device_ref, asset_ref, identity_basis, identity_value, received_at,
-         vendor_received_at, device_time, payload, adapter_version, raw_sha256)
+         vendor_received_at, device_time, payload, adapter_version, raw_sha256, version)
         VALUES (${this.tenantId}, ${observation.source}, ${observation.deviceRef},
                 ${observation.assetRef ?? null}, ${observation.identityBasis},
                 ${observation.identityValue}, ${observation.receivedAt},
                 ${observation.vendorReceivedAt ?? null}, ${observation.deviceTime ?? null},
                 ${tx.json(observation.payload as never)}, ${observation.adapterVersion},
-                ${observation.rawSha256})
-        ON CONFLICT (tenant_id, source, identity_basis, identity_value, received_at) DO NOTHING
+                ${observation.rawSha256}, ${observation.version ?? 1})
+        ON CONFLICT (tenant_id, source, identity_basis, identity_value, received_at, version) DO NOTHING
         RETURNING id`
       return rows.length > 0
     })
@@ -137,6 +139,29 @@ export class PostgresObservationStore {
     return withTenant(this.sql, this.tenantId, async (tx) => {
       const rows = await tx`SELECT count(*)::int AS n FROM core.observation`
       return (rows[0] as unknown as { n: number }).n
+    })
+  }
+
+  /**
+   * Every version of one observation, oldest first.
+   *
+   * Versions accumulate rather than replace: an episode classified from version 1 must stay
+   * reproducible from version 1 (FR-TEL-007).
+   */
+  async versionsOf(identityValue: string): Promise<ObservationVersion[]> {
+    return withTenant(this.sql, this.tenantId, async (tx) => {
+      const rows = await tx`SELECT version, adapter_version, raw_sha256, payload, superseded
+        FROM core.observation WHERE identity_value = ${identityValue} ORDER BY version`
+      return (rows as unknown as {
+        version: number; adapter_version: string; raw_sha256: string
+        payload: Record<string, unknown>; superseded: boolean
+      }[]).map((r) => ({
+        version: r.version,
+        adapterVersion: r.adapter_version,
+        rawSha256: r.raw_sha256,
+        payload: r.payload,
+        superseded: r.superseded,
+      }))
     })
   }
 
@@ -217,4 +242,60 @@ export async function traceToReceipt(
   }
 
   return { identityValue, rawSha256, payloadFound, payloadVerified }
+}
+
+export interface RedecodeOutcome {
+  readonly created: boolean
+  readonly version?: number
+  readonly reason?: 'already_decoded_by_this_adapter' | 'receipt_not_found' | 'decode_failed'
+}
+
+/**
+ * Re-decode an existing receipt with a newer adapter, as a new version.
+ *
+ * The original is never touched. Re-running the *same* adapter version is refused: a replay is not
+ * a second opinion, and a version that says nothing new is noise in an evidence record.
+ */
+export async function redecode(
+  observations: PostgresObservationStore,
+  receipts: PostgresReceiptStore,
+  params: {
+    identityValue: string
+    adapterVersion: string
+    decode: (payload: Buffer) => Record<string, unknown>
+    source: string
+    deviceRef: string
+    receivedAt: string
+  },
+): Promise<RedecodeOutcome> {
+  const existing = await observations.versionsOf(params.identityValue)
+  if (existing.length === 0) return { created: false, reason: 'receipt_not_found' }
+
+  const version = nextVersionFor(existing, params.adapterVersion)
+  if (version === undefined) return { created: false, reason: 'already_decoded_by_this_adapter' }
+
+  const rawSha256 = existing[0]!.rawSha256
+  const payload = await receipts.payloadFor(rawSha256)
+  if (payload === undefined) return { created: false, reason: 'receipt_not_found' }
+
+  let decoded: Record<string, unknown>
+  try {
+    decoded = params.decode(payload)
+  } catch {
+    return { created: false, reason: 'decode_failed' }
+  }
+
+  const created = await observations.putIfAbsent('redecode', {
+    source: params.source,
+    deviceRef: params.deviceRef,
+    identityBasis: 'vendor_sequence',
+    identityValue: params.identityValue,
+    receivedAt: params.receivedAt,
+    payload: decoded,
+    adapterVersion: params.adapterVersion,
+    rawSha256,
+    version,
+  })
+
+  return created ? { created: true, version } : { created: false, reason: 'already_decoded_by_this_adapter' }
 }
