@@ -110,9 +110,25 @@ export function emitBundle(params: {
       )
       sections[name] = published
       suppressedRows += suppressed
-    } else {
-      sections[name] = section
+      continue
     }
+
+    // A section can also be a single aggregate object rather than a list of rows. It is subject to
+    // the same floor: a summary over three devices is as disclosive as a row over three devices.
+    // Suppressing the whole section is the right outcome — a fleet too small to publish should
+    // still produce an audit, made of findings rather than tables.
+    if (
+      section !== null &&
+      typeof section === 'object' &&
+      !Array.isArray(section) &&
+      typeof (section as { device_count?: unknown }).device_count === 'number' &&
+      (section as { device_count: number }).device_count < MIN_COHORT_SIZE
+    ) {
+      suppressedRows += 1
+      continue
+    }
+
+    sections[name] = section
   }
 
   const manifest: BundleManifest = {
