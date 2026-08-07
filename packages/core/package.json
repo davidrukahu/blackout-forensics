@@ -15,5 +15,8 @@
   },
   "devDependencies": {
     "@blackout/generator": "*"
+  },
+  "dependencies": {
+    "h3-js": "^4.5.0"
   }
 }

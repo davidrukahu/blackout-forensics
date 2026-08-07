@@ -31,3 +31,10 @@ export { sampleEpisodes, summariseEpisodes } from './episodes/sampler.js'
 export type {
   EpisodeSample, EpisodeSummary, EpisodeType, SamplerEvent, SamplerOptions,
 } from './episodes/sampler.js'
+export {
+  BUNDLE_FIELD_ALLOWLIST, MAX_H3_RESOLUTION, MIN_COHORT_SIZE, MIN_TIME_BUCKET_S,
+  checkRedaction, coarsenToCell, suppressSmallCohorts,
+} from './bundle/redaction.js'
+export type { RedactionViolation, RedactionViolationCode } from './bundle/redaction.js'
+export { BUNDLE_VERSION, emitBundle, serializeBundle } from './bundle/emitter.js'
+export type { BundleManifest, BundleThresholds, EmitResult, FindingsBundle } from './bundle/emitter.js'
