@@ -38,3 +38,7 @@ export {
 export type { RedactionViolation, RedactionViolationCode } from './bundle/redaction.js'
 export { BUNDLE_VERSION, emitBundle, serializeBundle } from './bundle/emitter.js'
 export type { BundleManifest, BundleThresholds, EmitResult, FindingsBundle } from './bundle/emitter.js'
+export { MissingNarrativeError, UnsupportedClaimError, renderReport } from './report/render.js'
+export type {
+  Claim, EvidenceStatus, NarrativeSections, Recommendation, ReportInput,
+} from './report/render.js'
