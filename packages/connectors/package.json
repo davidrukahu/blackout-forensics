@@ -12,5 +12,13 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
+  },
+  "dependencies": {
+    "@blackout/spec": "*",
+    "hyparquet": "^1.28.1"
+  },
+  "devDependencies": {
+    "@blackout/generator": "*",
+    "hyparquet-writer": "^0.16.5"
   }
 }
