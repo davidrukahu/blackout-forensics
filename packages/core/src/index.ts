@@ -201,3 +201,9 @@ export type {
   Account, AccountKind, AccountRegistry, BreakGlassRecord, ElevationGrant, OidcClaims, SecretRef,
   Session, SigningKey,
 } from './security/identity.js'
+export {
+  DR_TARGETS, RECOVERY_RUNBOOK, backupStatus, evaluateExercise, exerciseDue,
+} from './dr/backup.js'
+export type {
+  BackupRecord, DailyBackupStatus, RestoreExercise, RestoreVerification,
+} from './dr/backup.js'

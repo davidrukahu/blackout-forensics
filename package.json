@@ -21,7 +21,7 @@
     "check:synthetic": "tsx scripts/check-synthetic.ts",
     "sbom": "npm sbom --sbom-format spdx --omit dev > release/app-sbom.spdx.json",
     "check:licences": "tsx scripts/check-licences.ts",
-    "test:integration": "vitest run --fileParallelism=false --testTimeout=180000 --hookTimeout=300000 packages/core/src/db packages/core/src/replay packages/core/src/geo packages/core/src/cells packages/core/src/acceptance packages/connectors/src/traccar",
+    "test:integration": "vitest run --fileParallelism=false --testTimeout=180000 --hookTimeout=300000 packages/core/src/db packages/core/src/replay packages/core/src/geo packages/core/src/cells packages/core/src/acceptance packages/core/src/dr packages/connectors/src/traccar",
     "fetch:osm": "tsx scripts/fetch-osm.ts"
   },
   "devDependencies": {
