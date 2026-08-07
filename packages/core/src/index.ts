@@ -42,3 +42,7 @@ export { MissingNarrativeError, UnsupportedClaimError, renderReport } from './re
 export type {
   Claim, EvidenceStatus, NarrativeSections, Recommendation, ReportInput,
 } from './report/render.js'
+export {
+  MissingTenantContextError, checkTenantIsolation, withTenant, withoutTenantForTesting,
+} from './db/tenant.js'
+export type { TenantContextCheck } from './db/tenant.js'

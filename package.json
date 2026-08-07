@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --build",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/db/*.test.ts'",
     "test:watch": "vitest",
     "lint:licences": "pipx run reuse lint",
     "export:spec": "tsx scripts/export-spec.ts",
@@ -20,9 +20,11 @@
     "build:schema": "tsx scripts/build-schema.ts",
     "check:synthetic": "tsx scripts/check-synthetic.ts",
     "sbom": "npm sbom --sbom-format spdx --omit dev > release/app-sbom.spdx.json",
-    "check:licences": "tsx scripts/check-licences.ts"
+    "check:licences": "tsx scripts/check-licences.ts",
+    "test:integration": "vitest run packages/core/src/db --testTimeout=180000"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^12.1.0",
     "@types/node": "^24.0.0",
     "fast-check": "^4.1.1",
     "tsx": "^4.19.2",

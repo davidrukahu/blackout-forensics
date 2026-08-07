@@ -17,6 +17,8 @@
     "@blackout/generator": "*"
   },
   "dependencies": {
-    "h3-js": "^4.5.0"
+    "h3-js": "^4.5.0",
+    "kysely": "^0.29.4",
+    "postgres": "^3.4.9"
   }
 }
