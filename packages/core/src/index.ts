@@ -136,6 +136,7 @@ export type {
   AuditSink, CallerContext, EpisodeDetail, EpisodeFilters, EpisodeListItem, EpisodePage,
   EpisodeReadStore, ListEpisodesRequest,
 } from './api/episodes.js'
+export { PostgresAuditSink, PostgresEpisodeStore } from './db/episode-store.js'
 export { CORPUS_POLICY, buildCorpus, factsForScenario } from './evaluation/corpus.js'
 export type { LabelledCase } from './evaluation/corpus.js'
 export {
