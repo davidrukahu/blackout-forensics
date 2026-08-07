@@ -1,0 +1,55 @@
+{
+  "release": "C",
+  "exit": "PRD §16.3: import → episode → evidence → review → approval → outcome → reproducible report",
+  "generatedAt": "2026-08-05T12:00:00.000Z",
+  "stages": [
+    {
+      "stage": "import_episode",
+      "detail": {
+        "episodeId": "ep-vendor-outage-with-individual-power-cut-dev_e0",
+        "band": "direct",
+        "priority": "urgent: direct-power-evidence; urgent eligible evidence; episode age exceeds routine window"
+      }
+    },
+    {
+      "stage": "evidence",
+      "detail": {
+        "hypothesis": "H-POWER",
+        "rule": "rule.h-power.external-cut@1.1.0"
+      }
+    },
+    {
+      "stage": "review",
+      "detail": {
+        "proposedBy": "dev:analyst",
+        "decision": "classify_suspicious"
+      }
+    },
+    {
+      "stage": "approval",
+      "detail": {
+        "actor": "dev:analyst",
+        "summary": "→ classified (human_decision): Classify as suspicious (evidence supports interference): device telemetry supports possible tracker interference (approved by dev:supervisor)"
+      }
+    },
+    {
+      "stage": "outcome",
+      "detail": {
+        "outcome": "OUT-FIELD-CHECK"
+      }
+    },
+    {
+      "stage": "report",
+      "detail": {
+        "integrity": "968747f934b8a27e195c0b8faf47d93514f530c5426a4c5b50483c8a3ba724df"
+      }
+    },
+    {
+      "stage": "no_automated_consequence",
+      "detail": {
+        "machineAudit": 0
+      }
+    }
+  ],
+  "integritySha256": "8e0508c4169297905bb492b0d6b45f6fcd1d4d4ea5489daa884af4eb44a447f6"
+}
