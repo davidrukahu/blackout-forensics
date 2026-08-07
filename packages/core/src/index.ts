@@ -120,3 +120,11 @@ export { CrossTenantCorrelationError, correlate, peerFactsFor } from './correlat
 export type {
   ClusterDimension, CorrelationCandidate, CorrelationOptions, ExcludedMember, PeerCluster, PeerFacts,
 } from './correlation/peers.js'
+export {
+  CORRIDOR_H3_RESOLUTION, corridorBaseline, projectCorridor, wilsonLowerBound,
+} from './geo/corridor.js'
+export type {
+  AccessProfile, BaselineOptions, CorridorBaseline as CorridorBaselineResult, CorridorExposure,
+  CorridorManifest, CorridorRequest, CorridorResult, CorridorTableRow, FleetExposure, RoadEdge,
+  RoadGraph, RoadNode,
+} from './geo/corridor.js'
