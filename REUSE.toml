@@ -19,6 +19,7 @@ path = [
   ".gitignore",
   ".dockerignore",
   ".env.example",
+  ".claude/**",
   "REUSE.toml",
 ]
 SPDX-FileCopyrightText = "2026 David Rukahu"
