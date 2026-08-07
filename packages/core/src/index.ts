@@ -191,3 +191,13 @@ export type {
   CohortComparison, RecoverySla, ReportManifest, SignedReport, SlaReport, SlaReportInput,
   TelemetrySla,
 } from './reporting/sla.js'
+export {
+  BREAK_GLASS_SESSION_S, JustificationRequiredError, KeyRotationError, MemoryAccountRegistry,
+  MfaRequiredError, PRIVILEGED_SESSION_S, STANDARD_SESSION_S, SelfGrantError, SharedAccountError,
+  TWO_PERSON_SCOPES, accountFromClaims, activeKey, breakGlass, grantElevation, issueSession,
+  reviewBreakGlass, rotateSigningKey, secretsDueForRotation, sessionActive, unreviewedBreakGlass,
+} from './security/identity.js'
+export type {
+  Account, AccountKind, AccountRegistry, BreakGlassRecord, ElevationGrant, OidcClaims, SecretRef,
+  Session, SigningKey,
+} from './security/identity.js'
