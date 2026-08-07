@@ -85,3 +85,12 @@ export type {
   ActionabilityExplanation, CellAcquisition, CellKey, CellLookup, CellLookupResult, CellRecord,
   EvidenceFamily, EvidenceItem, EvidenceStrength,
 } from './cells/opencellid.js'
+export {
+  ALLOWED_TRANSITIONS, ApprovalRequiredError, IllegalTransitionError, applyLateData,
+  confirmsRecovery, currentState, currentVersion as currentEpisodeVersion, evaluateLateData,
+  isFinalised, openEpisode, requiresApproval, transition,
+} from './episodes/lifecycle.js'
+export type {
+  ConfirmationPolicy, Episode, EpisodeState, EpisodeVersion, LateDataOutcome, LateReport,
+  RecordedAction, RevisionCause, TransitionRequest,
+} from './episodes/lifecycle.js'
