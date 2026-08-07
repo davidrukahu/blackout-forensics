@@ -1,22 +1,46 @@
 {
-  "artifact": "blackout-audit",
+  "artifact": "blackout-forensics",
   "version": "0.1.0",
-  "image_id": "sha256:23d8edd67e0aaa2be584036f93b84e12488a5e9ba488ce89e5a730e6736773c5",
-  "image_size": "309MB",
-  "base_image": "node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03",
-  "verified": {
-    "runs_with_network_none": true,
-    "runs_as_non_root": true,
-    "input_mounted_read_only": true
+  "commit": "0bfef4486137e2318d1535f48f6a743d40c7f67d",
+  "generatedAt": "2026-08-07T22:43:49.774Z",
+  "evidence": {
+    "app-sbom.spdx.json": "3ef7accea1350ff00da3203a54f05a89af90992683dcbb19ddcdae2ab5120477",
+    "audit-container-sbom.spdx.json": "793554747d916da84647949624cd10bee8ca4c8ce6b79f3a5921677a9cb4a7ee",
+    "THIRD_PARTY_NOTICES.txt": "11e573b10664f07637d76e7b5e5a734d1a5c4b2acbdf23b7f5915d9c6814aad9",
+    "release-a-acceptance.json": "baaa1e3522c3c8c67ec9f5ee52baf60d93985f8e1dc723220e1f5b9588a9ffe2",
+    "release-b-acceptance.json": "62580b5126d8923bb2f3a542a8a66815d37387b5931fd65582d08f407a1f9b3b",
+    "release-c-e2e.json": "493f285f35cad98c69f3c03f730ba058a583dd54db879f0ee59a61075ae40c38",
+    "security-verification.json": "2a752932a58aa0424319333a178d9e9d75c316e1d7e7588b63435e074d3cf9ee",
+    "dr-exercise.json": "8b619de316aceb701054511a6b316eb97a3954a223252961f8094fc1f73bd342",
+    "benchmark-smoke.json": "a9db8c0bbbfb98c63c3f2f84f025cdeb9db9fd8ef15434a8a35fd2bcacbc9bc1",
+    "a11y-review.json": "6b0e427f94eda3b8eb9df6c145b2df03f4dcefc2d501f6a10fd49dc88e8d77a1"
   },
-  "sbom": {
-    "app_spdx_sha256": "2c3c46d46e0372bf2ef1428bcb3614de690ba5b1c6840ceb9a489dd5a4c1a606",
-    "container_spdx_sha256": "793554747d916da84647949624cd10bee8ca4c8ce6b79f3a5921677a9cb4a7ee",
-    "third_party_notices_sha256": "396e65bf675e285d02a2f2aad8872bbdac40e3d4f803e810becfe5f02616a5ef"
+  "audit_container": {
+    "image_id": "sha256:23d8edd67e0aaa2be584036f93b84e12488a5e9ba488ce89e5a730e6736773c5",
+    "base_image": "node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03",
+    "verified": {
+      "runs_with_network_none": true,
+      "runs_as_non_root": true,
+      "input_mounted_read_only": true
+    }
+  },
+  "upgrade_package": {
+    "profile": "self-hosted-container",
+    "contents": [
+      "container image (digest-pinned base)",
+      "packages/core/src/db/schema.sql — idempotent, re-runnable migration",
+      "documentation/runbooks.md §1 (upgrade) and §2 (rollback)",
+      "this manifest and its signature"
+    ],
+    "apply": "documentation/runbooks.md — verify signature before applying anything"
+  },
+  "reproducibility": {
+    "sbom": "deterministic for a given package-lock.json",
+    "manifest": "deterministic for a given tree and evidence set",
+    "container_image": "digest-pinned base; NOT byte-for-byte reproducible yet (base image timestamps)"
   },
   "notes": [
-    "Image signing with cosign is NOT done \u2014 cosign is not installed and adding release tooling is a separate decision.",
-    "This manifest is SSH-signed instead, which binds the image id and SBOM hashes to a verifiable key.",
-    "Verify with: ssh-keygen -Y verify -f release/allowed_signers -I <email> -n file -s release/RELEASE.json.sig < release/RELEASE.json"
+    "Image signing with cosign is NOT done — this manifest is SSH-signed, binding the image id and every evidence hash to a verifiable key.",
+    "Verify with: ssh-keygen -Y verify -f release/allowed_signers -I drukahu09@gmail.com -n file -s release/RELEASE.json.sig < release/RELEASE.json"
   ]
 }

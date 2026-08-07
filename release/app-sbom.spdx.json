@@ -3,9 +3,9 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "blackout-forensics@0.1.0",
-  "documentNamespace": "http://spdx.org/spdxdocs/blackout-forensics-0.1.0-9ef88817-f455-4efc-afe9-67907ad8eb09",
+  "documentNamespace": "http://spdx.org/spdxdocs/blackout-forensics-0.1.0-301c94c4-75b1-4c4c-9800-ff6f1559225e",
   "creationInfo": {
-    "created": "2026-08-07T10:35:03.875Z",
+    "created": "2026-08-07T22:43:49.402Z",
     "creators": [
       "Tool: npm/cli-11.12.1"
     ]
@@ -201,26 +201,50 @@
       ]
     },
     {
-      "name": "require-from-string",
-      "SPDXID": "SPDXRef-Package-require-from-string-2.0.2",
-      "versionInfo": "2.0.2",
-      "packageFileName": "node_modules/require-from-string",
-      "description": "Require module from string",
-      "downloadLocation": "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz",
+      "name": "kysely",
+      "SPDXID": "SPDXRef-Package-kysely-0.29.4",
+      "versionInfo": "0.29.4",
+      "packageFileName": "node_modules/kysely",
+      "description": "Type safe SQL query builder",
+      "downloadLocation": "https://registry.npmjs.org/kysely/-/kysely-0.29.4.tgz",
       "filesAnalyzed": false,
-      "homepage": "NOASSERTION",
+      "homepage": "https://kysely.dev",
       "licenseDeclared": "MIT",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/require-from-string@2.0.2"
+          "referenceLocator": "pkg:npm/kysely@0.29.4"
         }
       ],
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "5dfd2759ee91b1ece214cbbe029f5b8a251b9a996ae92f7fa7eef0ed85cffc904786b5030d48706bebc0372b9bbaa7d9593bde53ffc36151ac0c6ed128bfef13"
+          "checksumValue": "cb999581036431bb3578af57c9cd2998d75a6cddb01e145863fe6be16e47ad44f5ad80843de54d4a3d515097920ca4f7534a7e9970af2e092b16e21a7d823a04"
+        }
+      ]
+    },
+    {
+      "name": "postgres",
+      "SPDXID": "SPDXRef-Package-postgres-3.4.9",
+      "versionInfo": "3.4.9",
+      "packageFileName": "node_modules/postgres",
+      "description": "Fastest full featured PostgreSQL client for Node.js",
+      "downloadLocation": "https://registry.npmjs.org/postgres/-/postgres-3.4.9.tgz",
+      "filesAnalyzed": false,
+      "homepage": "https://github.com/porsager/postgres",
+      "licenseDeclared": "Unlicense",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/postgres@3.4.9"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "183dea741d31d73f7180523a71d443eb1bb64a9d9608e1287b79ad9f207911ed17aeb2f93def9ee020a726b44c9cbd7362d44366641055bbceb6d2e72832e76b"
         }
       ]
     },
@@ -389,6 +413,11 @@
     },
     {
       "spdxElementId": "SPDXRef-Package-blackout.core-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.app-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.core-0.0.0",
       "relatedSpdxElement": "SPDXRef-Package-blackout.audit-0.0.0",
       "relationshipType": "DEPENDENCY_OF"
     },
@@ -418,6 +447,16 @@
       "relationshipType": "DEPENDENCY_OF"
     },
     {
+      "spdxElementId": "SPDXRef-Package-kysely-0.29.4",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.core-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-postgres-3.4.9",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.core-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
       "spdxElementId": "SPDXRef-Package-ajv-8.20.0",
       "relatedSpdxElement": "SPDXRef-Package-blackout.spec-0.0.0",
       "relationshipType": "DEPENDENCY_OF"
@@ -439,11 +478,6 @@
     },
     {
       "spdxElementId": "SPDXRef-Package-json-schema-traverse-1.0.0",
-      "relatedSpdxElement": "SPDXRef-Package-ajv-8.20.0",
-      "relationshipType": "DEPENDENCY_OF"
-    },
-    {
-      "spdxElementId": "SPDXRef-Package-require-from-string-2.0.2",
       "relatedSpdxElement": "SPDXRef-Package-ajv-8.20.0",
       "relationshipType": "DEPENDENCY_OF"
     },

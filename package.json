@@ -24,7 +24,8 @@
     "test:integration": "vitest run --fileParallelism=false --testTimeout=180000 --hookTimeout=300000 packages/core/src/db packages/core/src/replay packages/core/src/geo packages/core/src/cells packages/core/src/security packages/core/src/acceptance packages/core/src/dr packages/connectors/src/traccar",
     "fetch:osm": "tsx scripts/fetch-osm.ts",
     "bench": "tsx scripts/benchmark.ts",
-    "bench:reference": "tsx scripts/benchmark.ts reference"
+    "bench:reference": "tsx scripts/benchmark.ts reference",
+    "release": "tsx scripts/release.ts"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^12.1.0",
