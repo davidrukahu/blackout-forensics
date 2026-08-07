@@ -116,3 +116,7 @@ export { diffClassifications, summariseClassification } from './rules/diff.js'
 export type {
   ClassificationChange, ClassificationSnapshot, ClassificationSummary,
 } from './rules/diff.js'
+export { CrossTenantCorrelationError, correlate, peerFactsFor } from './correlation/peers.js'
+export type {
+  ClusterDimension, CorrelationCandidate, CorrelationOptions, ExcludedMember, PeerCluster, PeerFacts,
+} from './correlation/peers.js'
