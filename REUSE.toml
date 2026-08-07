@@ -42,3 +42,9 @@ SPDX-License-Identifier = "LicenseRef-DCO-1.1"
 path = ["packages/spec/fixtures/**", "packages/spec/schema/**"]
 SPDX-FileCopyrightText = "2026 David Rukahu"
 SPDX-License-Identifier = "Apache-2.0"
+
+# Release artefacts: generated SBOMs, notices and the signed release manifest.
+[[annotations]]
+path = ["release/**", "Dockerfile", ".dockerignore"]
+SPDX-FileCopyrightText = "2026 David Rukahu"
+SPDX-License-Identifier = "AGPL-3.0-only"

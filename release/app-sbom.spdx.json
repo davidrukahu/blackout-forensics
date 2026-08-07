@@ -1,0 +1,461 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "blackout-forensics@0.1.0",
+  "documentNamespace": "http://spdx.org/spdxdocs/blackout-forensics-0.1.0-9ef88817-f455-4efc-afe9-67907ad8eb09",
+  "creationInfo": {
+    "created": "2026-08-07T10:35:03.875Z",
+    "creators": [
+      "Tool: npm/cli-11.12.1"
+    ]
+  },
+  "documentDescribes": [
+    "SPDXRef-Package-blackout-forensics-0.1.0"
+  ],
+  "packages": [
+    {
+      "name": "blackout-forensics",
+      "SPDXID": "SPDXRef-Package-blackout-forensics-0.1.0",
+      "versionInfo": "0.1.0",
+      "packageFileName": "",
+      "primaryPackagePurpose": "LIBRARY",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/blackout-forensics@0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "ajv",
+      "SPDXID": "SPDXRef-Package-ajv-8.20.0",
+      "versionInfo": "8.20.0",
+      "packageFileName": "node_modules/ajv",
+      "description": "Another JSON Schema Validator",
+      "downloadLocation": "https://registry.npmjs.org/ajv/-/ajv-8.20.0.tgz",
+      "filesAnalyzed": false,
+      "homepage": "https://ajv.js.org",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/ajv@8.20.0"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "4e16e58be3a53a3fa230f60505505f2773a60809da4b2367e0cd6fcfd4fa1a46b926df5b6bf1c8479ea3a32eb9b58ea4c7f142179557341f35f58eff194ac118"
+        }
+      ]
+    },
+    {
+      "name": "ajv-formats",
+      "SPDXID": "SPDXRef-Package-ajv-formats-3.0.1",
+      "versionInfo": "3.0.1",
+      "packageFileName": "node_modules/ajv-formats",
+      "description": "Format validation for Ajv v7+",
+      "downloadLocation": "https://registry.npmjs.org/ajv-formats/-/ajv-formats-3.0.1.tgz",
+      "filesAnalyzed": false,
+      "homepage": "https://github.com/ajv-validator/ajv-formats#readme",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/ajv-formats@3.0.1"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "f2252a979d04511fae51c7514371c3a9ae84572a3776870bf20e5627714d7169aeeb621b90652e7bfa44c8b056f1518a2ae7133e0a9e92ce1f214d43038ca8c1"
+        }
+      ]
+    },
+    {
+      "name": "fast-deep-equal",
+      "SPDXID": "SPDXRef-Package-fast-deep-equal-3.1.3",
+      "versionInfo": "3.1.3",
+      "packageFileName": "node_modules/fast-deep-equal",
+      "description": "Fast deep equal",
+      "downloadLocation": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz",
+      "filesAnalyzed": false,
+      "homepage": "https://github.com/epoberezkin/fast-deep-equal#readme",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/fast-deep-equal@3.1.3"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "7f7a90f68432f63d808417bf1fd542f75c0b98a042094fe00ce9ca340606e61b303bb04b2a3d3d1dce4760dcfd70623efb19690c22200da8ad56cd3701347ce1"
+        }
+      ]
+    },
+    {
+      "name": "fast-uri",
+      "SPDXID": "SPDXRef-Package-fast-uri-3.1.5",
+      "versionInfo": "3.1.5",
+      "packageFileName": "node_modules/fast-uri",
+      "description": "Dependency-free RFC 3986 URI toolbox",
+      "downloadLocation": "https://registry.npmjs.org/fast-uri/-/fast-uri-3.1.5.tgz",
+      "filesAnalyzed": false,
+      "homepage": "https://github.com/fastify/fast-uri",
+      "licenseDeclared": "BSD-3-Clause",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/fast-uri@3.1.5"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "807c00d4ef4b0c870aba730a84e6d2fc78a6c2d7a13b59cf50408a02ee53a4a81a3b5f5f716125e1b96259ed635b1545bc85f3b498e34382fc5d0d4453d7fb27"
+        }
+      ]
+    },
+    {
+      "name": "h3-js",
+      "SPDXID": "SPDXRef-Package-h3-js-4.5.0",
+      "versionInfo": "4.5.0",
+      "packageFileName": "node_modules/h3-js",
+      "description": "Pure-Javascript version of the H3 library, a hexagon-based geographic grid system",
+      "downloadLocation": "https://registry.npmjs.org/h3-js/-/h3-js-4.5.0.tgz",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "Apache-2.0",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/h3-js@4.5.0"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "b8a99d3dcf83b9aae747e5ea67112e58e330ecacf32913abc7730b789a459cc3acefc4bd339799f97e5189e4bd51c48542a6de5f36df5ae5ff5bd3f26a38a7ab"
+        }
+      ]
+    },
+    {
+      "name": "hyparquet",
+      "SPDXID": "SPDXRef-Package-hyparquet-1.28.1",
+      "versionInfo": "1.28.1",
+      "packageFileName": "node_modules/hyparquet",
+      "description": "Parquet file parser for JavaScript",
+      "downloadLocation": "https://registry.npmjs.org/hyparquet/-/hyparquet-1.28.1.tgz",
+      "filesAnalyzed": false,
+      "homepage": "https://hyperparam.app",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/hyparquet@1.28.1"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "d383e5ca1619a4d0d568e8c9357e123f4d1b7967fd63dbd710e1105d2305a9540dcf11b14e6b093908018daafc5732e94fa13693136258a2f9dfd7b574770e54"
+        }
+      ]
+    },
+    {
+      "name": "json-schema-traverse",
+      "SPDXID": "SPDXRef-Package-json-schema-traverse-1.0.0",
+      "versionInfo": "1.0.0",
+      "packageFileName": "node_modules/json-schema-traverse",
+      "description": "Traverse JSON Schema passing each schema object to callback",
+      "downloadLocation": "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz",
+      "filesAnalyzed": false,
+      "homepage": "https://github.com/epoberezkin/json-schema-traverse#readme",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/json-schema-traverse@1.0.0"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "34cf3f3fd9f75e35e12199f594b86415a0024ce5114178d6855e0103f4673aff31be0aadaa9017f483b89914314b1d51968e2dab37aa6f4b0e96bb9a3b2dddba"
+        }
+      ]
+    },
+    {
+      "name": "require-from-string",
+      "SPDXID": "SPDXRef-Package-require-from-string-2.0.2",
+      "versionInfo": "2.0.2",
+      "packageFileName": "node_modules/require-from-string",
+      "description": "Require module from string",
+      "downloadLocation": "https://registry.npmjs.org/require-from-string/-/require-from-string-2.0.2.tgz",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "MIT",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/require-from-string@2.0.2"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "5dfd2759ee91b1ece214cbbe029f5b8a251b9a996ae92f7fa7eef0ed85cffc904786b5030d48706bebc0372b9bbaa7d9593bde53ffc36151ac0c6ed128bfef13"
+        }
+      ]
+    },
+    {
+      "name": "@blackout/app",
+      "SPDXID": "SPDXRef-Package-blackout.app-0.0.0",
+      "versionInfo": "0.0.0",
+      "packageFileName": "node_modules/@blackout/app",
+      "description": "Server-rendered queue, case review, reports and administration.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "AGPL-3.0-only",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40blackout/app@0.0.0"
+        }
+      ]
+    },
+    {
+      "name": "@blackout/audit",
+      "SPDXID": "SPDXRef-Package-blackout.audit-0.0.0",
+      "versionInfo": "0.0.0",
+      "packageFileName": "node_modules/@blackout/audit",
+      "description": "The audit container payload: the pipeline the customer runs inside their own environment.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "AGPL-3.0-only",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40blackout/audit@0.0.0"
+        }
+      ]
+    },
+    {
+      "name": "@blackout/connectors",
+      "SPDXID": "SPDXRef-Package-blackout.connectors-0.0.0",
+      "versionInfo": "0.0.0",
+      "packageFileName": "node_modules/@blackout/connectors",
+      "description": "Source adapters and the conformance kit.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "Apache-2.0",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40blackout/connectors@0.0.0"
+        }
+      ]
+    },
+    {
+      "name": "@blackout/core",
+      "SPDXID": "SPDXRef-Package-blackout.core-0.0.0",
+      "versionInfo": "0.0.0",
+      "packageFileName": "node_modules/@blackout/core",
+      "description": "Episode engine, evidence rules, queue domain and audit. The AGPL core.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "AGPL-3.0-only",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40blackout/core@0.0.0"
+        }
+      ]
+    },
+    {
+      "name": "@blackout/generator",
+      "SPDXID": "SPDXRef-Package-blackout.generator-0.0.0",
+      "versionInfo": "0.0.0",
+      "packageFileName": "node_modules/@blackout/generator",
+      "description": "Deterministic synthetic telemetry generator with ground-truth labels. Test infrastructure; never shipped.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "AGPL-3.0-only",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40blackout/generator@0.0.0"
+        }
+      ]
+    },
+    {
+      "name": "@blackout/sdk",
+      "SPDXID": "SPDXRef-Package-blackout.sdk-0.0.0",
+      "versionInfo": "0.0.0",
+      "packageFileName": "node_modules/@blackout/sdk",
+      "description": "Client libraries and the signed-observation protocol.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "Apache-2.0",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40blackout/sdk@0.0.0"
+        }
+      ]
+    },
+    {
+      "name": "@blackout/spec",
+      "SPDXID": "SPDXRef-Package-blackout.spec-0.0.0",
+      "versionInfo": "0.0.0",
+      "packageFileName": "node_modules/@blackout/spec",
+      "description": "Canonical event schema, adapter manifest contract and conformance fixtures. Published publicly.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "homepage": "NOASSERTION",
+      "licenseDeclared": "Apache-2.0",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:npm/%40blackout/spec@0.0.0"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relatedSpdxElement": "SPDXRef-Package-blackout-forensics-0.1.0",
+      "relationshipType": "DESCRIBES"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.app-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout-forensics-0.1.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.audit-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout-forensics-0.1.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.connectors-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout-forensics-0.1.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.core-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout-forensics-0.1.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.sdk-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout-forensics-0.1.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.spec-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout-forensics-0.1.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.core-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.audit-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.connectors-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.audit-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.spec-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.audit-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.spec-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.connectors-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-hyparquet-1.28.1",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.connectors-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-h3-js-4.5.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.core-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-ajv-8.20.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.spec-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-ajv-formats-3.0.1",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.spec-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-fast-deep-equal-3.1.3",
+      "relatedSpdxElement": "SPDXRef-Package-ajv-8.20.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-fast-uri-3.1.5",
+      "relatedSpdxElement": "SPDXRef-Package-ajv-8.20.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-json-schema-traverse-1.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-ajv-8.20.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-require-from-string-2.0.2",
+      "relatedSpdxElement": "SPDXRef-Package-ajv-8.20.0",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-ajv-8.20.0",
+      "relatedSpdxElement": "SPDXRef-Package-ajv-formats-3.0.1",
+      "relationshipType": "DEPENDENCY_OF"
+    },
+    {
+      "spdxElementId": "SPDXRef-Package-blackout.spec-0.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-blackout.generator-0.0.0",
+      "relationshipType": "DEPENDENCY_OF"
+    }
+  ]
+}

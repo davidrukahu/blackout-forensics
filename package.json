@@ -1,5 +1,6 @@
 {
   "name": "blackout-forensics",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "packageManager": "npm@11.0.0",
@@ -17,7 +18,9 @@
     "export:spec": "tsx scripts/export-spec.ts",
     "check": "npm run typecheck && npm run test && npm run build:schema && npm run check:synthetic && npm run export:spec",
     "build:schema": "tsx scripts/build-schema.ts",
-    "check:synthetic": "tsx scripts/check-synthetic.ts"
+    "check:synthetic": "tsx scripts/check-synthetic.ts",
+    "sbom": "npm sbom --sbom-format spdx --omit dev > release/app-sbom.spdx.json",
+    "check:licences": "tsx scripts/check-licences.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

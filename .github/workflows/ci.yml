@@ -44,9 +44,20 @@ jobs:
       - run: npm ci
       - run: npm run export:spec
 
+  # FR-ADM-004: a release fails when licence metadata or notices are missing.
+  dependency-licences:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc, cache: npm }
+      - run: npm ci
+      - run: mkdir -p release && npm run sbom
+      - run: npm run check:licences
+
   # Single enforcement point for PRD §15.5's release quality gate.
   release-gate:
-    needs: [verify, licences, export-allowlist]
+    needs: [verify, licences, export-allowlist, dependency-licences]
     runs-on: ubuntu-latest
     steps:
       - run: echo "All required gates passed."

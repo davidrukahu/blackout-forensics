@@ -1,0 +1,22 @@
+{
+  "artifact": "blackout-audit",
+  "version": "0.1.0",
+  "image_id": "sha256:23d8edd67e0aaa2be584036f93b84e12488a5e9ba488ce89e5a730e6736773c5",
+  "image_size": "309MB",
+  "base_image": "node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03",
+  "verified": {
+    "runs_with_network_none": true,
+    "runs_as_non_root": true,
+    "input_mounted_read_only": true
+  },
+  "sbom": {
+    "app_spdx_sha256": "2c3c46d46e0372bf2ef1428bcb3614de690ba5b1c6840ceb9a489dd5a4c1a606",
+    "container_spdx_sha256": "793554747d916da84647949624cd10bee8ca4c8ce6b79f3a5921677a9cb4a7ee",
+    "third_party_notices_sha256": "396e65bf675e285d02a2f2aad8872bbdac40e3d4f803e810becfe5f02616a5ef"
+  },
+  "notes": [
+    "Image signing with cosign is NOT done \u2014 cosign is not installed and adding release tooling is a separate decision.",
+    "This manifest is SSH-signed instead, which binds the image id and SBOM hashes to a verifiable key.",
+    "Verify with: ssh-keygen -Y verify -f release/allowed_signers -I <email> -n file -s release/RELEASE.json.sig < release/RELEASE.json"
+  ]
+}

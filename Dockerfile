@@ -7,10 +7,10 @@
 # bundle plus a contents listing. It makes no network connections: run it with --network none and
 # it behaves identically, which is the point.
 #
-# UNPINNED — must be pinned by digest before this image is offered to any customer. The image a
-# security team reviews must be the image they run, and a tag can move underneath both. Resolve
-# with: docker inspect --format='{{index .RepoDigests 0}}' node:24-bookworm-slim
-FROM node:24-bookworm-slim AS build
+# Pinned by digest, not tag: the image a customer's security team reviews must be the image they
+# run, and a tag moves underneath both. Re-resolve with:
+#   docker inspect --format='{{index .RepoDigests 0}}' node:24-bookworm-slim
+FROM node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03 AS build
 
 WORKDIR /src
 COPY package.json package-lock.json tsconfig.base.json tsconfig.json ./
@@ -19,7 +19,7 @@ COPY scripts ./scripts
 RUN npm ci --ignore-scripts
 RUN npm run typecheck
 
-FROM node:24-bookworm-slim
+FROM node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
 
 LABEL org.opencontainers.image.title="Blackout Forensics — Telemetry Control Audit"
 LABEL org.opencontainers.image.licenses="AGPL-3.0-only"

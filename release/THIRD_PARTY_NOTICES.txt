@@ -1,0 +1,21 @@
+THIRD-PARTY NOTICES
+
+This artefact includes the following third-party packages. Licence text for each is available
+from the package itself and from its published metadata.
+
+@blackout/app@0.0.0  AGPL-3.0-only
+@blackout/audit@0.0.0  AGPL-3.0-only
+@blackout/connectors@0.0.0  Apache-2.0
+@blackout/core@0.0.0  AGPL-3.0-only
+@blackout/generator@0.0.0  AGPL-3.0-only
+@blackout/sdk@0.0.0  Apache-2.0
+@blackout/spec@0.0.0  Apache-2.0
+ajv@8.20.0  MIT
+ajv-formats@3.0.1  MIT
+blackout-forensics@0.1.0  NOASSERTION
+fast-deep-equal@3.1.3  MIT
+fast-uri@3.1.5  BSD-3-Clause
+h3-js@4.5.0  Apache-2.0
+hyparquet@1.28.1  MIT
+json-schema-traverse@1.0.0  MIT
+require-from-string@2.0.2  MIT
