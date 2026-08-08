@@ -2,18 +2,17 @@
  * SPDX-FileCopyrightText: 2026 David Rukahu
  * SPDX-License-Identifier: AGPL-3.0-only
  *
- * Tailwind v4 + the shadcn/ui token set (zinc base, new-york flavour) for the metrics
- * dashboard. Preflight is deliberately NOT imported: the queue and case screens are styled by
- * styles.css against browser defaults, and a global reset would silently restyle them. The
- * metrics screen styles every element it renders, so it needs utilities and tokens only.
+ * The app's single stylesheet: Tailwind v4 with the shadcn/ui token set (zinc base, new-york
+ * flavour), light and dark. Dark mode is class-driven — an inline script in root.tsx applies
+ * `.dark` before first paint from localStorage or the OS preference, and the header toggle
+ * flips it.
  */
 
-@import 'tailwindcss/theme.css' layer(theme);
-@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tailwindcss';
 
-/* Scoped, not :root: styles.css owns --accent/--muted globally, and a second :root block
- * would silently restyle the queue and case screens. The metrics screen opts in by class. */
-.shadcn-scope {
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -28,15 +27,17 @@
   --accent-foreground: oklch(0.21 0.006 285.885);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.627 0.17 149.2);
+  --warning: oklch(0.554 0.135 66.442);
   --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.705 0.015 286.067);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --radius: 0.625rem;
 }
 
-.shadcn-scope.dark,
-.dark .shadcn-scope {
+.dark {
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
@@ -51,7 +52,10 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.723 0.219 149.579);
+  --warning: oklch(0.795 0.184 86.047);
   --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.552 0.016 285.938);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
@@ -72,7 +76,10 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-border: var(--border);
+  --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -82,4 +89,32 @@
   --radius-xl: calc(var(--radius) * 1.5);
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  z-index: 50;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1rem;
 }

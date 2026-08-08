@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
- * Case review, PRD §9.3.
+ * Case review, PRD §9.3 — shadcn-admin skin over the same contract.
  *
  * The screen renders `detail.sections` in array order — the mandated §9.3 sequence is data, not
  * layout discipline. Two rules are visible in the structure: supporting evidence, counterevidence
@@ -11,11 +11,25 @@
  * active (§9.3 — a point on a map creates false confidence).
  */
 
+import { ArrowLeft } from 'lucide-react'
 import { Form, Link, useActionData, useLoaderData, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 
 import { requireUser } from '../auth.server.js'
 import { getCase, proposeDecision, recordCaseOutcome, resolveProposal } from '../data/store.server.js'
+import { Alert, AlertDescription } from '../components/ui/alert.js'
+import { Badge } from '../components/ui/badge.js'
+import { Button } from '../components/ui/button.js'
+import { Card, CardContent, CardDescription, CardHeader } from '../components/ui/card.js'
+import { Input, Label, NativeSelect } from '../components/ui/form-controls.js'
+import {
+  Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow,
+} from '../components/ui/table.js'
+import { cn } from '../lib/utils.js'
 import type { CaseDetail, CaseSection } from '../data/case.server.js'
+
+export function meta() {
+  return [{ title: 'Case review — Blackout Forensics' }]
+}
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = requireUser(request, ['case:read'])
@@ -101,80 +115,146 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<C
   throw new Response('Unknown intent', { status: 400 })
 }
 
+const TIER_BADGE: Record<string, string> = {
+  urgent: 'border-transparent bg-destructive text-destructive-foreground',
+  elevated: 'border-transparent bg-secondary text-secondary-foreground',
+  routine: 'border-border text-muted-foreground',
+}
+
+function SectionCard({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id: string
+  title: string
+  description?: string
+  children: React.ReactNode
+}) {
+  return (
+    <section aria-labelledby={id}>
+      <Card>
+        <CardHeader>
+          {/* The section heading IS the card title — one element, correct outline level. */}
+          <h2 id={id} className="text-base leading-none font-medium tracking-tight">
+            {title}
+          </h2>
+          {description !== undefined && <CardDescription>{description}</CardDescription>}
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 text-sm">{children}</CardContent>
+      </Card>
+    </section>
+  )
+}
+
 function ReasonSection({ detail }: { detail: CaseDetail }) {
   return (
-    <section aria-labelledby="s-reason">
-      <h2 id="s-reason">Reason and uncertainty</h2>
+    <SectionCard id="s-reason" title="Reason and uncertainty">
+      <p className="font-medium">{detail.reason.headline}</p>
+      <p className="text-muted-foreground">{detail.reason.uncertainty}</p>
       <p>
-        <strong>{detail.reason.headline}</strong>
+        Urgent-eligible:{' '}
+        <Badge
+          className={cn(
+            detail.reason.urgentEligible
+              ? 'border-transparent bg-destructive text-destructive-foreground'
+              : 'border-border text-muted-foreground',
+          )}
+        >
+          {detail.reason.urgentEligible ? 'yes' : 'no'}
+        </Badge>
       </p>
-      <p>{detail.reason.uncertainty}</p>
-      <p>
-        Urgent-eligible: <strong>{detail.reason.urgentEligible ? 'yes' : 'no'}</strong>
-      </p>
-      <h3>Priority factors</h3>
-      {detail.reason.priorityFactors.length === 0 ? (
-        <p>No factor raised or lowered priority.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Factor</th>
-              <th scope="col">Effect</th>
-              <th scope="col">From rule</th>
-            </tr>
-          </thead>
-          <tbody>
-            {detail.reason.priorityFactors.map((factor) => (
-              <tr key={`${factor.factor}-${factor.fromRule}`}>
-                <td>{factor.factor.replaceAll('_', ' ')}</td>
-                <td>{factor.effect}</td>
-                <td>{factor.fromRule}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </section>
+      <div>
+        <h3 className="mb-2 text-sm font-medium">Priority factors</h3>
+        {detail.reason.priorityFactors.length === 0 ? (
+          <p className="text-muted-foreground">No factor raised or lowered priority.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col">Factor</TableHead>
+                <TableHead scope="col">Effect</TableHead>
+                <TableHead scope="col">From rule</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {detail.reason.priorityFactors.map((factor) => (
+                <TableRow key={`${factor.factor}-${factor.fromRule}`}>
+                  <TableCell>{factor.factor.replaceAll('_', ' ')}</TableCell>
+                  <TableCell>{factor.effect}</TableCell>
+                  <TableCell className="font-mono text-xs">{factor.fromRule}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </SectionCard>
   )
 }
 
 function EvidenceSection({ detail }: { detail: CaseDetail }) {
   return (
-    <section aria-labelledby="s-evidence">
-      <h2 id="s-evidence">Evidence</h2>
+    <SectionCard
+      id="s-evidence"
+      title="Evidence"
+      description="Supporting, counter and missing expected evidence together, per hypothesis (FR-QUE-003)"
+    >
       {detail.evidence.unknown !== null && (
-        <p>
-          <strong>Classification is unknown.</strong> {detail.evidence.unknown.reason}. Missing
-          expected evidence: {detail.evidence.unknown.missingExpected.join(', ') || 'none listed'}.
-        </p>
+        <Alert>
+          <AlertDescription>
+            <strong>Classification is unknown.</strong> {detail.evidence.unknown.reason}. Missing
+            expected evidence:{' '}
+            {detail.evidence.unknown.missingExpected.join(', ') || 'none listed'}.
+          </AlertDescription>
+        </Alert>
       )}
       {detail.evidence.entries.map((entry) => (
-        <article key={entry.code} aria-label={`Hypothesis ${entry.code}`}>
-          <h3>
-            {entry.code} <span className="badge">{entry.band}</span>
+        <article
+          key={entry.code}
+          aria-label={`Hypothesis ${entry.code}`}
+          className="rounded-lg border border-border p-4"
+        >
+          <h3 className="flex flex-wrap items-center gap-2 font-medium">
+            {entry.code}
+            <Badge variant={entry.band === 'direct' ? 'destructive' : 'secondary'}>{entry.band}</Badge>
             {entry.suppressedBy !== null && (
-              <span className="badge"> suppressed by {entry.suppressedBy}</span>
+              <Badge variant="outline">suppressed by {entry.suppressedBy}</Badge>
             )}
           </h3>
-          <p>{entry.summary}</p>
-          <dl>
-            <dt>Supporting</dt>
+          <p className="mt-1 text-muted-foreground">{entry.summary}</p>
+          <dl className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-[10rem_1fr]">
+            <dt className="text-xs font-medium text-muted-foreground uppercase">Supporting</dt>
             <dd>{entry.supporting}</dd>
-            <dt>Counterevidence</dt>
+            <dt className="text-xs font-medium text-muted-foreground uppercase">Counterevidence</dt>
             <dd>
-              {entry.counterevidence.length === 0 ? 'none recorded' : (
-                <ul>{entry.counterevidence.map((c) => <li key={c}>{c}</li>)}</ul>
+              {entry.counterevidence.length === 0 ? (
+                <span className="text-muted-foreground">none recorded</span>
+              ) : (
+                <ul className="list-disc pl-4">
+                  {entry.counterevidence.map((c) => (
+                    <li key={c}>{c}</li>
+                  ))}
+                </ul>
               )}
             </dd>
-            <dt>Missing expected evidence</dt>
+            <dt className="text-xs font-medium text-muted-foreground uppercase">Missing expected</dt>
             <dd>
-              {entry.missingExpected.length === 0 ? 'nothing expected was unreadable' : (
-                <ul>{entry.missingExpected.map((m) => <li key={m}>{m}</li>)}</ul>
+              {entry.missingExpected.length === 0 ? (
+                <span className="text-muted-foreground">nothing expected was unreadable</span>
+              ) : (
+                <ul className="list-disc pl-4">
+                  {entry.missingExpected.map((m) => (
+                    <li key={m} className="font-mono text-xs">
+                      {m}
+                    </li>
+                  ))}
+                </ul>
               )}
             </dd>
-            <dt>Rule</dt>
-            <dd>
+            <dt className="text-xs font-medium text-muted-foreground uppercase">Rule</dt>
+            <dd className="font-mono text-xs">
               {entry.ruleId} v{entry.ruleVersion}
               {entry.humanReview ? ' — human review required' : ''}
             </dd>
@@ -182,66 +262,280 @@ function EvidenceSection({ detail }: { detail: CaseDetail }) {
         </article>
       ))}
       {detail.evidence.notApplicable.length > 0 && (
-        <details>
-          <summary>{detail.evidence.notApplicable.length} rule(s) could not be evaluated</summary>
-          <ul>
+        <details className="text-muted-foreground">
+          <summary className="cursor-pointer text-sm">
+            {detail.evidence.notApplicable.length} rule(s) could not be evaluated
+          </summary>
+          <ul className="mt-2 list-disc pl-5 text-xs">
             {detail.evidence.notApplicable.map((n) => (
               <li key={n.code}>
-                {n.code}: missing {n.missingFacts.join(', ')}
+                {n.code}: missing <span className="font-mono">{n.missingFacts.join(', ')}</span>
               </li>
             ))}
           </ul>
         </details>
       )}
-    </section>
+    </SectionCard>
   )
 }
 
 function CorridorSectionView({ detail }: { detail: CaseDetail }) {
   const corridor = detail.corridor
   return (
-    <section aria-labelledby="s-corridor">
-      <h2 id="s-corridor">Candidate corridor</h2>
-      {corridor.state === 'not_computed' && <p>Not computed: {corridor.reason}.</p>}
+    <SectionCard id="s-corridor" title="Candidate corridor">
+      {corridor.state === 'not_computed' && (
+        <p className="text-muted-foreground">Not computed: {corridor.reason}.</p>
+      )}
       {corridor.state === 'corridor_ambiguous' && corridor.result.status === 'corridor_ambiguous' && (
-        <p>
-          <strong>Ambiguous — withheld.</strong> {corridor.result.reason}
-        </p>
+        <Alert>
+          <AlertDescription>
+            <strong>Ambiguous — withheld.</strong> {corridor.result.reason}
+          </AlertDescription>
+        </Alert>
       )}
       {corridor.state === 'infeasible' && corridor.result.status === 'infeasible' && (
-        <p>
-          <strong>Infeasible.</strong> {corridor.result.reason}
-        </p>
+        <Alert>
+          <AlertDescription>
+            <strong>Infeasible.</strong> {corridor.result.reason}
+          </AlertDescription>
+        </Alert>
       )}
       {corridor.state === 'corridor' && corridor.result.status === 'corridor' && (
         <>
           <p>
-            <strong>{corridor.result.claim}</strong> — cells every feasible path must cross.
-            Snapshot {corridor.result.manifest.snapshotId}, profile{' '}
+            <strong>{corridor.result.claim}</strong> — cells every feasible path must cross. Snapshot{' '}
+            <span className="font-mono text-xs">{corridor.result.manifest.snapshotId}</span>, profile{' '}
             {corridor.result.manifest.profile}.
           </p>
-          <table>
-            <caption>The table is the primary representation; the map below is supplementary.</caption>
-            <thead>
-              <tr>
-                <th scope="col">H3 cell</th>
-                <th scope="col">Road</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableCaption>
+              The table is the primary representation; the map below is supplementary.
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col">H3 cell</TableHead>
+                <TableHead scope="col">Road</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {corridor.result.table.map((row) => (
-                <tr key={row.h3Cell}>
-                  <td>{row.h3Cell}</td>
-                  <td>{row.roadNames.length === 0 ? 'unnamed' : row.roadNames.join(', ')}</td>
-                </tr>
+                <TableRow key={row.h3Cell}>
+                  <TableCell className="font-mono text-xs">{row.h3Cell}</TableCell>
+                  <TableCell>{row.roadNames.length === 0 ? 'unnamed' : row.roadNames.join(', ')}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </>
       )}
       {/* The map slot sits BELOW the table and the reason summary, §9.3. */}
-      <p className="map-slot">Map disabled: no active OSM snapshot. The table above is complete.</p>
-    </section>
+      <p className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
+        Map disabled: no active OSM snapshot. The table above is complete.
+      </p>
+    </SectionCard>
+  )
+}
+
+function DecisionsSection({ detail }: { detail: CaseDetail }) {
+  return (
+    <SectionCard id="s-actions" title="Prior actions and decisions">
+      {detail.decisions.prior.length === 0 ? (
+        <p className="text-muted-foreground">No action has been taken in the world on this episode.</p>
+      ) : (
+        <ul className="list-disc pl-4">
+          {detail.decisions.prior.map((prior) => (
+            <li key={`${prior.kind}-${prior.at}`}>
+              {prior.kind.replaceAll('_', ' ')} at{' '}
+              <time dateTime={prior.at} className="font-mono text-xs">
+                {prior.at.slice(0, 16)}Z
+              </time>{' '}
+              ({prior.reference})
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-medium">Recorded actions and outcomes</h3>
+        {detail.decisions.recordedActions.length === 0 ? (
+          <p className="text-muted-foreground">No externally-performed action has been recorded.</p>
+        ) : (
+          <ul className="flex flex-col gap-1">
+            {detail.decisions.recordedActions.map((recorded) => (
+              <li key={recorded.id} className="rounded-md border border-border px-3 py-2">
+                {recorded.actionKind.replaceAll('_', ' ')} by {recorded.owner} —{' '}
+                <span className="font-medium">
+                  {recorded.outcomeCode ?? 'no outcome label (honestly unlabelled)'}
+                </span>
+                {recorded.externalAuthorizationRef !== null && (
+                  <span className="text-muted-foreground"> · authorization {recorded.externalAuthorizationRef}</span>
+                )}
+                {recorded.vendorTicket !== null && (
+                  <span className="text-muted-foreground"> · vendor ticket {recorded.vendorTicket.reference}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <Form method="post" className="flex flex-col gap-3 rounded-lg border border-border p-4">
+        <h4 className="text-sm font-medium">Record an outcome</h4>
+        <input type="hidden" name="intent" value="record_outcome" />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Label>
+            Action performed externally
+            <NativeSelect name="actionKind">
+              {detail.decisions.actionKinds.map((kind) => (
+                <option key={kind} value={kind}>
+                  {kind.replaceAll('_', ' ')}
+                </option>
+              ))}
+            </NativeSelect>
+          </Label>
+          <Label>
+            Outcome (§22; leave empty when honestly unlabelled)
+            <NativeSelect name="outcomeCode" defaultValue="">
+              <option value="">— none yet —</option>
+              {detail.decisions.outcomeTaxonomy.map((outcome) => (
+                <option key={outcome.code} value={outcome.code}>
+                  {outcome.code}: {outcome.meaning}
+                </option>
+              ))}
+            </NativeSelect>
+          </Label>
+          <Label>
+            External authorization reference (required for OUT-RECOVERY)
+            <Input type="text" name="externalAuthorizationRef" />
+          </Label>
+          <Label>
+            Vendor ticket reference
+            <Input type="text" name="vendorTicketRef" />
+          </Label>
+          <Label>
+            Evidence-pack SHA-256
+            <Input type="text" name="evidencePackSha256" />
+          </Label>
+          <Label>
+            Note
+            <Input type="text" name="note" />
+          </Label>
+        </div>
+        <Button type="submit" variant="secondary" size="sm" className="self-start">
+          Record
+        </Button>
+      </Form>
+
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-medium">Machine suggestions</h3>
+        {detail.decisions.machineSuggestions.length === 0 ? (
+          <p className="text-muted-foreground">
+            The machine suggests nothing here. It can never suggest action against the asset.
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-1">
+            {detail.decisions.machineSuggestions.map((suggestion) => (
+              <li key={suggestion.decisionId} className="rounded-md border border-dashed border-border px-3 py-2">
+                <Badge variant="outline">machine suggestion</Badge>{' '}
+                <span className="font-mono text-xs">{suggestion.decisionId}</span>: {suggestion.basis}.{' '}
+                <span className="text-muted-foreground">
+                  Advice only — a human must propose it to make it a decision.
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <h3 className="text-sm font-medium">Proposals</h3>
+        {detail.decisions.proposals.length === 0 ? (
+          <p className="text-muted-foreground">None yet.</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {detail.decisions.proposals.map((proposal) => (
+              <li key={proposal.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border px-3 py-2">
+                <Badge variant="secondary">human proposal</Badge>
+                <span className="font-medium">{proposal.decisionId}</span>
+                <span className="text-muted-foreground">
+                  “{proposal.reason}” by {proposal.proposedBy}
+                </span>
+                <Badge variant={proposal.status === 'proposed' ? 'default' : 'outline'}>
+                  {proposal.status}
+                </Badge>
+                {proposal.resolvedBy !== null && (
+                  <span className="text-xs text-muted-foreground">resolved by {proposal.resolvedBy}</span>
+                )}
+                {proposal.status === 'proposed' && (
+                  <Form method="post" className="ml-auto flex gap-2">
+                    <input type="hidden" name="proposalId" value={proposal.id} />
+                    <input type="hidden" name="intent" value="resolve" />
+                    <Button type="submit" name="resolution" value="approve" size="sm">
+                      Approve
+                    </Button>
+                    <Button type="submit" name="resolution" value="reject" variant="outline" size="sm">
+                      Reject
+                    </Button>
+                  </Form>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <Form method="post" className="flex flex-col gap-3 rounded-lg border border-border p-4">
+        <h4 className="text-sm font-medium">Propose a decision</h4>
+        {detail.decisions.proposable.length === 0 ? (
+          <p className="text-muted-foreground">
+            No decision applies in the “{detail.item.bucket.replaceAll('_', ' ')}” state.
+          </p>
+        ) : (
+          <>
+            <input type="hidden" name="intent" value="propose" />
+            <input type="hidden" name="seenVersionCount" value={detail.decisions.seenVersionCount} />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Label>
+                Decision
+                <NativeSelect name="decisionId" required>
+                  {detail.decisions.proposable.map((decision) => (
+                    <option key={decision.id} value={decision.id}>
+                      {decision.label}
+                      {decision.highImpact ? ' (requires a second approver)' : ''}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Label>
+              <Label>
+                Canonical reason
+                <NativeSelect name="reason" required>
+                  {[...new Set(detail.decisions.proposable.flatMap((d) => d.canonicalReasons))].map(
+                    (reason) => (
+                      <option key={reason} value={reason}>
+                        {reason}
+                      </option>
+                    ),
+                  )}
+                </NativeSelect>
+              </Label>
+              <Label className="sm:col-span-2">
+                Note (explains; never substitutes for the reason)
+                <Input type="text" name="note" />
+              </Label>
+            </div>
+            <Button type="submit" size="sm" className="self-start">
+              Propose
+            </Button>
+          </>
+        )}
+      </Form>
+
+      <p className="text-xs text-muted-foreground">
+        Available transitions from “{detail.item.bucket.replaceAll('_', ' ')}”:{' '}
+        {detail.decisions.available.join(', ') || 'none'}. Decisions are made through the
+        maker-checker flow.
+      </p>
+    </SectionCard>
   )
 }
 
@@ -253,262 +547,105 @@ export default function CaseScreen() {
     reason_and_uncertainty: () => <ReasonSection key="reason" detail={detail} />,
     evidence: () => <EvidenceSection key="evidence" detail={detail} />,
     timeline: () => (
-      <section key="timeline" aria-labelledby="s-timeline">
-        <h2 id="s-timeline">Timeline</h2>
-        <ol>
+      <SectionCard key="timeline" id="s-timeline" title="Timeline">
+        <ol className="relative flex flex-col gap-3 border-l border-border pl-4">
           {detail.timeline.map((entry) => (
             <li key={`${entry.at}-${entry.summary}`}>
-              <time dateTime={entry.at}>{entry.at.slice(0, 16)}Z</time> — {entry.summary}{' '}
-              <small>({entry.actor})</small>
+              <time dateTime={entry.at} className="font-mono text-xs text-muted-foreground">
+                {entry.at.slice(0, 16)}Z
+              </time>{' '}
+              — {entry.summary} <span className="text-xs text-muted-foreground">({entry.actor})</span>
             </li>
           ))}
         </ol>
-      </section>
+      </SectionCard>
     ),
     observations: () => (
-      <section key="observations" aria-labelledby="s-observations">
-        <h2 id="s-observations">Last and next valid observations</h2>
-        <p>
-          Last valid before the gap:{' '}
-          {detail.observations.lastValidAt === null ? 'none' : (
-            <time dateTime={detail.observations.lastValidAt}>{detail.observations.lastValidAt}</time>
-          )}
-          <br />
-          First valid after the gap:{' '}
-          {detail.observations.nextValidAt === null ? 'none yet' : (
-            <time dateTime={detail.observations.nextValidAt}>{detail.observations.nextValidAt}</time>
-          )}
-        </p>
-        <p>{detail.observations.note}</p>
-      </section>
+      <SectionCard key="observations" id="s-observations" title="Last and next valid observations">
+        <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[14rem_1fr]">
+          <dt className="text-muted-foreground">Last valid before the gap</dt>
+          <dd>
+            {detail.observations.lastValidAt === null ? (
+              'none'
+            ) : (
+              <time dateTime={detail.observations.lastValidAt} className="font-mono text-xs">
+                {detail.observations.lastValidAt}
+              </time>
+            )}
+          </dd>
+          <dt className="text-muted-foreground">First valid after the gap</dt>
+          <dd>
+            {detail.observations.nextValidAt === null ? (
+              'none yet'
+            ) : (
+              <time dateTime={detail.observations.nextValidAt} className="font-mono text-xs">
+                {detail.observations.nextValidAt}
+              </time>
+            )}
+          </dd>
+        </dl>
+        <p className="text-muted-foreground">{detail.observations.note}</p>
+      </SectionCard>
     ),
     corridor: () => <CorridorSectionView key="corridor" detail={detail} />,
     peers: () => (
-      <section key="peers" aria-labelledby="s-peers">
-        <h2 id="s-peers">Peer incidents</h2>
-        <p>{detail.peers.note}</p>
+      <SectionCard key="peers" id="s-peers" title="Peer incidents">
+        <p className="text-muted-foreground">{detail.peers.note}</p>
         {detail.peers.clusters.map((cluster) => (
           <p key={`${cluster.dimension}-${cluster.key}`}>
-            {cluster.dimension} “{cluster.key}”: {cluster.independentCount} independent device(s)
-            of{' '}
+            {cluster.dimension} “{cluster.key}”: {cluster.independentCount} independent device(s) of{' '}
             {cluster.activePopulation === null
               ? `unknown active population (fleet observed: ${detail.peers.fleetSize})`
               : `${cluster.activePopulation} active`}{' '}
             in window {cluster.windowStart.slice(11, 16)}–{cluster.windowEnd.slice(11, 16)}Z
           </p>
         ))}
-      </section>
+      </SectionCard>
     ),
     policies: () => (
-      <section key="policies" aria-labelledby="s-policies">
-        <h2 id="s-policies">Effective policies</h2>
+      <SectionCard key="policies" id="s-policies" title="Effective policies">
         <p>
           Reporting policy v{detail.policies.record.version} ({detail.policies.record.provenance}):
           moving every {detail.policies.record.intervals.moving}s, parked every{' '}
           {detail.policies.record.intervals.parked}s, sleep every{' '}
           {detail.policies.record.intervals.sleep}s; grace ×{detail.policies.record.graceFactor}.
         </p>
-        <p>
+        <p className="text-muted-foreground">
           Suppression windows:{' '}
           {detail.policies.suppressionWindows.length === 0 ? 'none declared' : 'listed below'}
         </p>
-      </section>
+      </SectionCard>
     ),
-    actions_and_decisions: () => (
-      <section key="actions" aria-labelledby="s-actions">
-        <h2 id="s-actions">Prior actions and decisions</h2>
-        {detail.decisions.prior.length === 0 ? (
-          <p>No action has been taken in the world on this episode.</p>
-        ) : (
-          <ul>
-            {detail.decisions.prior.map((action) => (
-              <li key={`${action.kind}-${action.at}`}>
-                {action.kind.replaceAll('_', ' ')} at{' '}
-                <time dateTime={action.at}>{action.at.slice(0, 16)}Z</time> ({action.reference})
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <h3>Recorded actions and outcomes</h3>
-        {detail.decisions.recordedActions.length === 0 ? (
-          <p>No externally-performed action has been recorded.</p>
-        ) : (
-          <ul>
-            {detail.decisions.recordedActions.map((recorded) => (
-              <li key={recorded.id}>
-                {recorded.actionKind.replaceAll('_', ' ')} by {recorded.owner} —{' '}
-                {recorded.outcomeCode ?? 'no outcome label (honestly unlabelled)'}
-                {recorded.externalAuthorizationRef !== null &&
-                  ` (authorization: ${recorded.externalAuthorizationRef})`}
-                {recorded.vendorTicket !== null &&
-                  ` (vendor ticket ${recorded.vendorTicket.reference})`}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <h4>Record an outcome</h4>
-        <Form method="post">
-          <input type="hidden" name="intent" value="record_outcome" />
-          <p>
-            <label>
-              Action performed externally{' '}
-              <select name="actionKind">
-                {detail.decisions.actionKinds.map((kind) => (
-                  <option key={kind} value={kind}>
-                    {kind.replaceAll('_', ' ')}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </p>
-          <p>
-            <label>
-              Outcome (§22; leave empty when honestly unlabelled){' '}
-              <select name="outcomeCode" defaultValue="">
-                <option value="">— none yet —</option>
-                {detail.decisions.outcomeTaxonomy.map((outcome) => (
-                  <option key={outcome.code} value={outcome.code}>
-                    {outcome.code}: {outcome.meaning}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </p>
-          <p>
-            <label>
-              External authorization reference (required for OUT-RECOVERY){' '}
-              <input type="text" name="externalAuthorizationRef" />
-            </label>
-          </p>
-          <p>
-            <label>
-              Vendor ticket reference <input type="text" name="vendorTicketRef" />
-            </label>{' '}
-            <label>
-              Evidence-pack SHA-256 <input type="text" name="evidencePackSha256" />
-            </label>
-          </p>
-          <p>
-            <label>
-              Note <input type="text" name="note" />
-            </label>{' '}
-            <button type="submit">Record</button>
-          </p>
-        </Form>
-
-        <h3>Machine suggestions</h3>
-        {detail.decisions.machineSuggestions.length === 0 ? (
-          <p>The machine suggests nothing here. It can never suggest action against the asset.</p>
-        ) : (
-          <ul>
-            {detail.decisions.machineSuggestions.map((suggestion) => (
-              <li key={suggestion.decisionId}>
-                <span className="badge">machine suggestion</span> {suggestion.decisionId}: {suggestion.basis}.
-                {' '}Advice only — a human must propose it to make it a decision.
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <h3>Proposals</h3>
-        {detail.decisions.proposals.length === 0 ? (
-          <p>None yet.</p>
-        ) : (
-          <ul>
-            {detail.decisions.proposals.map((proposal) => (
-              <li key={proposal.id}>
-                <span className="badge">human proposal</span> <strong>{proposal.decisionId}</strong>{' '}
-                — “{proposal.reason}” by {proposal.proposedBy}, status <strong>{proposal.status}</strong>
-                {proposal.resolvedBy !== null && ` (resolved by ${proposal.resolvedBy})`}
-                {proposal.status === 'proposed' && (
-                  <Form method="post" style={{ display: 'inline' }}>
-                    <input type="hidden" name="proposalId" value={proposal.id} />
-                    <input type="hidden" name="intent" value="resolve" />
-                    {' '}
-                    <button type="submit" name="resolution" value="approve">
-                      Approve
-                    </button>{' '}
-                    <button type="submit" name="resolution" value="reject">
-                      Reject
-                    </button>
-                  </Form>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <h3>Propose a decision</h3>
-        {detail.decisions.proposable.length === 0 ? (
-          <p>No decision applies in the “{detail.item.bucket.replaceAll('_', ' ')}” state.</p>
-        ) : (
-          <Form method="post">
-            <input type="hidden" name="intent" value="propose" />
-            <input
-              type="hidden"
-              name="seenVersionCount"
-              value={detail.decisions.seenVersionCount}
-            />
-            <p>
-              <label>
-                Decision{' '}
-                <select name="decisionId" required>
-                  {detail.decisions.proposable.map((decision) => (
-                    <option key={decision.id} value={decision.id}>
-                      {decision.label}
-                      {decision.highImpact ? ' (requires a second approver)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </p>
-            <p>
-              <label>
-                Canonical reason{' '}
-                <select name="reason" required>
-                  {[...new Set(detail.decisions.proposable.flatMap((d) => d.canonicalReasons))].map(
-                    (reason) => (
-                      <option key={reason} value={reason}>
-                        {reason}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </label>
-            </p>
-            <p>
-              <label>
-                Note (explains; never substitutes for the reason){' '}
-                <input type="text" name="note" />
-              </label>
-            </p>
-            <button type="submit">Propose</button>
-          </Form>
-        )}
-      </section>
-    ),
+    actions_and_decisions: () => <DecisionsSection key="actions" detail={detail} />,
   }
 
   return (
-    <article aria-labelledby="case-heading">
-      <p>
-        <Link to="/queue">← Back to queue</Link>
-      </p>
-      <h1 id="case-heading">
-        Case {detail.item.assetRef} — {detail.item.episodeType.replaceAll('_', ' ')}
-      </h1>
-      <p>
-        <span className={`badge tier-${detail.item.priority.tier}`}>{detail.item.priority.tier}</span>{' '}
-        {detail.item.priority.reason}
-      </p>
-      {actionData?.notice !== undefined && <p role="status">{actionData.notice}</p>}
-      {actionData?.refusal !== undefined && (
-        <p className="conflict" role="alert">
-          {actionData.refusal}
-        </p>
+    <article aria-labelledby="case-heading" className="flex flex-col gap-4">
+      <div>
+        <Link to="/queue" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to queue
+        </Link>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <h1 id="case-heading" className="text-2xl font-bold tracking-tight">
+            Case {detail.item.assetRef}
+          </h1>
+          <Badge variant="outline">{detail.item.episodeType.replaceAll('_', ' ')}</Badge>
+          <Badge className={TIER_BADGE[detail.item.priority.tier] ?? ''}>{detail.item.priority.tier}</Badge>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">{detail.item.priority.reason}</p>
+      </div>
+
+      {actionData?.notice !== undefined && (
+        <Alert>
+          <AlertDescription role="status">{actionData.notice}</AlertDescription>
+        </Alert>
       )}
+      {actionData?.refusal !== undefined && (
+        <Alert variant="destructive">
+          <AlertDescription>{actionData.refusal}</AlertDescription>
+        </Alert>
+      )}
+
       {detail.sections.map((section) => renderers[section]())}
     </article>
   )

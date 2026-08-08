@@ -6,7 +6,7 @@
     "metrics"
   ],
   "queue_axe": {
-    "passes": 22,
+    "passes": 23,
     "violations": 0
   },
   "queue_keyboard": {
@@ -14,14 +14,14 @@
     "nonNativeClickables": 0
   },
   "case_axe": {
-    "passes": 26,
+    "passes": 27,
     "violations": 0
   },
   "case_structure": {
     "sections": 8
   },
   "metrics_axe": {
-    "passes": 19,
+    "passes": 18,
     "violations": 1
   },
   "manual_review": {

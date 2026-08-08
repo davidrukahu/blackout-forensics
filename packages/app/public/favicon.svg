@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 David Rukahu
+SPDX-License-Identifier: AGPL-3.0-only
+-->
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="7" fill="#101625"/>
+  <rect x="5" y="16" width="4" height="10" rx="1.5" fill="#5fb8a5"/>
+  <rect x="12" y="11" width="4" height="15" rx="1.5" fill="#5fb8a5"/>
+  <rect x="19" y="13" width="4" height="13" rx="1.5" fill="#e8635a" opacity="0.55"/>
+  <rect x="26" y="6" width="1" height="0" fill="none"/>
+  <rect x="25" y="7" width="4" height="19" rx="1.5" fill="#f2f5fa"/>
+</svg>

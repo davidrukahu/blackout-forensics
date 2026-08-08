@@ -4,8 +4,9 @@
 import { index, route, type RouteConfig } from '@react-router/dev/routes'
 
 export default [
-  index('routes/home.tsx'),
+  // The dashboard is the homepage; /metrics stays as a redirect so old links keep working.
+  index('routes/metrics.tsx'),
+  route('metrics', 'routes/home.tsx'),
   route('queue', 'routes/queue.tsx'),
   route('cases/:id', 'routes/case.tsx'),
-  route('metrics', 'routes/metrics.tsx'),
 ] satisfies RouteConfig

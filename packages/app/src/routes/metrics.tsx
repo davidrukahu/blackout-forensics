@@ -19,7 +19,9 @@ import { getMetrics } from '../data/store.server.js'
 import { Badge } from '../components/ui/badge.js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.js'
 
-import '../tailwind.css'
+export function meta() {
+  return [{ title: 'Dashboard — Blackout Forensics' }]
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = requireUser(request, ['queue:read'])
@@ -121,23 +123,12 @@ export default function MetricsScreen() {
   const sla = metrics.sla
 
   return (
-    <div className="shadcn-scope bg-background font-sans text-foreground antialiased">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 p-6">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
-              Fleet telemetry-evidence metrics · every number from the §6.12 report builder
-            </p>
-          </div>
-          <nav className="flex gap-2 text-sm" aria-label="Sections">
-            <Link className="rounded-md border border-border px-3 py-1.5 hover:bg-accent" to="/queue">
-              Review queue
-            </Link>
-            <span className="rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground" aria-current="page">
-              Metrics
-            </span>
-          </nav>
+    <div className="flex flex-col gap-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">
+            Fleet telemetry-evidence metrics · every number from the §6.12 report builder
+          </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -284,7 +275,6 @@ export default function MetricsScreen() {
             </CardContent>
           </Card>
         </div>
-      </div>
     </div>
   )
 }

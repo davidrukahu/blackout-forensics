@@ -76,8 +76,8 @@ async function renderRoute(
 
 async function runAxe(): Promise<axe.AxeResults> {
   return axe.run(container, {
-    // Colour-contrast needs real layout; jsdom has none. Contrast is controlled by the token
-    // set in styles.css and belongs to the browser-level review, recorded in the artifact.
+    // Colour-contrast needs real layout; jsdom has none. Contrast is controlled by the shadcn
+    // token set in tailwind.css and belongs to the browser-level review, recorded in the artifact.
     rules: { 'color-contrast': { enabled: false } },
   })
 }
