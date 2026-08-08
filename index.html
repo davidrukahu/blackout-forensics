@@ -59,6 +59,7 @@
   .gap{flex:2.6;align-self:stretch;display:flex;align-items:center;justify-content:center;border-left:1.5px dashed var(--red);border-right:1.5px dashed var(--red);background:
     repeating-linear-gradient(-45deg,transparent 0 9px,rgba(178,60,52,.07) 9px 18px)}
   .gap span{font-family:var(--mono);font-size:clamp(.62rem,1.1vw,.78rem);color:var(--red);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+  .gap b{font-weight:inherit}
   .strip-caption{display:flex;justify-content:space-between;gap:1rem;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);padding:.6rem 0 0}
   .strip-caption b{color:var(--red);font-weight:600}
   @media (prefers-reduced-motion:reduce){.bar{animation:none}}
@@ -120,6 +121,7 @@
   a:focus-visible,.cta:focus-visible{outline:2.5px solid var(--teal-deep);outline-offset:3px;border-radius:6px}
   @media(max-width:640px){
     .gap span{writing-mode:vertical-rl;letter-spacing:.14em}
+    .gap .gap-word{display:none}
     header .tag{display:none}
     .strip-caption span{display:none}
     .strip-caption{justify-content:center}
@@ -151,7 +153,7 @@
       <div class="bar" style="height:64%"></div><div class="bar" style="height:81%"></div>
       <div class="bar" style="height:70%"></div><div class="bar" style="height:60%"></div>
       <div class="bar" style="height:77%"></div><div class="bar" style="height:66%"></div>
-      <div class="gap"><span>blackout · 19 min</span></div>
+      <div class="gap"><span><b class="gap-word">blackout · </b>19 min</span></div>
       <div class="bar" style="height:69%"></div><div class="bar" style="height:75%"></div>
       <div class="bar" style="height:62%"></div>
     </div>
