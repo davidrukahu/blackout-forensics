@@ -187,13 +187,13 @@ export function corridorSectionFor(params: {
 }): CorridorSection {
   const corridor = CORRIDORS.find((c) => c.id === params.corridorId)
   if (corridor === undefined) {
-    return { state: 'not_computed', reason: 'no route skeleton covers this episode' }
+    return { state: 'not_computed', reason: 'No route data covers this episode' }
   }
   const version = currentEpisodeVersion(params.episode)
   if (version.endAt === null) {
     return {
       state: 'not_computed',
-      reason: 'the episode is still open: a corridor needs a recovery fix to bound it',
+      reason: 'The episode is open. A corridor needs a recovery fix as its end point',
     }
   }
 
@@ -212,7 +212,7 @@ export function corridorSectionFor(params: {
   if (lastValid === undefined || nextValid === undefined) {
     return {
       state: 'not_computed',
-      reason: 'no valid fix on both sides of the gap: nothing bounds where the vehicle could have been',
+      reason: 'There is no valid fix on both sides of the gap. The corridor has no limits',
     }
   }
 
@@ -331,8 +331,8 @@ export function buildCaseDetail(params: {
         classification.unknown !== null
           ? `Missing expected evidence: ${classification.unknown.missingExpected.join(', ') || 'none listed'}`
           : evidenceEntries.some((e) => e.missingExpected.length > 0)
-            ? 'Some expected evidence could not be read; each hypothesis lists what was missing.'
-            : 'All expected evidence was readable.',
+            ? 'The system could not read some expected evidence. Each hypothesis shows the missing items.'
+            : 'The system read all the expected evidence.',
     },
     evidence: {
       entries: evidenceEntries,
@@ -348,8 +348,8 @@ export function buildCaseDetail(params: {
       nextValidAt: nextValid === undefined ? null : new Date(timeOf(nextValid)).toISOString(),
       note:
         version.endAt === null
-          ? 'The episode is open: there is no next valid observation yet.'
-          : 'Valid means the fix passed quality checks; an invalid fix cannot bound the gap.',
+          ? 'The episode is open. There is no valid observation after the gap.'
+          : 'Valid means the fix passed the quality checks. An invalid fix cannot set the gap limits.',
     },
     corridor: corridorSectionFor({
       episode,
@@ -361,8 +361,8 @@ export function buildCaseDetail(params: {
       fleetSize,
       note:
         clusters.length === 0
-          ? `No peer cluster includes this device (fleet of ${fleetSize} observed devices).`
-          : `Denominators: activePopulation is the devices known active on the dimension; the fleet here is ${fleetSize}.`,
+          ? `No peer cluster includes this device. The observed fleet has ${fleetSize} devices.`
+          : `The active population is the number of devices that the system knows to be active for the dimension. The observed fleet has ${fleetSize} devices.`,
     },
     policies: {
       record: CORPUS_POLICY,

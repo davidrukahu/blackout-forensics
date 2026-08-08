@@ -18,6 +18,13 @@ authorisation.
 
 ![How Blackout Forensics works: telemetry goes silent, the evidence engine classifies with counterevidence, a human decides with maker-checker, and a signed report reproduces](media/overview.svg)
 
+| The dashboard (dark) | The review queue (light) |
+|---|---|
+| ![The metrics dashboard in dark mode: stat cards, the gap-duration chart, recent episodes with evidence-band badges](media/screenshots/dashboard-dark.png) | ![The review queue in light mode: saved views, named priority factors, evidence bands, due states and per-row warnings](media/screenshots/queue-light.png) |
+
+All interface text follows ASD-STE100 Simplified Technical English. The dark-mode toggle stores
+the choice and applies it before the first paint.
+
 ## Repository layout
 
 | Package | Licence | Contents |

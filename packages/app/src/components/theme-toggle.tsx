@@ -16,7 +16,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      aria-label="Toggle dark mode"
+      aria-label="Set dark mode on or off"
       onClick={() => {
         const dark = document.documentElement.classList.toggle('dark')
         try {

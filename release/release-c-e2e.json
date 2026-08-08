@@ -8,7 +8,7 @@
       "detail": {
         "episodeId": "ep-vendor-outage-with-individual-power-cut-dev_e0",
         "band": "direct",
-        "priority": "urgent: direct-power-evidence; urgent eligible evidence; episode age exceeds routine window"
+        "priority": "urgent: direct-power-evidence, urgent eligible evidence, episode age exceeds routine window"
       }
     },
     {
@@ -51,5 +51,5 @@
       }
     }
   ],
-  "integritySha256": "8e0508c4169297905bb492b0d6b45f6fcd1d4d4ea5489daa884af4eb44a447f6"
+  "integritySha256": "5d9217390732b21625d9d14fea8aa0d98c5ed4c19abdf2883b191d4f91c41132"
 }

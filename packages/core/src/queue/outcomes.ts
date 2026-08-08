@@ -96,7 +96,7 @@ export interface RecordedActionOutcome {
 
 export class UnknownOutcomeError extends Error {
   constructor(readonly code: string) {
-    super(`"${code}" is not in the §22 taxonomy`)
+    super(`The code "${code}" is not in the §22 taxonomy.`)
     this.name = 'UnknownOutcomeError'
   }
 }
@@ -104,8 +104,8 @@ export class UnknownOutcomeError extends Error {
 export class MissingAuthorizationError extends Error {
   constructor(readonly code: string) {
     super(
-      `${code} cannot be recorded without an external authorization reference (FR-OUT-002): ` +
-        'the product records that a separately authorized recovery happened; it never holds the authority',
+      `You cannot record ${code} without an external authorization reference (FR-OUT-002). ` +
+        'The product records the authorization. The product does not hold the authority.',
     )
     this.name = 'MissingAuthorizationError'
   }
@@ -113,7 +113,7 @@ export class MissingAuthorizationError extends Error {
 
 export class IncoherentTimesError extends Error {
   constructor() {
-    super('completion cannot precede the start of the action')
+    super('The completion time cannot be before the start time.')
     this.name = 'IncoherentTimesError'
   }
 }

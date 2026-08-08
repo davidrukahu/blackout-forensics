@@ -281,7 +281,7 @@ export function classify(params: {
     hypotheses.length === 0
       ? {
           code: 'H-UNKNOWN' as const,
-          reason: 'evidence is missing, conflicting or below threshold',
+          reason: 'the evidence is missing, in conflict, or below the threshold',
           missingExpected: [...allMissing].sort(),
         }
       : null

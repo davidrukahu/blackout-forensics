@@ -238,7 +238,7 @@ describe('H-UNKNOWN is the classifier speaking, not a rule', () => {
     const result = run({})
     expect(result.hypotheses).toEqual([])
     expect(result.unknown).not.toBeNull()
-    expect(result.unknown?.reason).toBe('evidence is missing, conflicting or below threshold')
+    expect(result.unknown?.reason).toBe('the evidence is missing, in conflict, or below the threshold')
     expect(result.unknown?.missingExpected.length).toBeGreaterThan(5)
     expect(result.urgentEligible).toBe(false)
   })

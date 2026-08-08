@@ -106,8 +106,8 @@ export function computePriority(
 
   const reason =
     raises.length > 0
-      ? `${tier}: ${raises.map((f) => f.factor.replaceAll('_', ' ')).join('; ')}`
-      : `routine: no factor raised priority (${factors.length} considered)`
+      ? `${tier}: ${raises.map((f) => f.factor.replaceAll('_', ' ')).join(', ')}`
+      : `routine: no factor increased the priority (the system examined ${factors.length} factors)`
 
   return { tier, factors, reason }
 }
@@ -165,10 +165,10 @@ export function buildQueueItem(input: BuildQueueItemInput): QueueItem {
 
   const warnings = [...(input.warnings ?? [])]
   if (current.clockBasis === 'received_at') {
-    warnings.push('boundaries rest on receipt time: the device clock was unusable')
+    warnings.push('The episode boundaries use the receipt time. The device clock was not usable.')
   }
   if (classification.unknown !== null) {
-    warnings.push(`classification is unknown: ${classification.unknown.reason}`)
+    warnings.push(`The classification is unknown: ${classification.unknown.reason}.`)
   }
 
   const dueAt = new Date(
@@ -242,7 +242,7 @@ export function checkBulk(
       eligible: [],
       refused: items.map((item) => ({
         episodeId: item.episodeId,
-        reason: `"${action}" is not a low-impact bulk action`,
+        reason: `The action "${action}" is not approved for bulk use.`,
       })),
     }
   }
@@ -251,9 +251,9 @@ export function checkBulk(
   const refused: BulkRefusal[] = []
   for (const item of items) {
     if (item.priority.tier === 'urgent') {
-      refused.push({ episodeId: item.episodeId, reason: 'urgent rows require individual review' })
+      refused.push({ episodeId: item.episodeId, reason: 'You must review urgent rows one at a time.' })
     } else if (item.band === 'direct') {
-      refused.push({ episodeId: item.episodeId, reason: 'direct evidence requires individual review' })
+      refused.push({ episodeId: item.episodeId, reason: 'You must review rows with direct evidence one at a time.' })
     } else {
       eligible.push(item)
     }

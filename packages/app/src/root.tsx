@@ -41,7 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <a className="skip-link" href="#main">
-          Skip to main content
+          Skip to the main content
         </a>
         <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-6">
@@ -75,9 +75,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               ))}
             </nav>
             <div className="ml-auto flex items-center gap-3">
-              <span className="text-xs text-muted-foreground" aria-label="All times are shown in UTC">
-                times in UTC
-              </span>
+              <span className="text-xs text-muted-foreground">All times are in UTC</span>
               <ThemeToggle />
             </div>
           </div>
@@ -102,12 +100,12 @@ export function ErrorBoundary() {
   return (
     <section aria-labelledby="error-heading" className="mx-auto max-w-md py-16 text-center">
       <h1 id="error-heading" className="text-2xl font-bold tracking-tight">
-        {known ? `${error.status} ${error.statusText}` : 'Something went wrong'}
+        {known ? `${error.status} ${error.statusText}` : 'An error occurred'}
       </h1>
       <p className="mt-3 text-sm text-muted-foreground">
         {known && typeof error.data === 'string'
           ? error.data
-          : 'The error has been recorded. No partial result is shown, because a partial screen is indistinguishable from a complete one.'}
+          : 'The system recorded the error. The system does not show a partial result.'}
       </p>
     </section>
   )

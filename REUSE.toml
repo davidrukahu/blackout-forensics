@@ -25,6 +25,12 @@ path = [
 SPDX-FileCopyrightText = "2026 David Rukahu"
 SPDX-License-Identifier = "AGPL-3.0-only"
 
+# Rendered images: screenshots of the AGPL application and rasterized project artwork.
+[[annotations]]
+path = ["media/**/*.png"]
+SPDX-FileCopyrightText = "2026 David Rukahu"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
 # Build output. Inherits the licence of the sources it is compiled from; never committed.
 [[annotations]]
 path = ["**/dist/**", "**/*.tsbuildinfo"]

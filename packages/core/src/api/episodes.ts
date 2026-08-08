@@ -52,8 +52,7 @@ export const LOCATION_SCOPE = 'episodes:exact-location'
 export class MissingScopeError extends Error {
   constructor(readonly scope: string) {
     super(
-      `this filter requires the "${scope}" scope: refusing outright rather than answering ` +
-        'unfiltered, because a quietly unscoped answer is indistinguishable from a scoped one',
+      `This filter needs the "${scope}" scope. The system refuses the request. The system does not return unfiltered data.`,
     )
     this.name = 'MissingScopeError'
   }
@@ -105,7 +104,7 @@ export interface ListEpisodesRequest {
 
 export class InvalidCursorError extends Error {
   constructor() {
-    super('the cursor is not one this API issued; restart the listing from the beginning')
+    super('The cursor is not valid. Start the list from the beginning.')
     this.name = 'InvalidCursorError'
   }
 }

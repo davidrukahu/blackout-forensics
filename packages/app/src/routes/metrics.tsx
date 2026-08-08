@@ -87,7 +87,7 @@ function GapChart({ data }: { data: readonly { label: string; minutes: number }[
         )
       })}
       <text x={width / 2} y={height - 6} textAnchor="middle" className="fill-muted-foreground" fontSize="11">
-        asset (gap minutes) — open episodes are counted, never charted as bounded
+        Assets with gap minutes. The chart does not show open episodes.
       </text>
     </svg>
   )
@@ -127,7 +127,7 @@ export default function MetricsScreen() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground">
-            Fleet telemetry-evidence metrics · every number from the §6.12 report builder
+            Metrics for the fleet telemetry evidence. The §6.12 report builder makes each number.
           </p>
         </div>
 
@@ -135,25 +135,25 @@ export default function MetricsScreen() {
           <StatCard
             title="Open cases"
             value={String(metrics.stats.totalCases)}
-            hint={`${metrics.openEpisodes} still unbounded by a recovery fix`}
+            hint={`${metrics.openEpisodes} have no recovery fix`}
             icon={<Gauge className="h-4 w-4" />}
           />
           <StatCard
             title="Urgent tier"
             value={String(metrics.stats.urgentTier)}
-            hint={`${metrics.stats.directEvidence} with direct evidence`}
+            hint={`${metrics.stats.directEvidence} have direct evidence`}
             icon={<ShieldAlert className="h-4 w-4" />}
           />
           <StatCard
             title="Overdue"
             value={String(metrics.stats.overdue)}
-            hint="past due state plus grace window"
+            hint="Past the due time and the grace period"
             icon={<Clock3 className="h-4 w-4" />}
           />
           <StatCard
             title="Unknown classifications"
             value={String(metrics.stats.unknownClassification)}
-            hint="honest unknowns — evidence missing, not guessed"
+            hint="The evidence is missing. The system does not guess."
             icon={<HelpCircle className="h-4 w-4" />}
           />
         </div>
@@ -162,7 +162,7 @@ export default function MetricsScreen() {
           <Card className="lg:col-span-4">
             <CardHeader>
               <CardTitle className="text-base">Overview</CardTitle>
-              <CardDescription>Gap duration per closed episode, minutes</CardDescription>
+              <CardDescription>The gap duration for each closed episode, in minutes</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
               <GapChart data={metrics.gapChart} />
@@ -173,7 +173,7 @@ export default function MetricsScreen() {
             <CardHeader>
               <CardTitle className="text-base">Recent episodes</CardTitle>
               <CardDescription>
-                Latest {metrics.recent.length} of {metrics.stats.totalCases} open cases
+                The latest {metrics.recent.length} of {metrics.stats.totalCases} open cases
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
@@ -203,7 +203,7 @@ export default function MetricsScreen() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Telemetry SLA</CardTitle>
-              <CardDescription>tracker + platform delivery</CardDescription>
+              <CardDescription>Tracker and platform delivery</CardDescription>
             </CardHeader>
             <CardContent>
               <dl className="grid grid-cols-2 gap-y-3 text-sm">
@@ -226,7 +226,7 @@ export default function MetricsScreen() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Evidence bands</CardTitle>
-              <CardDescription>strength across open cases</CardDescription>
+              <CardDescription>The evidence strength for the open cases</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {metrics.bands.map((band) => (
@@ -249,14 +249,14 @@ export default function MetricsScreen() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Report integrity</CardTitle>
-              <CardDescription>what an export of this screen would sign</CardDescription>
+              <CardDescription>An export of this screen signs these values</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
                 <span>
-                  {sla.recovery.unresolvedAging[0]?.count ?? 0} unresolved past due — aged separately,
-                  never folded into done
+                  {sla.recovery.unresolvedAging[0]?.count ?? 0} unresolved case(s) are past due.
+                  The report ages them separately.
                 </span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -270,7 +270,7 @@ export default function MetricsScreen() {
               </div>
               <p className="text-xs text-muted-foreground">
                 rule {sla.manifest.ruleVersion} · vocabulary {sla.manifest.factVocabularyVersion} ·
-                clock basis {sla.manifest.clockBasis} · denominators travel with every rate
+                clock basis {sla.manifest.clockBasis}. Each rate includes its denominator.
               </p>
             </CardContent>
           </Card>

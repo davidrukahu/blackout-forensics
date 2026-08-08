@@ -57,7 +57,7 @@ describe('§9.4 propose → approve through the route', () => {
       reason: 'device telemetry supports possible tracker interference',
       seenVersionCount: String(seen),
     }))
-    expect(proposed.notice).toContain('Proposed')
+    expect(proposed.notice).toContain('The proposal is saved')
 
     const { detail: withProposal } = await caseLoader(get(id))
     const proposal = withProposal.decisions.proposals[0]!
@@ -89,7 +89,7 @@ describe('§9.4 propose → approve through the route', () => {
     const result = await caseAction(post(id, 'supervisor', {
       intent: 'resolve', proposalId: proposal.id, resolution: 'approve',
     }))
-    expect(result.refusal).toContain('cannot approve')
+    expect(result.refusal).toContain('A different person must approve')
 
     const { detail: after } = await caseLoader(get(id))
     expect(after.item.bucket).toBe('review_required')
@@ -110,7 +110,7 @@ describe('§9.4 propose → approve through the route', () => {
       reason: 'seems dodgy',
       seenVersionCount: String(seen),
     }))
-    expect(result.refusal).toContain('not a canonical reason')
+    expect(result.refusal).toContain('not an approved reason')
   })
 
   it('a stale screen cannot propose (§15.2)', async () => {
@@ -121,7 +121,7 @@ describe('§9.4 propose → approve through the route', () => {
       reason: 'device telemetry supports possible tracker interference',
       seenVersionCount: String(seen - 1),
     }))
-    expect(result.refusal).toContain('revised since this screen was loaded')
+    expect(result.refusal).toContain('changed after this screen loaded')
   })
 
   it('machine suggestions render as advice and exclude world-affecting decisions', async () => {

@@ -38,7 +38,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     actor: user.actor,
     episodeId: params['id'] ?? '',
   })
-  if (detail === null) throw new Response('No such case', { status: 404 })
+  if (detail === null) throw new Response('The case does not exist.', { status: 404 })
   return { detail }
 }
 
@@ -65,7 +65,7 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<C
       seenVersionCount: Number(form.get('seenVersionCount') ?? Number.NaN),
     })
     return result.kind === 'proposed'
-      ? { notice: `Proposed (${result.proposalId}); awaiting a different approver where required.` }
+      ? { notice: `The proposal is saved (${result.proposalId}). A second person must approve a high-impact decision.` }
       : { refusal: result.message }
   }
 
@@ -80,9 +80,9 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<C
     })
     switch (result.kind) {
       case 'applied':
-        return { notice: 'Decision applied. The timeline records proposer and approver.' }
+        return { notice: 'The decision is applied. The timeline shows the proposer and the approver.' }
       case 'rejected':
-        return { notice: 'Proposal rejected; the episode is untouched.' }
+        return { notice: 'The proposal is rejected. The episode did not change.' }
       case 'superseded':
         return { refusal: result.message }
       case 'refused':
@@ -108,11 +108,11 @@ export async function action({ request, params }: ActionFunctionArgs): Promise<C
       evidencePackSha256: optional('evidencePackSha256'),
     })
     return result.kind === 'recorded'
-      ? { notice: `Outcome recorded (${result.actionId}).` }
+      ? { notice: `The outcome is recorded (${result.actionId}).` }
       : { refusal: result.message }
   }
 
-  throw new Response('Unknown intent', { status: 400 })
+  throw new Response('The request is not valid.', { status: 400 })
 }
 
 const TIER_BADGE: Record<string, string> = {
@@ -168,7 +168,7 @@ function ReasonSection({ detail }: { detail: CaseDetail }) {
       <div>
         <h3 className="mb-2 text-sm font-medium">Priority factors</h3>
         {detail.reason.priorityFactors.length === 0 ? (
-          <p className="text-muted-foreground">No factor raised or lowered priority.</p>
+          <p className="text-muted-foreground">No factor changed the priority.</p>
         ) : (
           <Table>
             <TableHeader>
@@ -199,13 +199,13 @@ function EvidenceSection({ detail }: { detail: CaseDetail }) {
     <SectionCard
       id="s-evidence"
       title="Evidence"
-      description="Supporting, counter and missing expected evidence together, per hypothesis (FR-QUE-003)"
+      description="Each hypothesis shows its supporting evidence, its counterevidence, and its missing expected evidence (FR-QUE-003)"
     >
       {detail.evidence.unknown !== null && (
         <Alert>
           <AlertDescription>
-            <strong>Classification is unknown.</strong> {detail.evidence.unknown.reason}. Missing
-            expected evidence:{' '}
+            <strong>The classification is unknown.</strong> {detail.evidence.unknown.reason}.
+            The missing expected evidence is:{' '}
             {detail.evidence.unknown.missingExpected.join(', ') || 'none listed'}.
           </AlertDescription>
         </Alert>
@@ -242,7 +242,7 @@ function EvidenceSection({ detail }: { detail: CaseDetail }) {
             <dt className="text-xs font-medium text-muted-foreground uppercase">Missing expected</dt>
             <dd>
               {entry.missingExpected.length === 0 ? (
-                <span className="text-muted-foreground">nothing expected was unreadable</span>
+                <span className="text-muted-foreground">the system read all the expected evidence</span>
               ) : (
                 <ul className="list-disc pl-4">
                   {entry.missingExpected.map((m) => (
@@ -256,7 +256,7 @@ function EvidenceSection({ detail }: { detail: CaseDetail }) {
             <dt className="text-xs font-medium text-muted-foreground uppercase">Rule</dt>
             <dd className="font-mono text-xs">
               {entry.ruleId} v{entry.ruleVersion}
-              {entry.humanReview ? ' — human review required' : ''}
+              {entry.humanReview ? '. A person must review this result.' : ''}
             </dd>
           </dl>
         </article>
@@ -264,7 +264,7 @@ function EvidenceSection({ detail }: { detail: CaseDetail }) {
       {detail.evidence.notApplicable.length > 0 && (
         <details className="text-muted-foreground">
           <summary className="cursor-pointer text-sm">
-            {detail.evidence.notApplicable.length} rule(s) could not be evaluated
+            The system could not evaluate {detail.evidence.notApplicable.length} rule(s)
           </summary>
           <ul className="mt-2 list-disc pl-5 text-xs">
             {detail.evidence.notApplicable.map((n) => (
@@ -284,32 +284,33 @@ function CorridorSectionView({ detail }: { detail: CaseDetail }) {
   return (
     <SectionCard id="s-corridor" title="Candidate corridor">
       {corridor.state === 'not_computed' && (
-        <p className="text-muted-foreground">Not computed: {corridor.reason}.</p>
+        <p className="text-muted-foreground">The system did not compute the corridor. {corridor.reason}.</p>
       )}
       {corridor.state === 'corridor_ambiguous' && corridor.result.status === 'corridor_ambiguous' && (
         <Alert>
           <AlertDescription>
-            <strong>Ambiguous — withheld.</strong> {corridor.result.reason}
+            <strong>The corridor is ambiguous. The system does not show a route.</strong>{' '}
+            {corridor.result.reason}
           </AlertDescription>
         </Alert>
       )}
       {corridor.state === 'infeasible' && corridor.result.status === 'infeasible' && (
         <Alert>
           <AlertDescription>
-            <strong>Infeasible.</strong> {corridor.result.reason}
+            <strong>No route is possible in the elapsed time.</strong> {corridor.result.reason}
           </AlertDescription>
         </Alert>
       )}
       {corridor.state === 'corridor' && corridor.result.status === 'corridor' && (
         <>
           <p>
-            <strong>{corridor.result.claim}</strong> — cells every feasible path must cross. Snapshot{' '}
-            <span className="font-mono text-xs">{corridor.result.manifest.snapshotId}</span>, profile{' '}
-            {corridor.result.manifest.profile}.
+            <strong>{corridor.result.claim}</strong>: each feasible path must cross these cells.
+            Snapshot <span className="font-mono text-xs">{corridor.result.manifest.snapshotId}</span>.
+            Profile {corridor.result.manifest.profile}.
           </p>
           <Table>
             <TableCaption>
-              The table is the primary representation; the map below is supplementary.
+              The table is the primary output. The map below is a supplement.
             </TableCaption>
             <TableHeader>
               <TableRow>
@@ -330,7 +331,7 @@ function CorridorSectionView({ detail }: { detail: CaseDetail }) {
       )}
       {/* The map slot sits BELOW the table and the reason summary, §9.3. */}
       <p className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
-        Map disabled: no active OSM snapshot. The table above is complete.
+        The map is off. There is no active OSM snapshot. The table above is complete.
       </p>
     </SectionCard>
   )
@@ -340,7 +341,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
   return (
     <SectionCard id="s-actions" title="Prior actions and decisions">
       {detail.decisions.prior.length === 0 ? (
-        <p className="text-muted-foreground">No action has been taken in the world on this episode.</p>
+        <p className="text-muted-foreground">No external action is recorded for this episode.</p>
       ) : (
         <ul className="list-disc pl-4">
           {detail.decisions.prior.map((prior) => (
@@ -358,14 +359,14 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">Recorded actions and outcomes</h3>
         {detail.decisions.recordedActions.length === 0 ? (
-          <p className="text-muted-foreground">No externally-performed action has been recorded.</p>
+          <p className="text-muted-foreground">No external action is recorded.</p>
         ) : (
           <ul className="flex flex-col gap-1">
             {detail.decisions.recordedActions.map((recorded) => (
               <li key={recorded.id} className="rounded-md border border-border px-3 py-2">
                 {recorded.actionKind.replaceAll('_', ' ')} by {recorded.owner} —{' '}
                 <span className="font-medium">
-                  {recorded.outcomeCode ?? 'no outcome label (honestly unlabelled)'}
+                  {recorded.outcomeCode ?? 'no outcome code'}
                 </span>
                 {recorded.externalAuthorizationRef !== null && (
                   <span className="text-muted-foreground"> · authorization {recorded.externalAuthorizationRef}</span>
@@ -384,7 +385,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
         <input type="hidden" name="intent" value="record_outcome" />
         <div className="grid gap-3 sm:grid-cols-2">
           <Label>
-            Action performed externally
+            External action
             <NativeSelect name="actionKind">
               {detail.decisions.actionKinds.map((kind) => (
                 <option key={kind} value={kind}>
@@ -394,7 +395,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
             </NativeSelect>
           </Label>
           <Label>
-            Outcome (§22; leave empty when honestly unlabelled)
+            Outcome code (§22). Keep this empty if the outcome is not known.
             <NativeSelect name="outcomeCode" defaultValue="">
               <option value="">— none yet —</option>
               {detail.decisions.outcomeTaxonomy.map((outcome) => (
@@ -405,7 +406,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
             </NativeSelect>
           </Label>
           <Label>
-            External authorization reference (required for OUT-RECOVERY)
+            External authorization reference. Required for OUT-RECOVERY.
             <Input type="text" name="externalAuthorizationRef" />
           </Label>
           <Label>
@@ -417,7 +418,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
             <Input type="text" name="evidencePackSha256" />
           </Label>
           <Label>
-            Note
+            Note. A note adds information only.
             <Input type="text" name="note" />
           </Label>
         </div>
@@ -430,7 +431,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
         <h3 className="text-sm font-medium">Machine suggestions</h3>
         {detail.decisions.machineSuggestions.length === 0 ? (
           <p className="text-muted-foreground">
-            The machine suggests nothing here. It can never suggest action against the asset.
+            The machine has no suggestion. The machine cannot suggest an action against the asset.
           </p>
         ) : (
           <ul className="flex flex-col gap-1">
@@ -439,7 +440,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
                 <Badge variant="outline">machine suggestion</Badge>{' '}
                 <span className="font-mono text-xs">{suggestion.decisionId}</span>: {suggestion.basis}.{' '}
                 <span className="text-muted-foreground">
-                  Advice only — a human must propose it to make it a decision.
+                  This is advice only. A person must propose it as a decision.
                 </span>
               </li>
             ))}
@@ -488,7 +489,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
         <h4 className="text-sm font-medium">Propose a decision</h4>
         {detail.decisions.proposable.length === 0 ? (
           <p className="text-muted-foreground">
-            No decision applies in the “{detail.item.bucket.replaceAll('_', ' ')}” state.
+            No decision is available in the “{detail.item.bucket.replaceAll('_', ' ')}” state.
           </p>
         ) : (
           <>
@@ -501,13 +502,13 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
                   {detail.decisions.proposable.map((decision) => (
                     <option key={decision.id} value={decision.id}>
                       {decision.label}
-                      {decision.highImpact ? ' (requires a second approver)' : ''}
+                      {decision.highImpact ? ' (a second person must approve)' : ''}
                     </option>
                   ))}
                 </NativeSelect>
               </Label>
               <Label>
-                Canonical reason
+                Approved reason
                 <NativeSelect name="reason" required>
                   {[...new Set(detail.decisions.proposable.flatMap((d) => d.canonicalReasons))].map(
                     (reason) => (
@@ -519,7 +520,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
                 </NativeSelect>
               </Label>
               <Label className="sm:col-span-2">
-                Note (explains; never substitutes for the reason)
+                Note. A note adds information. A note does not replace the reason.
                 <Input type="text" name="note" />
               </Label>
             </div>
@@ -531,9 +532,9 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
       </Form>
 
       <p className="text-xs text-muted-foreground">
-        Available transitions from “{detail.item.bucket.replaceAll('_', ' ')}”:{' '}
-        {detail.decisions.available.join(', ') || 'none'}. Decisions are made through the
-        maker-checker flow.
+        The available transitions from “{detail.item.bucket.replaceAll('_', ' ')}” are:{' '}
+        {detail.decisions.available.join(', ') || 'none'}. All decisions follow the
+        maker-checker procedure.
       </p>
     </SectionCard>
   )
@@ -573,7 +574,7 @@ export default function CaseScreen() {
               </time>
             )}
           </dd>
-          <dt className="text-muted-foreground">First valid after the gap</dt>
+          <dt className="text-muted-foreground">Next valid after the gap</dt>
           <dd>
             {detail.observations.nextValidAt === null ? (
               'none yet'
@@ -608,7 +609,7 @@ export default function CaseScreen() {
           Reporting policy v{detail.policies.record.version} ({detail.policies.record.provenance}):
           moving every {detail.policies.record.intervals.moving}s, parked every{' '}
           {detail.policies.record.intervals.parked}s, sleep every{' '}
-          {detail.policies.record.intervals.sleep}s; grace ×{detail.policies.record.graceFactor}.
+          {detail.policies.record.intervals.sleep}s. The grace factor is ×{detail.policies.record.graceFactor}.
         </p>
         <p className="text-muted-foreground">
           Suppression windows:{' '}
@@ -623,7 +624,7 @@ export default function CaseScreen() {
     <article aria-labelledby="case-heading" className="flex flex-col gap-4">
       <div>
         <Link to="/queue" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to queue
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to the queue
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h1 id="case-heading" className="text-2xl font-bold tracking-tight">

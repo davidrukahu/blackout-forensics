@@ -105,7 +105,7 @@ describe('§16.3: the full path, in order', () => {
       reason: 'device telemetry supports possible tracker interference',
       seenVersionCount: String(detail.decisions.seenVersionCount),
     }))
-    expect(proposed.notice).toContain('Proposed')
+    expect(proposed.notice).toContain('The proposal is saved')
     trace.push({ stage: 'review', detail: { proposedBy: 'dev:analyst', decision: 'classify_suspicious' } })
   })
 

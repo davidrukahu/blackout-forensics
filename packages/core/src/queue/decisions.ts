@@ -70,7 +70,7 @@ export const DECISIONS: readonly DecisionDefinition[] = [
   },
   {
     id: 'retract',
-    label: 'Retract (the gap never happened)',
+    label: 'Retract (the gap did not occur)',
     transitionTo: 'retracted',
     canonicalReasons: [
       'buffered records show continuous reporting',
@@ -129,7 +129,7 @@ export interface DecisionProposal {
 
 export class UnknownDecisionError extends Error {
   constructor(readonly decisionId: string) {
-    super(`no decision "${decisionId}" exists`)
+    super(`The decision "${decisionId}" does not exist.`)
     this.name = 'UnknownDecisionError'
   }
 }
@@ -137,8 +137,8 @@ export class UnknownDecisionError extends Error {
 export class NonCanonicalReasonError extends Error {
   constructor(readonly decisionId: string, readonly reason: string) {
     super(
-      `"${reason}" is not a canonical reason for ${decisionId}. Free text explains; it never ` +
-        'substitutes for the controlled vocabulary.',
+      `"${reason}" is not an approved reason for ${decisionId}. Select a reason from the ` +
+        'approved list. Use the note field for more text.',
     )
     this.name = 'NonCanonicalReasonError'
   }
@@ -147,8 +147,7 @@ export class NonCanonicalReasonError extends Error {
 export class StaleBasisError extends Error {
   constructor() {
     super(
-      'the episode has been revised since this screen was loaded: re-read the case before ' +
-        'proposing. A decision made on a stale view is a decision about a different case.',
+      'The episode changed after this screen loaded. Read the case again before you propose.',
     )
     this.name = 'StaleBasisError'
   }
@@ -157,8 +156,7 @@ export class StaleBasisError extends Error {
 export class SelfApprovalError extends Error {
   constructor(readonly actor: string) {
     super(
-      `${actor} proposed this decision and cannot approve it (§3.3). There is no override: the ` +
-        'second person is the control.',
+      `${actor} proposed this decision. A different person must approve it (§3.3). There is no override.`,
     )
     this.name = 'SelfApprovalError'
   }
@@ -167,8 +165,7 @@ export class SelfApprovalError extends Error {
 export class MachineOriginError extends Error {
   constructor() {
     super(
-      'a machine suggestion cannot be proposed or approved as a decision (FR-QUE-006). A human ' +
-        'must propose, and a different human must approve.',
+      'A machine suggestion is not a decision (FR-QUE-006). A person must propose it. A different person must approve it.',
     )
     this.name = 'MachineOriginError'
   }
@@ -176,7 +173,7 @@ export class MachineOriginError extends Error {
 
 export class ProposalNotPendingError extends Error {
   constructor(readonly status: DecisionProposal['status']) {
-    super(`this proposal is already ${status}; it cannot be resolved twice`)
+    super(`This proposal is already ${status}. You cannot resolve it again.`)
     this.name = 'ProposalNotPendingError'
   }
 }
@@ -207,7 +204,7 @@ export function suggestFor(params: {
     suggestions.push({
       kind: 'machine_suggestion',
       decisionId: 'classify_explained',
-      basis: 'a source-level cluster explains the gap without device-level cause',
+      basis: 'a source-level cluster explains the gap without a device-level cause',
     })
   }
   // Deliberately absent: any suggestion whose decision is worldAffecting. The list above is the
@@ -297,7 +294,7 @@ export function approveProposal(params: {
       to: decision.transitionTo,
       cause: 'human_decision',
       actor: proposal.proposedBy,
-      reason: `${decision.label}: ${proposal.reason}${proposal.note === null ? '' : ` — ${proposal.note}`}`,
+      reason: `${decision.label}: ${proposal.reason}${proposal.note === null ? '' : `. Note: ${proposal.note}`}`,
       at: params.at,
       ...(decision.highImpact ? { approvedBy: params.approvedBy } : {}),
     },

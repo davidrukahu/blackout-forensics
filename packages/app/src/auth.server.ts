@@ -67,13 +67,13 @@ function resolveUser(request: Request): AppUser | null {
 export function requireUser(request: Request, neededScopes: readonly string[]): AppUser {
   const user = resolveUser(request)
   if (user === null) {
-    throw new Response('Sign in required', { status: 401 })
+    throw new Response('Sign in to continue.', { status: 401 })
   }
   const missing = neededScopes.filter((scope) => !user.scopes.includes(scope))
   if (missing.length > 0) {
     // The refusal names what was missing: a silent 404 here would make authorization failures
     // indistinguishable from broken links, and §11.1 asks for deny — not disguise.
-    throw new Response(`Missing scope: ${missing.join(', ')}`, { status: 403 })
+    throw new Response(`You do not have the required scope: ${missing.join(', ')}.`, { status: 403 })
   }
   return user
 }

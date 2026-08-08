@@ -120,7 +120,7 @@ describe('§5.3: priority is named factors, never a hidden score', () => {
 
     const routine = computePriority(unknownClassification, 100, DEFAULT_QUEUE_POLICY)
     expect(routine.tier).toBe('routine')
-    expect(routine.reason).toContain('no factor raised priority')
+    expect(routine.reason).toContain('no factor increased the priority')
   })
 
   it('age past the routine window is itself a named factor, not a silent bump', () => {
@@ -201,7 +201,7 @@ describe('§9.2: bulk actions are low-impact only, refusals shown per row', () =
     const { eligible, refused } = checkBulk('classify', [item(), item()])
     expect(eligible).toEqual([])
     expect(refused).toHaveLength(2)
-    expect(refused[0]!.reason).toContain('not a low-impact bulk action')
+    expect(refused[0]!.reason).toContain('not approved for bulk use')
   })
 
   it('excludes urgent and direct-evidence rows individually, with reasons', () => {
@@ -210,7 +210,7 @@ describe('§9.2: bulk actions are low-impact only, refusals shown per row', () =
     const { eligible, refused } = checkBulk('assign_owner', [urgent, routine])
     expect(eligible.map((i) => i.episodeId)).toEqual(['ep-2'])
     expect(refused).toEqual([
-      { episodeId: 'ep-1', reason: 'urgent rows require individual review' },
+      { episodeId: 'ep-1', reason: 'You must review urgent rows one at a time.' },
     ])
   })
 })

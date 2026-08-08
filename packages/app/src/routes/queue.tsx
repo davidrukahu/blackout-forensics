@@ -60,7 +60,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
     const episodeId = String(form.get('episodeId') ?? '')
     const expectedVersion = Number(form.get('expectedVersion') ?? Number.NaN)
     if (episodeId === '' || Number.isNaN(expectedVersion)) {
-      throw new Response('Malformed assignment', { status: 400 })
+      throw new Response('The assignment request is not valid.', { status: 400 })
     }
     const outcome = assignOwner({
       scopes: user.scopes,
@@ -69,7 +69,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
       owner: user.actor,
       expectedVersion,
     })
-    if (outcome.kind === 'not_found') throw new Response('No such episode', { status: 404 })
+    if (outcome.kind === 'not_found') throw new Response('The episode does not exist.', { status: 404 })
     if (outcome.kind === 'conflict') {
       return {
         conflict: { episodeId: outcome.episodeId, currentOwner: outcome.currentOwner },
@@ -90,7 +90,7 @@ export async function action({ request }: ActionFunctionArgs): Promise<ActionRes
     return { assigned, refusals: refused }
   }
 
-  throw new Response('Unknown intent', { status: 400 })
+  throw new Response('The request is not valid.', { status: 400 })
 }
 
 const BAND_MARKS: Record<string, string> = {
@@ -141,7 +141,7 @@ export default function QueueScreen() {
           Review queue
         </h1>
         <p className="text-sm text-muted-foreground">
-          Priority is named factors, never a hidden score.
+          The priority shows its factors by name. There is no hidden score.
         </p>
       </div>
 
@@ -170,18 +170,17 @@ export default function QueueScreen() {
         <Alert variant="destructive">
           <AlertTitle>Assignment conflict</AlertTitle>
           <AlertDescription>
-            This row is now{' '}
             {actionData.conflict.currentOwner === null
-              ? 'unassigned again'
-              : `owned by ${actionData.conflict.currentOwner}`}
-            . The row below shows the current state; nothing was overwritten.
+              ? 'This row now has no owner.'
+              : `The owner of this row is now ${actionData.conflict.currentOwner}.`}{' '}
+            The row below shows the current state. The system did not overwrite the row.
           </AlertDescription>
         </Alert>
       )}
 
       {actionData?.refusals !== undefined && actionData.refusals.length > 0 && (
         <Alert variant="destructive">
-          <AlertTitle>{actionData.refusals.length} row(s) excluded from the bulk action</AlertTitle>
+          <AlertTitle>The bulk action excluded {actionData.refusals.length} row(s)</AlertTitle>
           <AlertDescription>
             <ul className="list-disc pl-4">
               {actionData.refusals.map((refusal) => (
@@ -196,18 +195,19 @@ export default function QueueScreen() {
 
       <Form method="post" id="bulk-form" className="flex flex-wrap items-center gap-3">
         <Button type="submit" name="intent" value="bulk_assign" variant="outline" size="sm">
-          Assign selected to me
+          Assign the selected rows to me
         </Button>
         <span id="bulk-hint" className="text-xs text-muted-foreground">
-          Bulk actions are low-impact only; urgent and direct-evidence rows are excluded
-          individually and listed when refused.
+          Bulk actions are for low-impact rows only. The system excludes urgent rows and rows
+          with direct evidence. The system lists each refusal.
         </span>
       </Form>
 
       <div className="rounded-xl border border-border bg-card p-2">
         <Table className="queue">
           <TableCaption className="px-2 pt-2">
-            {items.length} episode(s) in “{view.name}”, sorted {view.sort.replaceAll('_', ' ')}.
+            The view “{view.name}” has {items.length} episode(s). The sort order is{' '}
+            {view.sort.replaceAll('_', ' ')}.
           </TableCaption>
           <TableHeader>
             <TableRow>
@@ -289,13 +289,13 @@ export default function QueueScreen() {
                 </TableCell>
                 <TableCell>
                   {item.owner === actor ? (
-                    <span className="text-xs text-muted-foreground">yours</span>
+                    <span className="text-xs text-muted-foreground">assigned to you</span>
                   ) : (
                     <Form method="post">
                       <input type="hidden" name="episodeId" value={item.episodeId} />
                       <input type="hidden" name="expectedVersion" value={item.version} />
                       <Button type="submit" name="intent" value="assign" variant="outline" size="sm">
-                        Claim
+                        Assign to me
                       </Button>
                     </Form>
                   )}

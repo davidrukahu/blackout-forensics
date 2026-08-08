@@ -101,7 +101,7 @@ describe('bulk assignment', () => {
     expect(assigned).toBe(items.length - urgent.length)
     expect(refused.length).toBe(urgent.length)
     for (const refusal of refused) {
-      expect(refusal.reason).toMatch(/individual review/)
+      expect(refusal.reason).toMatch(/one at a time/)
     }
   })
 })

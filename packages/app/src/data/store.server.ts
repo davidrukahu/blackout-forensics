@@ -138,7 +138,7 @@ function seed(): AppStore {
         type: sample.type,
         startAt: sample.startAt,
         actor: 'system:sampler',
-        reason: `expected report missed (${sample.missedReports} missed)`,
+        reason: `the system did not receive the expected report (missed reports: ${sample.missedReports})`,
         at: sample.startAt,
         clockBasis: sample.clockBasis,
         policyVersion: sample.policyVersion,
@@ -152,7 +152,7 @@ function seed(): AppStore {
           to: 'monitoring',
           cause: 'evidence_updated',
           actor: 'system:watermark',
-          reason: 'recovery observed; gap bounded',
+          reason: 'The system observed a recovery. The recovery bounded the gap.',
           at: sample.endAt,
           endAt: sample.endAt,
         }, sample.endAt)
@@ -220,7 +220,7 @@ function toQueueItem(record: StoredCase, now: string): QueueItem {
 
 function requireScope(scopes: readonly string[], needed: string): void {
   if (!scopes.includes(needed)) {
-    throw new Response(`Missing scope: ${needed}`, { status: 403 })
+    throw new Response(`You do not have the required scope: ${needed}.`, { status: 403 })
   }
 }
 
@@ -330,7 +330,7 @@ export function saveView(params: {
 }): void {
   requireScope(params.scopes, 'queue:read')
   if (BUILTIN_VIEWS.some((v) => v.id === params.view.id)) {
-    throw new Response('Built-in views cannot be replaced', { status: 422 })
+    throw new Response('You cannot replace a built-in view.', { status: 422 })
   }
   store().customViews.set(params.view.id, params.view)
 }
@@ -472,7 +472,7 @@ export function proposeDecision(params: {
 }): ProposalResult {
   requireScope(params.scopes, 'case:propose')
   const record = store().cases.get(params.episodeId)
-  if (record === undefined) return { kind: 'refused', message: 'no such case' }
+  if (record === undefined) return { kind: 'refused', message: 'The case does not exist.' }
 
   try {
     const proposal = propose({
@@ -515,7 +515,7 @@ export function resolveProposal(params: {
   requireScope(params.scopes, 'case:approve')
   const record = store().cases.get(params.episodeId)
   const index = record?.proposals.findIndex((p) => p.id === params.proposalId) ?? -1
-  if (record === undefined || index < 0) return { kind: 'refused', message: 'no such proposal' }
+  if (record === undefined || index < 0) return { kind: 'refused', message: 'The proposal does not exist.' }
   const proposal = record.proposals[index]!
   const now = new Date().toISOString()
 
@@ -536,7 +536,7 @@ export function resolveProposal(params: {
     if (outcome.kind === 'superseded') {
       return {
         kind: 'superseded',
-        message: 'the episode was revised after this proposal; it was superseded, nothing applied',
+        message: 'The episode changed after this proposal. The proposal is superseded. The system did not apply the decision.',
       }
     }
     record.episode = outcome.episode
@@ -575,7 +575,7 @@ export function recordCaseOutcome(params: {
 }): OutcomeRecordResult {
   requireScope(params.scopes, 'case:propose')
   const record = store().cases.get(params.episodeId)
-  if (record === undefined) return { kind: 'refused', message: 'no such case' }
+  if (record === undefined) return { kind: 'refused', message: 'The case does not exist.' }
   const now = new Date().toISOString()
 
   try {
