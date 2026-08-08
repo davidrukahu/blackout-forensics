@@ -22,6 +22,7 @@ export const EXPORT_ALLOWLIST: readonly RegExp[] = [
   /^src\/[\w.-]+\.ts$/,
   /^fixtures\/[\w./-]+$/,
   /^schema\/[\w./-]+\.json$/,
+  /^media\/[\w.-]+\.svg$/,
 ]
 
 export function isExportable(relPath: string): boolean {

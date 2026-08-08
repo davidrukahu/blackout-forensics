@@ -16,6 +16,8 @@ a prioritised queue that a human works.
 change credit state or dispatch a recovery. Priority means investigation order — not proof, blame or
 authorisation.
 
+![How Blackout Forensics works: telemetry goes silent, the evidence engine classifies with counterevidence, a human decides with maker-checker, and a signed report reproduces](media/overview.svg)
+
 ## Repository layout
 
 | Package | Licence | Contents |
