@@ -181,3 +181,18 @@ button:hover {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+.app-nav {
+  display: flex;
+  gap: 1rem;
+  margin-right: auto;
+  margin-left: 2rem;
+}
+.app-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.app-nav a:hover {
+  text-decoration: underline;
+}

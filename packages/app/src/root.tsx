@@ -29,6 +29,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </a>
         <header className="app-header">
           <span className="app-name">Blackout Forensics</span>
+          <nav className="app-nav" aria-label="Primary">
+            <a href="/queue">Queue</a>
+            <a href="/metrics">Metrics</a>
+          </nav>
           <span className="app-tz" aria-label="All times are shown in UTC">
             times in UTC
           </span>

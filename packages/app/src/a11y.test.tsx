@@ -30,6 +30,8 @@ import { loader as queueLoader } from './routes/queue.js'
 import QueueScreen from './routes/queue.js'
 import { loader as caseLoader } from './routes/case.js'
 import CaseScreen from './routes/case.js'
+import { loader as metricsLoader } from './routes/metrics.js'
+import MetricsScreen from './routes/metrics.js'
 
 const NOW = '2026-08-05T12:00:00.000Z'
 const ANALYST = ['queue:read', 'queue:assign', 'case:read']
@@ -155,6 +157,19 @@ describe('case flow', () => {
     artifact['case_structure'] = { sections: headings.length }
   })
 
+  it('metrics dashboard: axe finds no critical or serious violation', async () => {
+    const data = await metricsLoader(args('http://app.test/metrics'))
+    await renderRoute(MetricsScreen, data, '/metrics')
+    const results = await runAxe()
+    expect(
+      critical(results).map((violation) => `${violation.id}: ${violation.nodes[0]?.html}`),
+    ).toEqual([])
+    expect(container.querySelector('svg[role="img"]')?.getAttribute('aria-label')).toContain(
+      'Gap duration',
+    )
+    artifact['metrics_axe'] = { passes: results.passes.length, violations: results.violations.length }
+  })
+
   it('writes the review record with what automation can and cannot claim', () => {
     artifact['manual_review'] = {
       keyboardTraversal:
@@ -167,7 +182,7 @@ describe('case flow', () => {
     mkdirSync(join(process.cwd(), 'release'), { recursive: true })
     writeFileSync(
       join(process.cwd(), 'release', 'a11y-review.json'),
-      `${JSON.stringify({ standard: 'WCAG 2.2 AA', flows: ['queue', 'case'], ...artifact }, null, 2)}\n`,
+      `${JSON.stringify({ standard: 'WCAG 2.2 AA', flows: ['queue', 'case', 'metrics'], ...artifact }, null, 2)}\n`,
     )
   })
 })

@@ -16,10 +16,16 @@
     "@blackout/generator": "*",
     "@react-router/node": "^7.7.0",
     "@react-router/serve": "^7.7.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "isbot": "^5.1.0",
+    "lucide-react": "^1.30.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router": "^7.7.0"
+    "react-router": "^7.7.0",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@react-router/dev": "^7.7.0",

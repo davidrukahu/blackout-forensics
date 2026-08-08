@@ -35,6 +35,8 @@ export {
   RULE_PACKAGES,
   applyView,
   assign,
+  buildSlaReport,
+  percentiles,
   buildQueueItem,
   checkBulk,
   classify,
@@ -51,6 +53,8 @@ export {
 export type {
   ActionKind,
   BulkRefusal,
+  SlaReport,
+  SlaReportInput,
   DecisionDefinition,
   DecisionProposal,
   MachineSuggestion,

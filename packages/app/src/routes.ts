@@ -7,4 +7,5 @@ export default [
   index('routes/home.tsx'),
   route('queue', 'routes/queue.tsx'),
   route('cases/:id', 'routes/case.tsx'),
+  route('metrics', 'routes/metrics.tsx'),
 ] satisfies RouteConfig

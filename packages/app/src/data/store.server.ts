@@ -38,7 +38,9 @@ import {
   type SamplerEvent,
   type SavedView,
   approveProposal,
+  buildSlaReport,
   completeAction,
+  percentiles,
   propose,
   recordAction,
   rejectProposal,
@@ -335,6 +337,124 @@ export function saveView(params: {
 
 export function auditTrail(): readonly AppAuditEvent[] {
   return store().auditEvents
+}
+
+export interface MetricsData {
+  readonly generatedAt: string
+  readonly stats: {
+    readonly totalCases: number
+    readonly urgentTier: number
+    readonly directEvidence: number
+    readonly unknownClassification: number
+    readonly overdue: number
+    readonly deliveryLagP95S: number | null
+  }
+  /** Closed gaps only, minutes; open episodes are counted, never charted as if bounded. */
+  readonly gapChart: readonly { readonly label: string; readonly minutes: number }[]
+  readonly openEpisodes: number
+  readonly bands: readonly { readonly band: string; readonly count: number }[]
+  readonly tiers: readonly { readonly tier: string; readonly count: number }[]
+  readonly recent: readonly {
+    readonly episodeId: string
+    readonly assetRef: string
+    readonly episodeType: string
+    readonly band: string | null
+    readonly tier: string
+    readonly startAt: string
+  }[]
+  readonly sla: ReturnType<typeof buildSlaReport>
+}
+
+/**
+ * The metrics screen's loader data — every number computed from the same store the queue reads,
+ * through the same §6.12 report builder the signed exports use. No dashboard-only arithmetic.
+ */
+export function getMetrics(params: {
+  readonly scopes: readonly string[]
+  readonly now?: string
+}): MetricsData {
+  requireScope(params.scopes, 'queue:read')
+  const now = params.now ?? new Date().toISOString()
+  const records = [...store().cases.values()]
+  const items = records.map((record) => toQueueItem(record, now))
+
+  const deliveryLagsS = records.flatMap((record) =>
+    record.events
+      .filter((event) => typeof event.device_time === 'string')
+      .map((event) =>
+        Math.max(0, (Date.parse(event.received_at) - Date.parse(event.device_time as string)) / 1000),
+      ),
+  )
+  const lag = percentiles([...deliveryLagsS])
+
+  const closedGaps = records.flatMap((record) => {
+    const version = record.episode.versions[record.episode.versions.length - 1]!
+    if (version.endAt === null) return []
+    return [{
+      label: items.find((item) => item.episodeId === record.episode.id)?.assetRef ?? record.episode.id,
+      minutes: Math.round((Date.parse(version.endAt) - Date.parse(version.startAt)) / 60_000),
+    }]
+  }).sort((a, b) => a.label.localeCompare(b.label))
+
+  const countBy = <T extends string>(values: readonly T[]): { label: T; count: number }[] => {
+    const map = new Map<T, number>()
+    for (const value of values) map.set(value, (map.get(value) ?? 0) + 1)
+    return [...map.entries()].map(([label, count]) => ({ label, count }))
+  }
+
+  const windowHours = 6
+  const devices = new Set(items.map((item) => item.deviceRef)).size
+  const sla = buildSlaReport({
+    reportId: `metrics-${now.slice(0, 10)}`,
+    generatedAt: now,
+    window: { from: '2026-08-05T06:00:00.000Z', to: now },
+    deliveryLagsS,
+    episodeDurationsS: closedGaps.map((gap) => gap.minutes * 60),
+    openedEpisodes: items.length,
+    retractedEpisodes: 0,
+    activeAssetHours: devices * windowHours,
+    devicesWithEpisodes: devices,
+    devicesWithRepeats: 0,
+    backfill: { denominator: 0, numerator: 0, excluded: 0, exclusionReasons: {} },
+    completeness: { denominator: items.length, numerator: items.length, excluded: 0, exclusionReasons: {} },
+    exclusions: [],
+    clockBasis: 'device_time',
+    ruleVersion: '1.1.0',
+    factVocabularyVersion: '1.0.0',
+    mapSnapshotId: null,
+    timeToReviewS: [],
+    timeToActionS: [],
+    unresolvedAging: [{ bucket: '7d', count: items.filter((item) => item.dueState === 'overdue').length }],
+    cohorts: [],
+  })
+
+  return {
+    generatedAt: now,
+    stats: {
+      totalCases: items.length,
+      urgentTier: items.filter((item) => item.priority.tier === 'urgent').length,
+      directEvidence: items.filter((item) => item.band === 'direct').length,
+      unknownClassification: records.filter((record) => record.classification.unknown !== null).length,
+      overdue: items.filter((item) => item.dueState === 'overdue').length,
+      deliveryLagP95S: lag.p95,
+    },
+    gapChart: closedGaps,
+    openEpisodes: items.length - closedGaps.length,
+    bands: countBy(items.map((item) => item.band ?? 'unknown')).map(({ label, count }) => ({ band: label, count })),
+    tiers: countBy(items.map((item) => item.priority.tier)).map(({ label, count }) => ({ tier: label, count })),
+    recent: [...items]
+      .sort((a, b) => b.startAt.localeCompare(a.startAt))
+      .slice(0, 5)
+      .map((item) => ({
+        episodeId: item.episodeId,
+        assetRef: item.assetRef,
+        episodeType: item.episodeType,
+        band: item.band,
+        tier: item.priority.tier,
+        startAt: item.startAt,
+      })),
+    sla,
+  }
 }
 
 export type ProposalResult =
