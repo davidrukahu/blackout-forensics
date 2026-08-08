@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blackout Forensics — evidence for tracker silence</title>
 <meta name="description" content="When a tracker on a financed motorcycle goes silent, Blackout Forensics turns the silence into evidence. Fixed-price audit. Runs in your infrastructure.">
+<link rel="canonical" href="https://davidrukahu.github.io/blackout-forensics/">
+<meta property="og:title" content="Blackout Forensics — evidence for tracker silence">
+<meta property="og:description" content="A tracker went silent. What can you prove? The audit runs in your infrastructure. Your data does not leave your environment.">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidrukahu/blackout-forensics/main/media/social/blackout-forensics-social.png">
+<meta property="og:url" content="https://davidrukahu.github.io/blackout-forensics/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" rx="7" fill="%23101625"/><rect x="5" y="16" width="4" height="10" rx="1.5" fill="%235fb8a5"/><rect x="12" y="11" width="4" height="15" rx="1.5" fill="%235fb8a5"/><rect x="19" y="13" width="4" height="13" rx="1.5" fill="%23e8635a" opacity="0.55"/><rect x="25" y="7" width="4" height="19" rx="1.5" fill="%23f2f5fa"/></svg>'>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,800;1,6..72,300&display=swap" rel="stylesheet">
@@ -109,6 +117,13 @@
   .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1)}
   .reveal.in{opacity:1;transform:none}
   @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+  a:focus-visible,.cta:focus-visible{outline:2.5px solid var(--teal-deep);outline-offset:3px;border-radius:6px}
+  @media(max-width:640px){
+    .gap span{writing-mode:vertical-rl;letter-spacing:.14em}
+    header .tag{display:none}
+    .strip-caption span{display:none}
+    .strip-caption{justify-content:center}
+  }
 </style>
 </head>
 <body>
@@ -125,7 +140,7 @@
     probable explanation, the counterevidence, and a queue with visible reasons. Not a dot on a
     map. Not a score.</p>
     <div class="cta-row">
-      <a class="cta" href="https://www.linkedin.com/in/davidrukahu/">Request the fixed-price audit</a>
+      <a class="cta" href="https://www.linkedin.com/in/davidrukahu/">Request the audit on LinkedIn</a>
       <a class="cta secondary" href="https://github.com/davidrukahu/blackout-forensics">Read the source</a>
     </div>
   </div>
@@ -190,8 +205,8 @@
     <h2>Start with the Telemetry Control Audit.</h2>
     <div class="offer reveal">
       <div class="buy">
-        <p class="price">USD 4,000<small>Fixed price. Two weeks. Your data does not leave your
-        environment.</small></p>
+        <p class="price">Two weeks.<small>One fixed price, agreed before we start. Your data
+        does not leave your environment.</small></p>
         <ul class="deliver">
           <li>Data-rights matrix</li>
           <li>Device, firmware, SIM, and platform inventory</li>
