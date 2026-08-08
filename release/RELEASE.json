@@ -1,10 +1,10 @@
 {
   "artifact": "blackout-forensics",
   "version": "0.1.0",
-  "commit": "d62f51154a2f00ec1f28def6b300351d831a32d6",
-  "generatedAt": "2026-08-07T22:49:28.639Z",
+  "commit": "857abd0c7ba5b62a12e028c690b3bfd1fb74b1fd",
+  "generatedAt": "2026-08-08T07:49:19.413Z",
   "evidence": {
-    "app-sbom.spdx.json": "dc1264e76a8a4df33a30ef30d0e1edd5b91b36c428b8f1799d4cb5bc2f3b942c",
+    "app-sbom.spdx.json": "9ef1a39b7cf8ac0c60028301aa64002a6b73f2911695e8138568e24076cfed96",
     "audit-container-sbom.spdx.json": "793554747d916da84647949624cd10bee8ca4c8ce6b79f3a5921677a9cb4a7ee",
     "THIRD_PARTY_NOTICES.txt": "11e573b10664f07637d76e7b5e5a734d1a5c4b2acbdf23b7f5915d9c6814aad9",
     "release-a-acceptance.json": "baaa1e3522c3c8c67ec9f5ee52baf60d93985f8e1dc723220e1f5b9588a9ffe2",
