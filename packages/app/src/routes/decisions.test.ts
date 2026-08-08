@@ -145,7 +145,7 @@ describe('§22 outcomes through the route', () => {
     const refused = await caseAction(post(id, 'analyst', {
       intent: 'record_outcome', actionKind: 'record_external_recovery', outcomeCode: 'OUT-RECOVERY',
     }))
-    expect(refused.refusal).toContain('FR-OUT-002')
+    expect(refused.refusal).toContain('external authorization reference')
 
     const recorded = await caseAction(post(id, 'analyst', {
       intent: 'record_outcome', actionKind: 'record_external_recovery', outcomeCode: 'OUT-RECOVERY',

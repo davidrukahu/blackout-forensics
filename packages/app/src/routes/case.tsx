@@ -199,7 +199,7 @@ function EvidenceSection({ detail }: { detail: CaseDetail }) {
     <SectionCard
       id="s-evidence"
       title="Evidence"
-      description="Each hypothesis shows its supporting evidence, its counterevidence, and its missing expected evidence (FR-QUE-003)"
+      description="Each hypothesis shows its supporting evidence, its counterevidence, and its missing expected evidence"
     >
       {detail.evidence.unknown !== null && (
         <Alert>
@@ -395,7 +395,7 @@ function DecisionsSection({ detail }: { detail: CaseDetail }) {
             </NativeSelect>
           </Label>
           <Label>
-            Outcome code (§22). Keep this empty if the outcome is not known.
+            Outcome code. Keep this empty if the outcome is not known.
             <NativeSelect name="outcomeCode" defaultValue="">
               <option value="">— none yet —</option>
               {detail.decisions.outcomeTaxonomy.map((outcome) => (

@@ -19,7 +19,7 @@ system cannot immobilise a vehicle. The system cannot contact a borrower. The sy
 change a credit state. The system cannot dispatch a recovery. Priority sets the investigation
 order only. Priority is not proof, blame, or authorisation.
 
-**The dashboard.** The §6.12 report builder makes each number. The same builder makes the signed
+**The dashboard.** The report builder makes each number. The same builder makes the signed
 exports. The integrity hash on the screen is the hash that an export signs.
 
 ![The metrics dashboard: stat cards for open cases, the urgent tier, overdue cases and unknown classifications; the gap-duration chart; recent episodes with evidence-band badges](media/screenshots/dashboard-light.png)
@@ -31,8 +31,7 @@ those rows one at a time.
 ![The review queue: saved views, named priority factors, evidence bands, due states and per-row data-quality warnings](media/screenshots/queue-light.png)
 
 **Case review.** Each hypothesis shows its supporting evidence, its counterevidence, and its
-missing expected evidence. Each hypothesis shows the rule identifier and the rule version
-(FR-QUE-003).
+missing expected evidence. Each hypothesis shows the rule identifier and the rule version.
 
 ![Case review: the reason and uncertainty summary, the priority factors, and the H-POWER hypothesis with supporting evidence, counterevidence and missing expected evidence](media/screenshots/case-light.png)
 
@@ -72,7 +71,7 @@ app.tenant_id` stays explicit and testable.
 ## Evidence
 
 Each acceptance claim has linked evidence. See
-[`release/v1-acceptance-pack.md`](release/v1-acceptance-pack.md) for all PRD §17 items. The
+[`release/v1-acceptance-pack.md`](release/v1-acceptance-pack.md) for all acceptance items. The
 [`release/`](release/) directory contains the signed release manifest, the SBOMs, the acceptance
 packs, the security verification, the disaster-recovery exercise, and the benchmark results.
 

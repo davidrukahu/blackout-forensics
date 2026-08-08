@@ -96,7 +96,7 @@ export interface RecordedActionOutcome {
 
 export class UnknownOutcomeError extends Error {
   constructor(readonly code: string) {
-    super(`The code "${code}" is not in the §22 taxonomy.`)
+    super(`The code "${code}" is not in the outcome taxonomy.`)
     this.name = 'UnknownOutcomeError'
   }
 }
@@ -104,7 +104,7 @@ export class UnknownOutcomeError extends Error {
 export class MissingAuthorizationError extends Error {
   constructor(readonly code: string) {
     super(
-      `You cannot record ${code} without an external authorization reference (FR-OUT-002). ` +
+      `You cannot record ${code} without an external authorization reference. ` +
         'The product records the authorization. The product does not hold the authority.',
     )
     this.name = 'MissingAuthorizationError'

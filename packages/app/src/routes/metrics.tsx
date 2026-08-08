@@ -127,7 +127,7 @@ export default function MetricsScreen() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground">
-            Metrics for the fleet telemetry evidence. The §6.12 report builder makes each number.
+            Metrics for the fleet telemetry evidence. The report builder for the signed exports makes each number.
           </p>
         </div>
 

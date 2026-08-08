@@ -156,7 +156,7 @@ export class StaleBasisError extends Error {
 export class SelfApprovalError extends Error {
   constructor(readonly actor: string) {
     super(
-      `${actor} proposed this decision. A different person must approve it (§3.3). There is no override.`,
+      `${actor} proposed this decision. A different person must approve it. There is no override.`,
     )
     this.name = 'SelfApprovalError'
   }
@@ -165,7 +165,7 @@ export class SelfApprovalError extends Error {
 export class MachineOriginError extends Error {
   constructor() {
     super(
-      'A machine suggestion is not a decision (FR-QUE-006). A person must propose it. A different person must approve it.',
+      'A machine suggestion is not a decision. A person must propose it. A different person must approve it.',
     )
     this.name = 'MachineOriginError'
   }

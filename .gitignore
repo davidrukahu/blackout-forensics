@@ -26,3 +26,6 @@ packages/app/build/
 .scratch/
 .taskmaster/
 docs/*.docx
+
+# Commercial collateral: local-only, never committed (repo is public)
+commercial/
