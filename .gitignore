@@ -21,3 +21,8 @@ map-data/
 # React Router typegen and build output
 .react-router/
 packages/app/build/
+
+# Private planning artifacts: local-only, never committed (repo is public)
+.scratch/
+.taskmaster/
+docs/*.docx

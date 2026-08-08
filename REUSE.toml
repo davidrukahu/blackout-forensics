@@ -4,7 +4,7 @@ SPDX-PackageSupplier = "David Rukahu <drukahu09@gmail.com>"
 
 # Planning artefacts and decision records. Not distributed with any release.
 [[annotations]]
-path = ["docs/**", ".scratch/**", ".taskmaster/**", ".gstack/**", "cla/**"]
+path = ["docs/**", "cla/**"]
 SPDX-FileCopyrightText = "2026 David Rukahu"
 SPDX-License-Identifier = "LicenseRef-Proprietary"
 
