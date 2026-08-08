@@ -5,47 +5,85 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Blackout Forensics
 
-A vendor-neutral evidence and recovery-control system for financed motorcycles and vehicles.
+A vendor-neutral system for telemetry evidence and recovery control. It is made for financed
+motorcycles and vehicles.
 
-When a GPS tracker stops reporting, a financier cannot tell expected sleep from a coverage gap, a
-platform delay, a dead SIM, a disconnected battery, a failed device, interference, or theft. This
-system turns that silence into an evidence record, a probable explanation with counterevidence, and
-a prioritised queue that a human works.
+A GPS tracker can stop its reports for many causes. The cause can be expected sleep, a coverage
+gap, a platform delay, a dead SIM, a disconnected battery, a failed device, interference, or
+theft. A financier cannot see the difference without evidence. This system turns the silence into
+an evidence record. The record contains a probable explanation and the counterevidence. The
+system puts the case in a queue. A person works the queue.
 
-**It never decides anything consequential.** It cannot repossess, immobilise, contact a borrower,
-change credit state or dispatch a recovery. Priority means investigation order — not proof, blame or
-authorisation.
+**The system does not make consequential decisions.** The system cannot repossess a vehicle. The
+system cannot immobilise a vehicle. The system cannot contact a borrower. The system cannot
+change a credit state. The system cannot dispatch a recovery. Priority sets the investigation
+order only. Priority is not proof, blame, or authorisation.
 
-![How Blackout Forensics works: telemetry goes silent, the evidence engine classifies with counterevidence, a human decides with maker-checker, and a signed report reproduces](media/overview.svg)
+**The dashboard.** The §6.12 report builder makes each number. The same builder makes the signed
+exports. The integrity hash on the screen is the hash that an export signs.
 
-| The dashboard (dark) | The review queue (light) |
-|---|---|
-| ![The metrics dashboard in dark mode: stat cards, the gap-duration chart, recent episodes with evidence-band badges](media/screenshots/dashboard-dark.png) | ![The review queue in light mode: saved views, named priority factors, evidence bands, due states and per-row warnings](media/screenshots/queue-light.png) |
+![The metrics dashboard: stat cards for open cases, the urgent tier, overdue cases and unknown classifications; the gap-duration chart; recent episodes with evidence-band badges](media/screenshots/dashboard-light.png)
 
-All interface text follows ASD-STE100 Simplified Technical English. The dark-mode toggle stores
-the choice and applies it before the first paint.
+**The review queue.** The priority shows its factors by name. There is no hidden score. The
+system excludes urgent rows and rows with direct evidence from bulk actions. A person must review
+those rows one at a time.
+
+![The review queue: saved views, named priority factors, evidence bands, due states and per-row data-quality warnings](media/screenshots/queue-light.png)
+
+**Case review.** Each hypothesis shows its supporting evidence, its counterevidence, and its
+missing expected evidence. Each hypothesis shows the rule identifier and the rule version
+(FR-QUE-003).
+
+![Case review: the reason and uncertainty summary, the priority factors, and the H-POWER hypothesis with supporting evidence, counterevidence and missing expected evidence](media/screenshots/case-light.png)
+
+All interface text follows ASD-STE100 Simplified Technical English. The dark-mode control stores
+your choice. The application applies the choice before the first paint.
+
+## Quick start
+
+```bash
+npm install
+npm run check
+npm run dev -w @blackout/app
+```
+
+Open <http://localhost:5173>. The [developer guide](documentation/developer.md) shows the full
+synthetic demonstration. The [documentation set](documentation/README.md) covers operators,
+administrators, developers, data-protection officers, and incident response.
 
 ## Repository layout
 
 | Package | Licence | Contents |
 |---|---|---|
-| `packages/spec` | Apache-2.0 | Canonical event schema, adapter manifest contract, conformance fixtures. Published publicly. |
-| `packages/core` | AGPL-3.0-only | Episode engine, evidence rules, queue domain, audit. |
-| `packages/connectors` | Apache-2.0 | Source adapters and conformance kit. |
-| `packages/sdk` | Apache-2.0 | Client libraries. |
-| `packages/app` | AGPL-3.0-only | Server-rendered queue, case review, reports, administration. |
+| `packages/spec` | Apache-2.0 | The canonical event schema, the adapter manifest contract, and the conformance fixtures. The project publishes this package to [blackout-spec](https://github.com/davidrukahu/blackout-spec). |
+| `packages/core` | AGPL-3.0-only | The episode engine, the evidence rules, the queue domain, and the audit functions. |
+| `packages/connectors` | Apache-2.0 | The source adapters and the conformance kit. |
+| `packages/sdk` | Apache-2.0 | The client libraries. |
+| `packages/app` | AGPL-3.0-only | The server-rendered queue, case review, metrics, and administration screens. |
 
 ## Stack
 
-TypeScript on Node 24 LTS. Postgres/PostGIS as the single query engine — including inside the audit
-container, so it runs the identical analyser code the product runs. React Router 7 for the web
-application. Vitest, `fast-check` and Testcontainers. Kysely over `postgres.js`, chosen so
-`SET LOCAL app.tenant_id` stays explicit and testable.
+The language is TypeScript on Node 24 LTS. Postgres with PostGIS is the single query engine. The
+audit container includes the same engine. The audit container runs the identical analyser code
+that the product runs. The web application uses React Router 7. The tests use Vitest,
+`fast-check`, and Testcontainers. The data layer uses `postgres.js`, so `SET LOCAL
+app.tenant_id` stays explicit and testable.
 
-## Where the decisions live
+## Evidence
 
-`.scratch/blackout-v1/map.md` is the decision record — every settled question, its reasoning and
-what later evidence changed. `.taskmaster/` is the execution backlog; run `task-master next`.
+Each acceptance claim has linked evidence. See
+[`release/v1-acceptance-pack.md`](release/v1-acceptance-pack.md) for all PRD §17 items. The
+[`release/`](release/) directory contains the signed release manifest, the SBOMs, the acceptance
+packs, the security verification, the disaster-recovery exercise, and the benchmark results.
 
-    npm install
-    npm run check
+## Decisions
+
+The architecture decision records are in [`docs/adr/`](docs/adr/). The threat model is in
+[`documentation/threat-model.md`](documentation/threat-model.md).
+
+## Licences
+
+The core and the application are AGPL-3.0-only. The interoperability spec is Apache-2.0. A
+closed-source product can implement the spec. The spec lives at
+[blackout-spec](https://github.com/davidrukahu/blackout-spec). The REUSE tool checks the licence
+boundary in CI.
